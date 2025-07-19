@@ -107,9 +107,15 @@ class LearningPlanner:
     def chat_with_ai(self, messages, new_message):
         """与AI进行对话"""
         try:
+            # 添加系统提示，要求返回markdown格式
+            system_message = {
+                "role": "system", 
+                "content": "请使用Markdown格式回复，可以使用**粗体**、*斜体*、`代码`、列表、标题等格式来组织内容。"
+            }
+            
             response = self.client.chat.completions.create(
                 model='generalv3.5',
-                messages=messages + [{"role": "user", "content": new_message}]
+                messages=[system_message] + messages + [{"role": "user", "content": new_message}]
             )
             return response.choices[0].message.content
         except Exception as e:

@@ -445,16 +445,23 @@ def get_books():
 @app.route('/api/training/upload', methods=['POST'])
 def upload_book():
     try:
+        if 'title' not in request.form:
+            return jsonify({'error': '请提供书籍名称'}), 400
+        
         if 'cover' not in request.files or 'pdf' not in request.files:
             return jsonify({'error': '请上传封面和PDF文件'}), 400
         
+        title = request.form['title'].strip()
         cover_file = request.files['cover']
         pdf_file = request.files['pdf']
+        
+        if not title:
+            return jsonify({'error': '书籍名称不能为空'}), 400
         
         if cover_file.filename == '' or pdf_file.filename == '':
             return jsonify({'error': '请选择文件'}), 400
         
-        result = skill_manager.save_uploaded_book(cover_file, pdf_file)
+        result = skill_manager.save_uploaded_book(title, cover_file, pdf_file)
         
         return jsonify({
             'success': True,
@@ -467,13 +474,39 @@ def upload_book():
 @app.route('/api/training/pdf/<path:filename>')
 def get_pdf(filename):
     try:
-        pdf_path = os.path.join('modules', 'book', filename)
+        # 首先检查pdf文件夹
+        pdf_path = os.path.join('modules', 'modules', 'book', 'pdf', filename)
+        if not os.path.exists(pdf_path):
+            # 如果不在pdf文件夹，检查根目录
+            pdf_path = os.path.join('modules', 'modules', 'book', filename)
+        
         if os.path.exists(pdf_path):
             return send_file(pdf_path, mimetype='application/pdf')
         else:
             return jsonify({'error': '文件不存在'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/training/cover/<path:filename>')
+def get_cover(filename):
+    try:
+        # 首先检查cover文件夹
+        cover_path = os.path.join('modules', 'modules', 'book', 'cover', filename)
+        if not os.path.exists(cover_path):
+            # 如果不在cover文件夹，检查根目录
+            cover_path = os.path.join('modules', 'modules', 'book', filename)
+        
+        if os.path.exists(cover_path):
+            return send_file(cover_path, mimetype='image/png')
+        else:
+            return jsonify({'error': '文件不存在'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/book-reader')
+@login_required
+def book_reader_page():
+    return render_template('book_reader.html')
 
 # 学习路径相关路由
 @app.route('/learning')

@@ -923,8 +923,8 @@
             const messageElement = document.createElement('div');
             messageElement.className = `message ${role}`;
             
-            // 如果是AI消息且包含markdown语法，则渲染markdown
-            if (role === 'ai' && (content.includes('**') || content.includes('*') || content.includes('`') || content.includes('#') || content.includes('['))) {
+            // 如果是AI消息，则渲染markdown
+            if (role === 'ai') {
                 messageElement.innerHTML = marked.parse(content);
             } else {
                 messageElement.textContent = content;

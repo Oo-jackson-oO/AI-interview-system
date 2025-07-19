@@ -49,6 +49,13 @@
             justify-content: center;
             color: white;
             font-size: 48px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .book-cover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
         
         .book-title {
@@ -160,6 +167,92 @@
             padding: 20px;
             color: rgba(255, 255, 255, 0.7);
         }
+        
+        /* PDF阅读器模态框样式 */
+        .pdf-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .pdf-modal-content {
+            position: relative;
+            width: 95%;
+            height: 95%;
+            margin: 2.5% auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .pdf-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .pdf-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .pdf-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .pdf-modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .pdf-modal-body {
+            height: calc(100% - 80px);
+            padding: 0;
+        }
+        
+        .pdf-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        /* 上传成功提示 */
+        .upload-success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #4CAF50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .upload-error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #F44336;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -186,6 +279,10 @@
             <h2><i class="fas fa-upload"></i> 上传学习资料</h2>
             <form id="uploadForm" class="upload-form">
                 <div class="upload-field">
+                    <label for="bookTitle">书籍名称</label>
+                    <input type="text" id="bookTitle" placeholder="请输入书籍名称" required>
+                </div>
+                <div class="upload-field">
                     <label for="coverFile">封面图片</label>
                     <input type="file" id="coverFile" accept=".png,.jpg,.jpeg" required>
                 </div>
@@ -199,6 +296,12 @@
                     </button>
                 </div>
             </form>
+            <div id="uploadSuccess" class="upload-success">
+                <i class="fas fa-check-circle"></i> 上传成功！文件已保存到学习资料库。
+            </div>
+            <div id="uploadError" class="upload-error">
+                <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
+            </div>
         </div>
         
         <!-- 书籍列表 -->
@@ -206,6 +309,21 @@
             <h2><i class="fas fa-book"></i> 学习资料库</h2>
             <div id="booksGrid" class="books-grid">
                 <div class="loading">正在加载书籍列表...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- PDF阅读器模态框 -->
+    <div id="pdfModal" class="pdf-modal">
+        <div class="pdf-modal-content">
+            <div class="pdf-modal-header">
+                <div class="pdf-modal-title" id="pdfModalTitle">PDF阅读器</div>
+                <button class="pdf-modal-close" onclick="closePdfModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="pdf-modal-body">
+                <iframe id="pdfIframe" class="pdf-iframe" src=""></iframe>
             </div>
         </div>
     </div>
@@ -243,9 +361,19 @@
                 const card = document.createElement('div');
                 card.className = 'book-card';
                 
-                const coverHtml = book.cover ? 
-                    `<img src="${book.cover}" alt="${book.title}" class="book-cover">` :
-                    `<div class="book-cover"><i class="fas fa-book"></i></div>`;
+                // 生成封面图片URL
+                let coverUrl = '';
+                if (book.cover) {
+                    const coverFilename = book.cover.split('/').pop();
+                    coverUrl = `/api/training/cover/${encodeURIComponent(coverFilename)}`;
+                }
+                
+                const coverHtml = coverUrl ? 
+                    `<img src="${coverUrl}" alt="${book.title}" class="book-cover" onclick="openBookReader('${book.title}', '${book.pdf_path}')">` :
+                    `<div class="book-cover" onclick="openBookReader('${book.title}', '${book.pdf_path}')"><i class="fas fa-book"></i></div>`;
+                
+                // 生成PDF文件名
+                const pdfFilename = book.pdf_path;  // pdf_path现在直接是文件名
                 
                 card.innerHTML = `
                     ${coverHtml}
@@ -254,12 +382,12 @@
                         <i class="fas fa-file-pdf"></i> ${book.pages} 页
                     </div>
                     <div class="book-actions">
-                        <a href="/api/training/pdf/${encodeURIComponent(book.pdf_path.split('/').pop())}" 
+                        <a href="/api/training/pdf/${encodeURIComponent(pdfFilename)}" 
                            class="btn btn-primary" target="_blank">
                             <i class="fas fa-download"></i> 下载
                         </a>
-                        <button class="btn btn-secondary" onclick="previewBook('${book.title}')">
-                            <i class="fas fa-eye"></i> 预览
+                        <button class="btn btn-secondary" onclick="openBookReader('${book.title}', '${book.pdf_path}')">
+                            <i class="fas fa-eye"></i> 详细阅读
                         </button>
                     </div>
                 `;
@@ -268,26 +396,78 @@
             });
         }
         
-        // 预览书籍
-        function previewBook(title) {
-            alert(`预览功能：${title}\n\n此功能正在开发中，敬请期待！`);
+        // 打开书籍阅读器
+        function openBookReader(title, pdfPath) {
+            // 跳转到详细的书籍阅读页面
+            const readerUrl = `/book-reader?title=${encodeURIComponent(title)}&pdf=${encodeURIComponent(pdfPath)}`;
+            window.location.href = readerUrl;
         }
+        
+        // 打开PDF阅读器（保留原有功能）
+        function openPdfReader(title, pdfPath) {
+            const modal = document.getElementById('pdfModal');
+            const modalTitle = document.getElementById('pdfModalTitle');
+            const iframe = document.getElementById('pdfIframe');
+            
+            // 生成PDF URL
+            const pdfFilename = pdfPath.split('/').pop();
+            const pdfUrl = `/api/training/pdf/${encodeURIComponent(pdfFilename)}`;
+            
+            modalTitle.textContent = title;
+            iframe.src = pdfUrl;
+            modal.style.display = 'block';
+            
+            // 禁止背景滚动
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 关闭PDF阅读器
+        function closePdfModal() {
+            const modal = document.getElementById('pdfModal');
+            const iframe = document.getElementById('pdfIframe');
+            
+            modal.style.display = 'none';
+            iframe.src = '';
+            
+            // 恢复背景滚动
+            document.body.style.overflow = 'auto';
+        }
+        
+        // 点击模态框外部关闭
+        document.getElementById('pdfModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePdfModal();
+            }
+        });
         
         // 处理文件上传
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            const bookTitle = document.getElementById('bookTitle').value.trim();
             const coverFile = document.getElementById('coverFile').files[0];
             const pdfFile = document.getElementById('pdfFile').files[0];
             
+            if (!bookTitle) {
+                showUploadError('请输入书籍名称');
+                return;
+            }
+            
             if (!coverFile || !pdfFile) {
-                alert('请选择封面图片和PDF文件');
+                showUploadError('请选择封面图片和PDF文件');
                 return;
             }
             
             const formData = new FormData();
+            formData.append('title', bookTitle);
             formData.append('cover', coverFile);
             formData.append('pdf', pdfFile);
+            
+            // 显示上传中状态
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上传中...';
+            submitBtn.disabled = true;
             
             fetch('/api/training/upload', {
                 method: 'POST',
@@ -296,17 +476,49 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('上传成功！');
+                    showUploadSuccess();
                     loadBooks(); // 重新加载书籍列表
                     document.getElementById('uploadForm').reset();
                 } else {
-                    alert('上传失败：' + data.error);
+                    showUploadError(data.error || '上传失败');
                 }
             })
             .catch(error => {
-                alert('上传失败：' + error.message);
+                showUploadError('网络错误：' + error.message);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             });
         });
+        
+        // 显示上传成功提示
+        function showUploadSuccess() {
+            const successDiv = document.getElementById('uploadSuccess');
+            const errorDiv = document.getElementById('uploadError');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 显示上传错误提示
+        function showUploadError(message) {
+            const successDiv = document.getElementById('uploadSuccess');
+            const errorDiv = document.getElementById('uploadError');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            successDiv.style.display = 'none';
+            errorMessage.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
         
         // 页面加载时获取书籍列表
         document.addEventListener('DOMContentLoaded', function() {
