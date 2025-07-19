@@ -224,7 +224,9 @@ class ConnectorSystem {
         this.bubbles = [
             document.querySelector('.bubble-1-wrapper'),
             document.querySelector('.bubble-2-wrapper'),
-            document.querySelector('.bubble-3-wrapper')
+            document.querySelector('.bubble-3-wrapper'),
+            document.querySelector('.bubble-4-wrapper'),
+            document.querySelector('.bubble-5-wrapper')
         ];
         this.init();
     }
@@ -240,14 +242,11 @@ class ConnectorSystem {
         this.svg.innerHTML = '';
         if (defs) this.svg.appendChild(defs);
         
-        // 连接泡泡1和泡泡2
-        if (this.bubbles[0] && this.bubbles[1]) {
-            this.createConnector(this.bubbles[0], this.bubbles[1]);
-        }
-        
-        // 连接泡泡2和泡泡3
-        if (this.bubbles[1] && this.bubbles[2]) {
-            this.createConnector(this.bubbles[1], this.bubbles[2]);
+        // 创建连接线：泡泡1 -> 泡泡2 -> 泡泡3 -> 泡泡4 -> 泡泡5
+        for (let i = 0; i < this.bubbles.length - 1; i++) {
+            if (this.bubbles[i] && this.bubbles[i + 1]) {
+                this.createConnector(this.bubbles[i], this.bubbles[i + 1]);
+            }
         }
     }
 

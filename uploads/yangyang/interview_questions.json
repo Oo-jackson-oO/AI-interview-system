@@ -1,0 +1,66 @@
+{
+  "generated_at": "2025-07-19T20:50:29.478112",
+  "candidate_name": "yangyang",
+  "interview_position": "python工程师",
+  "tech_domain": "python",
+  "strict_mode": true,
+  "questions": {
+    "能力评估": [
+      {
+        "question": "请描述您在分布式系统中处理过的一个高并发问题，并详细说明您的解决方案和最终效果。",
+        "importance": 1,
+        "difficulty": "hard"
+      },
+      {
+        "question": "在开发过程中，您如何确保代码的质量和可维护性？请结合具体案例说明。",
+        "importance": 2,
+        "difficulty": "medium"
+      }
+    ],
+    "岗位匹配度": [
+      {
+        "question": "阿里巴巴以技术驱动为核心，您认为Python工程师在这个环境中需要具备哪些核心竞争力？",
+        "importance": 1,
+        "difficulty": "hard"
+      },
+      {
+        "question": "您如何理解阿里巴巴的技术文化？您认为自己能为团队带来哪些独特价值？",
+        "importance": 2,
+        "difficulty": "medium"
+      }
+    ],
+    "专业能力测试": [
+      {
+        "question": "请实现一个基于Python的异步任务调度系统，要求支持任务优先级、失败重试和资源隔离，并解释其设计原理。",
+        "importance": 1,
+        "difficulty": "hard"
+      },
+      {
+        "question": "假设您需要优化一个高流量的Django应用，请列出至少三种性能优化方案，并详细说明每种方案的实现思路和预期效果。",
+        "importance": 2,
+        "difficulty": "medium"
+      }
+    ],
+    "candidate_name": "yangyang",
+    "简历深挖": [
+      {
+        "question": "您在Python开发工程师的工作经历中，最引以为傲的项目是什么？请详细描述项目背景、技术挑战以及您在其中扮演的角色和贡献。",
+        "importance": 1,
+        "difficulty": "hard",
+        "focus_area": "项目经历"
+      },
+      {
+        "question": "阿里巴巴作为一家技术驱动型公司，对代码质量和系统性能有着极高要求。请分享一个您在优化代码性能或提升系统稳定性方面的实际案例，包括遇到的问题、解决思路及最终成果。",
+        "importance": 2,
+        "difficulty": "hard",
+        "focus_area": "技能匹配度"
+      },
+      {
+        "question": "在您的简历中提到了熟悉Django框架，能否谈谈您在Django项目中遇到的最具挑战性的问题，以及您是如何克服它的？",
+        "importance": 3,
+        "difficulty": "medium",
+        "focus_area": "技能匹配度"
+      }
+    ]
+  }
+}

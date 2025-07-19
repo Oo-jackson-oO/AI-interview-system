@@ -408,8 +408,10 @@
         <ul class="sidebar-list">
             <li><a href="/resume" onclick="checkLoginAndNavigate('/resume', event)"><i class="fas fa-file-alt"></i> 简历解析</a></li>
             <li><a href="/my-resumes" onclick="checkLoginAndNavigate('/my-resumes', event)"><i class="fas fa-folder-open"></i> 我的简历 <span id="resumeCount" class="resume-count" style="display: none;">(0)</span></a></li>
-            <li><a href="/training" onclick="checkLoginAndNavigate('/training', event)"><i class="fas fa-graduation-cap"></i> 技能培训</a></li>
+            <li><a href="/interview" onclick="checkLoginAndNavigate('/interview', event)"><i class="fas fa-comments"></i> 模拟面试</a></li>
+            <li><a href="/interview-analysis" onclick="checkLoginAndNavigate('/interview-analysis', event)"><i class="fas fa-chart-line"></i> 面试解析</a></li>
             <li><a href="/learning" onclick="checkLoginAndNavigate('/learning', event)"><i class="fas fa-route"></i> 学习路径</a></li>
+            <li><a href="/training" onclick="checkLoginAndNavigate('/training', event)"><i class="fas fa-graduation-cap"></i> 技能培训</a></li>
         </ul>
     </nav>
     
@@ -539,7 +541,7 @@
                             <div class="bubble-inner">
                                 <div class="vortex-effect"></div>
                                 <div class="planet-svg planet-svg-1">
-                                    <img src="{{ url_for('static', filename='星球1.svg') }}" alt="星球1">
+                                    <img src="{{ url_for('static', filename='地球.svg') }}" alt="星球1">
                                 </div>
                                 <div class="bubble-content">
                                     <h3>个人简历</h3>
@@ -567,7 +569,7 @@
                             <div class="bubble-inner">
                                 <div class="vortex-effect"></div>
                                 <div class="planet-svg planet-svg-2">
-                                    <img src="{{ url_for('static', filename='星球2.svg') }}" alt="星球2">
+                                    <img src="{{ url_for('static', filename='月球.svg') }}" alt="星球2">
                                 </div>
                                 <div class="bubble-content">
                                     <h3>模拟面试</h3>
@@ -588,14 +590,42 @@
                     </div>
                 </div>
                 
-                <!-- 第三个泡泡 - 个性化学习路径 -->
+                <!-- 第三个泡泡 - 面试解析 -->
                 <div class="bubble-wrapper bubble-3-wrapper">
                     <div class="bubble-card">
-                        <a href="/learning" class="bubble bubble-3" id="learningLink" onclick="checkLoginAndNavigate('/learning', event)">
+                        <a href="/interview-analysis" class="bubble bubble-3" id="analysisLink" onclick="checkLoginAndNavigate('/interview-analysis', event)">
                             <div class="bubble-inner">
                                 <div class="vortex-effect"></div>
                                 <div class="planet-svg planet-svg-3">
-                                    <img src="{{ url_for('static', filename='星球3.svg') }}" alt="星球3">
+                                    <img src="{{ url_for('static', filename='星球1.svg') }}" alt="星球3">
+                                </div>
+                                <div class="bubble-content">
+                                    <h3>面试解析</h3>
+                                    <p>深度分析报告</p>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="bubble-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>642</span>
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-star"></i>
+                                <span>4.7</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第四个泡泡 - 学习路径 -->
+                <div class="bubble-wrapper bubble-4-wrapper">
+                    <div class="bubble-card">
+                        <a href="/learning" class="bubble bubble-4" id="learningLink" onclick="checkLoginAndNavigate('/learning', event)">
+                            <div class="bubble-inner">
+                                <div class="vortex-effect"></div>
+                                <div class="planet-svg planet-svg-4">
+                                    <img src="{{ url_for('static', filename='星球2.svg') }}" alt="星球4">
                                 </div>
                                 <div class="bubble-content">
                                     <h3>学习路径</h3>
@@ -611,6 +641,34 @@
                             <span class="stat-item">
                                 <i class="fas fa-star"></i>
                                 <span>4.7</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第五个泡泡 - 技能培训 -->
+                <div class="bubble-wrapper bubble-5-wrapper">
+                    <div class="bubble-card">
+                        <a href="/training" class="bubble bubble-5" id="trainingLink" onclick="checkLoginAndNavigate('/training', event)">
+                            <div class="bubble-inner">
+                                <div class="vortex-effect"></div>
+                                <div class="planet-svg planet-svg-5">
+                                    <img src="{{ url_for('static', filename='星球6.svg') }}" alt="星球5">
+                                </div>
+                                <div class="bubble-content">
+                                    <h3>技能培训</h3>
+                                    <p>专业技能提升</p>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="bubble-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-book"></i>
+                                <span>1.8k</span>
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-star"></i>
+                                <span>4.8</span>
                             </span>
                         </div>
                     </div>

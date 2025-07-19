@@ -8,174 +8,46 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 继承主页面的背景和特效 */
-        body {
-            font-family: 'Inter', 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-            overflow-x: hidden;
-            background: linear-gradient(135deg, 
-                #0a0a2a 0%, 
-                #1a1a4a 25%, 
-                #2a2a6a 50%, 
-                #1a1a4a 75%, 
-                #0a0a2a 100%);
-            min-height: 100vh;
-            position: relative;
-            color: #ffffff;
-        }
-
-        /* 星空纹理背景 */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 70%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 40% 80%, rgba(147, 112, 219, 0.12) 0%, transparent 50%),
-                radial-gradient(ellipse at 60% 20%, rgba(72, 61, 139, 0.1) 0%, transparent 50%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* 星光容器 */
-        .stars-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* 流星容器 */
-        .meteor-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* 粒子容器 */
-        .particles-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        #particles-canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* 主容器 */
-        .main-container {
-            position: relative;
-            z-index: 2;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        /* 面试配置容器 */
+        /* 面试配置页面样式 */
         .interview-config-container {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .config-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 30px;
             max-width: 1200px;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
         }
-
+        
         .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .header-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            margin-bottom: 40px;
             color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
-
-        .header-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .header-btn.primary {
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: transparent;
-        }
-
-        .config-header {
-            text-align: left;
-            margin-bottom: 30px;
-        }
-
-        .config-title {
-            color: white;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
-        .config-subtitle {
+        
+        .page-header p {
+            font-size: 1.1rem;
             color: rgba(255, 255, 255, 0.8);
-            font-size: 1rem;
-            font-weight: 400;
+        }
+
+        .config-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .config-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .form-section {
@@ -196,54 +68,83 @@
             margin-bottom: 20px;
         }
 
-        .form-label {
+        .form-group label {
             display: block;
-            color: white;
-            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
             margin-bottom: 8px;
-            font-size: 0.95rem;
+            font-weight: 500;
         }
 
-        .form-input {
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1rem;
+            font-size: 14px;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
-        .form-input:focus {
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.5);
+            border-color: #667eea;
             background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
         }
 
-        .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        .form-group input:hover,
+        .form-group textarea:hover,
+        .form-group select:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 修复select下拉框的字体颜色 */
+        .form-group select {
+            color: white;
+        }
+
+        .form-group select option {
+            color: white;
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* 未选择时的占位符样式 */
+        .form-group select:invalid,
+        .form-group select option[value=""] {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .checkbox-group {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
             margin-top: 12px;
         }
 
         .checkbox-item {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            border-radius: 12px;
             border: 2px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
             cursor: pointer;
+            min-height: 80px;
         }
 
         .checkbox-item:hover {
@@ -253,22 +154,30 @@
         }
 
         .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             accent-color: #667eea;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .checkbox-content {
+            flex: 1;
         }
 
         .checkbox-label {
             color: white;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            flex: 1;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            display: block;
         }
 
         .checkbox-description {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.85rem;
-            margin-top: 4px;
+            font-size: 0.8rem;
+            line-height: 1.3;
         }
 
         .resume-section {
@@ -368,11 +277,15 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
 
         .submit-btn:disabled {
@@ -384,45 +297,84 @@
         .loading {
             display: none;
             text-align: center;
-            margin-top: 20px;
+            color: white;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .loading.show {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-text {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .loading-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            animation: progressFill 2s ease-in-out infinite;
+        }
+
+        @keyframes progressFill {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
         .back-btn {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
             padding: 10px 15px;
-            border-radius: 8px;
-            text-decoration: none;
+            border-radius: 25px;
+            cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            z-index: 100;
         }
 
         .back-btn:hover {
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
         .error-message {
@@ -444,51 +396,197 @@
             margin-bottom: 20px;
             display: none;
         }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                gap: 12px;
+            }
+            
+            .checkbox-item {
+                min-height: 60px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .checkbox-group {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+            }
+        }
+
+        /* 确保鼠标特效正常工作 */
+        .interview-config-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        .config-form {
+            position: relative;
+            z-index: 11;
+        }
+
+        /* 波动效果样式 */
+        .rocket-wave {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: waveExpand 2s ease-out forwards;
+        }
+
+        @keyframes waveExpand {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+                transform: translate(-50%, -50%);
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- 粒子系统 -->
-    <div class="particles-container">
-        <canvas id="particles-canvas"></canvas>
-    </div>
-
-    <!-- 星光系统 -->
-    <div class="stars-container"></div>
-
-    <!-- 流星系统 -->
-    <div class="meteor-container"></div>
-
-    <!-- 火箭鼠标光标 -->
+    <!-- 火箭鼠标样式 -->
     <div class="rocket-cursor" id="rocketCursor">
         <div class="rocket-nose"></div>
         <div class="rocket-body"></div>
         <div class="rocket-fins"></div>
         <div class="rocket-engine"></div>
     </div>
+    
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 火箭 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation orion">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 0%; left: 30%;"></div>
+        <div class="star" style="top: 20%; left: 40%;"></div>
+        <div class="star" style="top: 40%; left: 35%;"></div>
+        <div class="star" style="top: 30%; left: 20%;"></div>
+        <div class="star" style="top: 60%; left: 10%;"></div>
+        <div class="star" style="top: 70%; left: 50%;"></div>
+        <div class="star" style="top: 20%; left: 10%;"></div>
 
-    <div class="main-container">
-        <div class="interview-config-container">
-            <div class="config-card">
-                <!-- 页面头部 -->
-                <div class="page-header">
-                    <div class="header-left">
-                        <div class="config-header">
-                            <h1 class="config-title">面试配置</h1>
-                            <p class="config-subtitle">请填写面试相关信息，我们将为您生成个性化的面试题目</p>
-                        </div>
-                    </div>
-                    <div class="header-buttons">
-                        <a href="/" class="header-btn">
-                            <i class="fas fa-home"></i>
-                            返回主页
-                        </a>
-                        <a href="/interview" class="header-btn">
-                            <i class="fas fa-play"></i>
-                            模拟面试
-                        </a>
-                    </div>
-                </div>
+        <!-- 线段连接（用绝对定位和 transform 绘制虚线） -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="30" y1="0" x2="40" y2="20" />
+            <line x1="40" y1="20" x2="35" y2="40" />
+            <line x1="20" y1="30" x2="40" y2="20" />
+            <line x1="10" y1="20" x2="20" y2="30" />
+            <line x1="10" y1="20" x2="30" y2="0" />
+            <line x1="10" y1="60" x2="20" y2="30" />
+            <line x1="35" y1="40" x2="50" y2="70" />
+        </svg>
+    </div>
+    <div class="constellation big-dipper">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 20%; left: 0%;"></div>
+        <div class="star" style="top: 10%; left: 25%;"></div>
+        <div class="star" style="top: 20%; left: 50%;"></div>
+        <div class="star" style="top: 10%; left: 75%;"></div>
+        <div class="star" style="top: 20%; left: 100%;"></div>
 
+        <!-- 连接线 -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="0" y1="20" x2="25" y2="10" />
+            <line x1="25" y1="10" x2="50" y2="20" />
+            <line x1="50" y1="20" x2="75" y2="10" />
+            <line x1="75" y1="10" x2="100" y2="20" />
+        </svg>
+    </div>
+
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station right"></div>
+    
+    <!-- 返回按钮 -->
+    <button class="back-btn" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> 返回主页
+    </button>
+    
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+
+    <div class="interview-config-container" style="position: relative; z-index: 10;">
+        <div class="page-header">
+            <h1>面试配置</h1>
+            <p>请填写面试相关信息，我们将为您生成个性化的面试题目</p>
+        </div>
+
+        <div class="config-form">
             <div class="error-message" id="errorMessage"></div>
             <div class="success-message" id="successMessage"></div>
 
@@ -584,7 +682,7 @@
                     <div class="checkbox-group">
                         <div class="checkbox-item">
                             <input type="checkbox" id="self_intro" name="sections" value="自我介绍" checked>
-                            <div>
+                            <div class="checkbox-content">
                                 <label for="self_intro" class="checkbox-label">自我介绍</label>
                                 <div class="checkbox-description">展示个人背景和优势</div>
                             </div>
@@ -592,7 +690,7 @@
                         
                         <div class="checkbox-item" id="resume_digging_item">
                             <input type="checkbox" id="resume_digging" name="sections" value="简历深挖">
-                            <div>
+                            <div class="checkbox-content">
                                 <label for="resume_digging" class="checkbox-label">简历深挖</label>
                                 <div class="checkbox-description">深入探讨工作经验和项目经历</div>
                             </div>
@@ -600,7 +698,7 @@
                         
                         <div class="checkbox-item">
                             <input type="checkbox" id="ability_assessment" name="sections" value="能力评估" checked>
-                            <div>
+                            <div class="checkbox-content">
                                 <label for="ability_assessment" class="checkbox-label">能力评估</label>
                                 <div class="checkbox-description">评估专业技能和学习能力</div>
                             </div>
@@ -608,7 +706,7 @@
                         
                         <div class="checkbox-item">
                             <input type="checkbox" id="position_matching" name="sections" value="岗位匹配度" checked>
-                            <div>
+                            <div class="checkbox-content">
                                 <label for="position_matching" class="checkbox-label">岗位匹配度</label>
                                 <div class="checkbox-description">分析与目标岗位的匹配程度</div>
                             </div>
@@ -616,7 +714,7 @@
                         
                         <div class="checkbox-item">
                             <input type="checkbox" id="professional_skills" name="sections" value="专业能力测试" checked>
-                            <div>
+                            <div class="checkbox-content">
                                 <label for="professional_skills" class="checkbox-label">专业能力测试</label>
                                 <div class="checkbox-description">测试专业技能和知识水平</div>
                             </div>
@@ -624,7 +722,7 @@
                         
                         <div class="checkbox-item">
                             <input type="checkbox" id="reverse_question" name="sections" value="反问环节" checked>
-                            <div>
+                            <div class="checkbox-content">
                                 <label for="reverse_question" class="checkbox-label">反问环节</label>
                                 <div class="checkbox-description">向面试官提问的机会</div>
                             </div>
@@ -639,290 +737,34 @@
             </form>
 
             <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p style="color: white;">正在生成面试题目，请稍候...</p>
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在生成面试题目，请稍候...</div>
+                <div class="loading-progress">
+                    <div class="progress-bar-inner"></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script>
-        // 高级粒子系统
-        class ParticleSystem {
-            constructor() {
-                this.canvas = document.getElementById('particles-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.particles = [];
-                this.mouse = { x: 0, y: 0 };
-                this.init();
-            }
-
-            init() {
-                this.resize();
-                this.createParticles();
-                this.animate();
-                this.addEventListeners();
-            }
-
-            resize() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-            }
-
-            createParticles() {
-                const particleCount = 100;
-                for (let i = 0; i < particleCount; i++) {
-                    this.particles.push({
-                        x: Math.random() * this.canvas.width,
-                        y: Math.random() * this.canvas.height,
-                        vx: (Math.random() - 0.5) * 0.5,
-                        vy: (Math.random() - 0.5) * 0.5,
-                        size: Math.random() * 2 + 1,
-                        opacity: Math.random() * 0.5 + 0.2
-                    });
-                }
-            }
-
-            animate() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                this.particles.forEach(particle => {
-                    // 更新位置
-                    particle.x += particle.vx;
-                    particle.y += particle.vy;
-                    
-                    // 边界检查
-                    if (particle.x < 0 || particle.x > this.canvas.width) particle.vx *= -1;
-                    if (particle.y < 0 || particle.y > this.canvas.height) particle.vy *= -1;
-                    
-                    // 绘制粒子
-                    this.ctx.beginPath();
-                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-                    this.ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
-                    this.ctx.fill();
-                    
-                    // 鼠标交互
-                    const dx = particle.x - this.mouse.x;
-                    const dy = particle.y - this.mouse.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 100) {
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(particle.x, particle.y);
-                        this.ctx.lineTo(this.mouse.x, this.mouse.y);
-                        this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1 - distance / 100)})`;
-                        this.ctx.stroke();
-                    }
-                });
-                
-                requestAnimationFrame(() => this.animate());
-            }
-
-            addEventListeners() {
-                window.addEventListener('resize', () => this.resize());
-                window.addEventListener('mousemove', (e) => {
-                    this.mouse.x = e.clientX;
-                    this.mouse.y = e.clientY;
-                });
-            }
-        }
-
-        // 星光系统
-        class StarSystem {
-            constructor() {
-                this.container = document.querySelector('.stars-container');
-                this.stars = [];
-                this.init();
-            }
-
-            init() {
-                // 初始创建星星
-                for (let i = 0; i < 50; i++) {
-                    this.createStar();
-                }
-                
-                // 定期创建新星星
-                setInterval(() => {
-                    this.createStar();
-                }, 2000);
-            }
-
-            createStar() {
-                const star = document.createElement('div');
-                star.className = 'star';
-                
-                // 随机位置
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight;
-                
-                star.style.left = x + 'px';
-                star.style.top = y + 'px';
-                
-                // 随机大小和类型
-                const sizes = ['small', 'medium', 'large'];
-                const size = sizes[Math.floor(Math.random() * sizes.length)];
-                star.classList.add(size);
-                
-                // 随机添加彩色效果
-                if (Math.random() > 0.7) {
-                    star.classList.add('colorful');
-                }
-                
-                // 随机延迟
-                star.style.animationDelay = Math.random() * 3 + 's';
-                
-                this.container.appendChild(star);
-                this.stars.push(star);
-                
-                // 定期移除星星以控制数量
-                setTimeout(() => {
-                    star.remove();
-                    this.stars = this.stars.filter(s => s !== star);
-                }, 10000 + Math.random() * 5000);
-            }
-        }
-
-        // 流星系统
-        class MeteorSystem {
-            constructor() {
-                this.container = document.querySelector('.meteor-container');
-                this.meteors = [];
-                this.init();
-            }
-
-            init() {
-                // 初始创建流星
-                for (let i = 0; i < 8; i++) {
-                    this.createMeteor();
-                }
-                
-                // 定期创建新流星
-                setInterval(() => {
-                    this.createMeteor();
-                }, 800);
-            }
-
-            createMeteor() {
-                const meteor = document.createElement('div');
-                meteor.className = 'meteor';
-                
-                // 随机起始位置（主要在左右两侧）
-                const side = Math.random() > 0.5 ? 'left' : 'right';
-                let startX, startY;
-                
-                if (side === 'left') {
-                    startX = -50;
-                    startY = Math.random() * window.innerHeight * 0.8;
-                } else {
-                    startX = window.innerWidth + 50;
-                    startY = Math.random() * window.innerHeight * 0.8;
-                }
-                
-                // 随机结束位置
-                const endX = startX + (Math.random() * 800 + 400) * (side === 'left' ? 1 : -1);
-                const endY = startY + Math.random() * 400 + 200;
-                
-                meteor.style.left = startX + 'px';
-                meteor.style.top = startY + 'px';
-                
-                // 随机大小和速度
-                const size = Math.random() * 3 + 2;
-                const duration = Math.random() * 2 + 1.5;
-                
-                meteor.style.width = size + 'px';
-                meteor.style.height = size + 'px';
-                
-                // 创建自定义动画
-                const animationName = 'meteor-' + Math.floor(Math.random() * 10000);
-                const style = document.createElement('style');
-                style.innerHTML = `
-                    @keyframes ${animationName} {
-                        0% {
-                            transform: translate(0, 0) rotate(45deg);
-                            opacity: 1;
-                        }
-                        70% {
-                            opacity: 1;
-                        }
-                        100% {
-                            transform: translate(${endX - startX}px, ${endY - startY}px) rotate(45deg);
-                            opacity: 0;
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                meteor.style.animation = `${animationName} ${duration}s linear`;
-                
-                this.container.appendChild(meteor);
-                this.meteors.push(meteor);
-                
-                // 动画结束后清理
-                setTimeout(() => {
-                    meteor.remove();
-                    style.remove();
-                    this.meteors = this.meteors.filter(m => m !== meteor);
-                }, duration * 1000);
-            }
-        }
-
-        // 火箭鼠标光标系统
-        class RocketCursorSystem {
-            constructor() {
-                this.cursor = document.getElementById('rocketCursor');
-                this.isVisible = false;
-                this.waveTimer = null;
-                this.init();
-            }
-
-            init() {
-                this.addEventListeners();
-                this.startWaveTimer();
-            }
-
-            addEventListeners() {
-                document.addEventListener('mousemove', (e) => {
-                    this.cursor.style.left = e.clientX + 'px';
-                    this.cursor.style.top = e.clientY + 'px';
-                    
-                    if (!this.isVisible) {
-                        this.cursor.style.opacity = '1';
-                        this.isVisible = true;
-                    }
-                });
-
-                document.addEventListener('mouseleave', () => {
-                    this.cursor.style.opacity = '0';
-                    this.isVisible = false;
-                });
-
-                document.addEventListener('click', (e) => {
-                    this.createWave(e.clientX, e.clientY);
-                });
-            }
-
-            startWaveTimer() {
-                this.waveTimer = setInterval(() => {
-                    if (this.isVisible) {
-                        const rect = this.cursor.getBoundingClientRect();
-                        this.createWave(rect.left + rect.width / 2, rect.top + rect.height / 2);
-                    }
-                }, 2000);
-            }
-
-            createWave(x, y) {
-                const wave = document.createElement('div');
-                wave.className = 'rocket-wave';
-                wave.style.left = x + 'px';
-                wave.style.top = y + 'px';
-                document.body.appendChild(wave);
-
-                setTimeout(() => {
-                    if (document.body.contains(wave)) {
-                        document.body.removeChild(wave);
-                    }
-                }, 2000);
-            }
-        }
+        // 初始化鼠标特效系统
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化火箭鼠标系统
+            new RocketCursorSystem();
+            
+            // 初始化高级粒子系统
+            new ParticleSystem();
+            
+            // 初始化星光系统
+            new StarSystem();
+            
+            // 初始化流星系统
+            new MeteorSystem();
+            
+            // 初始化加载系统
+            new LoadingSystem();
+        });
 
         // 切换开关功能
         function initToggles() {
@@ -1043,16 +885,82 @@
             successMessage.style.display = 'block';
         }
         
+        // 返回主页
+        function goBack() {
+            // 触发黑洞转场效果
+            const blackhole = document.getElementById('blackholeTransition');
+            blackhole.style.display = 'flex';
+            blackhole.classList.add('active');
+            
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+        
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化特效系统
-            new ParticleSystem();
-            new StarSystem();
-            new MeteorSystem();
-            new RocketCursorSystem();
-            
             // 初始化表单功能
             initToggles();
+            
+            // 页面加载动画
+            const configForm = document.querySelector('.config-form');
+            const pageHeader = document.querySelector('.page-header');
+            
+            // 初始状态
+            configForm.style.opacity = '0';
+            configForm.style.transform = 'translateY(30px)';
+            pageHeader.style.opacity = '0';
+            pageHeader.style.transform = 'translateY(-20px)';
+            
+            // 动画序列
+            setTimeout(() => {
+                pageHeader.style.transition = 'all 0.8s ease-out';
+                pageHeader.style.opacity = '1';
+                pageHeader.style.transform = 'translateY(0)';
+                
+                setTimeout(() => {
+                    configForm.style.transition = 'all 0.8s ease-out';
+                    configForm.style.opacity = '1';
+                    configForm.style.transform = 'translateY(0)';
+                }, 300);
+            }, 500);
+            
+            // 为表单元素添加鼠标特效
+            const formElements = document.querySelectorAll('.form-group input, .form-group textarea, .form-group select');
+            formElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    // 创建波动效果
+                    const wave = document.createElement('div');
+                    wave.className = 'rocket-wave';
+                    wave.style.left = event.clientX + 'px';
+                    wave.style.top = event.clientY + 'px';
+                    document.body.appendChild(wave);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(wave)) {
+                            document.body.removeChild(wave);
+                        }
+                    }, 2000);
+                });
+            });
+            
+            // 为按钮添加鼠标特效
+            const buttons = document.querySelectorAll('.submit-btn, .back-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    const wave = document.createElement('div');
+                    wave.className = 'rocket-wave';
+                    wave.style.left = event.clientX + 'px';
+                    wave.style.top = event.clientY + 'px';
+                    document.body.appendChild(wave);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(wave)) {
+                            document.body.removeChild(wave);
+                        }
+                    }, 2000);
+                });
+            });
         });
     </script>
 </body>

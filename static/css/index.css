@@ -661,7 +661,7 @@ body::before {
 .bubbles-container {
     position: relative;
     width: 100%;
-    height: 800px;
+    height: 1400px;
     max-width: 1400px;
 }
 
@@ -688,12 +688,22 @@ body::before {
 }
 
 .bubble-2-wrapper {
-    top: 350px;
+    top: 300px;
     left: 25%;
 }
 
 .bubble-3-wrapper {
-    top: 650px;
+    top: 550px;
+    right: 25%;
+}
+
+.bubble-4-wrapper {
+    top: 800px;
+    left: 25%;
+}
+
+.bubble-5-wrapper {
+    top: 1050px;
     right: 25%;
 }
 
@@ -853,8 +863,8 @@ body::before {
     top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 140px;
-    height: 140px;
+    width: 160px;
+    height: 160px;
     z-index: 2;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     opacity: 0.9;
@@ -916,6 +926,14 @@ body::before {
     animation: planetOrbit3 30s linear infinite;
 }
 
+.planet-svg-4 {
+    animation: planetOrbit4 22s linear infinite;
+}
+
+.planet-svg-5 {
+    animation: planetOrbit5 28s linear infinite;
+}
+
 /* 星球轨道动画 */
 @keyframes planetOrbit1 {
     0% {
@@ -944,12 +962,30 @@ body::before {
     }
 }
 
+@keyframes planetOrbit4 {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(-360deg);
+    }
+}
+
+@keyframes planetOrbit5 {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
 /* 星球发光效果 */
 .bubble:hover .planet-svg-1 img {
     filter: 
         drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4))
-        drop-shadow(0 0 25px rgba(255, 165, 0, 0.6))
-        drop-shadow(0 0 35px rgba(255, 165, 0, 0.3));
+        drop-shadow(0 0 25px rgba(135, 206, 235, 0.6))
+        drop-shadow(0 0 35px rgba(135, 206, 235, 0.3));
 }
 
 .bubble:hover .planet-svg-2 img {
@@ -964,6 +1000,20 @@ body::before {
         drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4))
         drop-shadow(0 0 25px rgba(147, 112, 219, 0.6))
         drop-shadow(0 0 35px rgba(147, 112, 219, 0.3));
+}
+
+.bubble:hover .planet-svg-4 img {
+    filter: 
+        drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 0 25px rgba(255, 165, 0, 0.6))
+        drop-shadow(0 0 35px rgba(255, 165, 0, 0.3));
+}
+
+.bubble:hover .planet-svg-5 img {
+    filter: 
+        drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 0 25px rgba(255, 20, 147, 0.6))
+        drop-shadow(0 0 35px rgba(255, 20, 147, 0.3));
 }
 
 /* 星球层次优化 */
@@ -1148,6 +1198,14 @@ body::before {
     .bubble-3-wrapper {
         right: 20%;
     }
+    
+    .bubble-4-wrapper {
+        left: 20%;
+    }
+    
+    .bubble-5-wrapper {
+        right: 20%;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1170,6 +1228,10 @@ body::before {
         font-size: 14px;
     }
     
+    .bubbles-container {
+        height: 1200px;
+    }
+    
     .bubble-wrapper {
         width: 200px;
         height: 200px;
@@ -1181,19 +1243,29 @@ body::before {
     }
     
     .bubble-2-wrapper {
-        top: 280px;
+        top: 240px;
         left: 10%;
     }
     
     .bubble-3-wrapper {
-        top: 530px;
+        top: 450px;
+        right: 10%;
+    }
+    
+    .bubble-4-wrapper {
+        top: 660px;
+        left: 10%;
+    }
+    
+    .bubble-5-wrapper {
+        top: 870px;
         right: 10%;
     }
     
     .bubble-content h3 {
         font-size: 1.4rem;
     }
-    
+
     .bubble-content p {
         font-size: 0.9rem;
     }
@@ -1202,10 +1274,6 @@ body::before {
     .planet-svg {
         width: 120px;
         height: 120px;
-    }
-    
-    .bubble-content {
-        padding: 10px;
     }
 
     /* 移动端隐藏部分装饰元素 */
@@ -1219,17 +1287,52 @@ body::before {
         font-size: 1.8rem;
     }
     
+    .bubbles-container {
+        height: 1000px;
+    }
+    
     .bubble-wrapper {
         width: 150px;
         height: 150px;
     }
     
+    .bubble-1-wrapper {
+        top: 20px;
+        right: 5%;
+    }
+    
+    .bubble-2-wrapper {
+        top: 190px;
+        left: 5%;
+    }
+    
+    .bubble-3-wrapper {
+        top: 360px;
+        right: 5%;
+    }
+    
+    .bubble-4-wrapper {
+        top: 530px;
+        left: 5%;
+    }
+    
+    .bubble-5-wrapper {
+        top: 700px;
+        right: 5%;
+    }
+
     .bubble-content h3 {
         font-size: 1.2rem;
     }
-    
+
     .bubble-content p {
         font-size: 0.8rem;
+    }
+    
+    /* 小屏幕星球适配 */
+    .planet-svg {
+        width: 80px;
+        height: 80px;
     }
 }
 

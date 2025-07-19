@@ -1,0 +1,22 @@
+{
+  "generated_at": "2025-07-19T20:50:29.476081",
+  "interview_config": {
+    "candidate_name": "yangyang",
+    "position": "python工程师",
+    "target_company": "阿里巴巴",
+    "tech_domain": "python",
+    "has_resume": true,
+    "resume_path": "",
+    "interview_type": "单人",
+    "strict_mode": true,
+    "selected_sections": [
+      "自我介绍",
+      "简历深挖",
+      "能力评估",
+      "岗位匹配度",
+      "专业能力测试",
+      "反问环节"
+    ]
+  },
+  "resume_content": ""
+}
