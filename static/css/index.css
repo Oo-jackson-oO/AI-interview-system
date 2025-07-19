@@ -356,125 +356,114 @@ body::before {
 .telescope {
     position: fixed;
     left: 5%;
-    bottom: 20%;
-    width: 80px;
-    height: 50px;
+    bottom: 10%;
+    width: 160px;   /* 放大后尺寸 */
+    height: 100px;
     z-index: 3;
     pointer-events: none;
+
+    background-image: url('/static/火箭02.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.95;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+
+    /* 初始旋转角度设置为顺时针 90° */
+    transform: rotate(90deg);
+    transition: transform 0.3s ease;
+
+    animation: telescopeFloat 4s ease-in-out infinite;
 }
 
-.telescope::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-        linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.9) 40%, rgba(255, 255, 255, 0.9) 60%, transparent 60%),
-        linear-gradient(-45deg, transparent 40%, rgba(255, 255, 255, 0.7) 40%, rgba(255, 255, 255, 0.7) 60%, transparent 60%);
-    border-radius: 50% 50% 0 0;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+
+
+@keyframes telescopeFloat {
+    0%, 100% {
+        transform: rotate(90deg) translateY(0);
+    }
+    50% {
+        transform: rotate(90deg) translateY(-6px);
+    }
 }
 
-.telescope::after {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
-    width: 6px;
-    height: 25px;
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateX(-50%);
-    border-radius: 3px;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
+
 
 /* 观星小人 */
 .stargazer {
     position: fixed;
     right: 5%;
-    bottom: 20%;
-    width: 50px;
-    height: 70px;
+    bottom: 4%;
+    width: 180px;
+    height: 240px;
     z-index: 3;
     pointer-events: none;
+
+    background-image: url('/static/宇航员.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.95;
+
+    /* ✅ 滤镜：反转黑白 + 可选亮度/对比增强 */
+    filter: invert(1) brightness(1.2) contrast(1.1) drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+
+    animation: floatStargazer 5s ease-in-out infinite;
 }
 
-.stargazer::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 25px;
-    height: 35px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px 12px 0 0;
-    transform: translateX(-50%);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
-}
 
-.stargazer::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
-}
-
-/* 星座图案 */
-.constellation {
-    position: fixed;
-    width: 150px;
-    height: 100px;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.25;
-}
-
-.constellation.big-dipper {
-    top: 8%;
-    left: 8%;
-    transform: rotateZ(-20deg);
+@keyframes floatStargazer {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
 }
 
 .constellation.orion {
-    top: 12%;
+    top: 14%;
     right: 8%;
-    transform: rotateZ(20deg);
+}
+.constellation.big-dipper {
+    top: 15%;
+    left: 8%;
+    transform: rotateZ(-15deg);
+  }
+  
+.constellation {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  transform: rotateZ(10deg);
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.9;
 }
 
-.constellation::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: 
-        radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-        radial-gradient(1px 1px at 40% 20%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-        radial-gradient(1px 1px at 60% 40%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-        radial-gradient(1px 1px at 80% 25%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-        radial-gradient(1px 1px at 30% 60%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-        radial-gradient(1px 1px at 70% 70%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-        radial-gradient(1px 1px at 50% 80%, rgba(255, 255, 255, 0.9) 1px, transparent 1px);
-    background-size: 100% 100%;
+.star {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.7);
 }
 
-.constellation::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: 
-        linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0.4) 60%, transparent 60%),
-        linear-gradient(-45deg, transparent 40%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0.4) 60%, transparent 60%),
-        linear-gradient(90deg, transparent 40%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0.4) 60%, transparent 60%);
+/* 虚线连接星星 */
+.constellation .lines {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
 }
+
+.constellation .lines line {
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 1;
+  stroke-dasharray: 3, 3;
+}
+
+
+
+  
+
 
 /* 流星痕迹 */
 .meteor-trail {
@@ -516,47 +505,26 @@ body::before {
 /* 空间站 */
 .space-station {
     position: fixed;
-    width: 50px;
-    height: 25px;
+    width: 80px;
+    height: 80px;
     z-index: 3;
     pointer-events: none;
+    background-image: url('/static/空间站.svg'); /* 引用本地 SVG */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
 }
 
-.space-station.left {
-    top: 3%;
-    left: 3%;
-}
+/* 空间站的位置 */
+
 
 .space-station.right {
     top: 6%;
     right: 3%;
 }
 
-.space-station::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-        linear-gradient(90deg, transparent 20%, rgba(255, 255, 255, 0.9) 20%, rgba(255, 255, 255, 0.9) 80%, transparent 80%),
-        linear-gradient(0deg, transparent 40%, rgba(255, 255, 255, 0.7) 40%, rgba(255, 255, 255, 0.7) 60%, transparent 60%);
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
-}
-
-.space-station::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 70px;
-    height: 5px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
 
 
 
@@ -944,6 +912,16 @@ body::before {
 }
 
 /* 流星拖尾效果 */
+.meteor {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 50%;
+    animation: meteorFall 2s linear infinite;
+}
+
+/* 第一条拖尾：斜向 */
 .meteor::before {
     content: '';
     position: absolute;
@@ -956,20 +934,47 @@ body::before {
     animation: meteorTrail 2s linear infinite;
 }
 
+/* 第二条拖尾：交叉方向（可为垂直或水平） */
+.meteor::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 100px;
+    background: linear-gradient(180deg, transparent, #ffffff, transparent);
+    transform: translate(-50%, -50%) rotate(45deg); /* 可试 135deg 实现正交 */
+    animation: meteorTrail 2s linear infinite;
+}
+
+/* 拖尾动画 */
 @keyframes meteorTrail {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+        transform: translate(-50%, -50%) rotate(45deg) scaleY(0);
     }
     50% {
         opacity: 1;
-        transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
+        transform: translate(-50%, -50%) rotate(45deg) scaleY(1);
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+        transform: translate(-50%, -50%) rotate(45deg) scaleY(0);
     }
 }
+
+/* 流星坠落动画 */
+@keyframes meteorFall {
+    0% {
+        transform: translateX(-100px) translateY(-100px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(calc(100vw + 100px)) translateY(calc(100vh + 100px));
+        opacity: 0;
+    }
+}
+
 
 
 
