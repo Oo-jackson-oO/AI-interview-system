@@ -384,6 +384,25 @@
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
+        
+        /* 确保内容在背景特效之上 */
+        .resume-container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .upload-section,
+        .analysis-section,
+        .chat-section {
+            position: relative;
+            z-index: 11;
+        }
+        
+        /* 确保鼠标特效正常工作 */
+        .back-button {
+            position: fixed;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
@@ -399,6 +418,79 @@
     <a href="/" class="back-button" onclick="triggerReturnTransition()">
         <i class="fas fa-arrow-left"></i> 返回首页
     </a>
+    
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 望远镜 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation big-dipper"></div>
+    <div class="constellation orion"></div>
+    
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station right"></div>
+    
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
     
     <div class="resume-container">
         <h1 style="text-align: center; margin-bottom: 40px; color: white;">
@@ -438,6 +530,24 @@
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script>
         let chatMessages = [];
+        
+        // 初始化背景特效系统
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化火箭鼠标系统
+            new RocketCursorSystem();
+            
+            // 初始化高级粒子系统
+            new ParticleSystem();
+            
+            // 初始化星光系统
+            new StarSystem();
+            
+            // 初始化流星系统
+            new MeteorSystem();
+            
+            // 初始化加载系统
+            new LoadingSystem();
+        });
         
         // 触发返回转场效果
         function triggerReturnTransition() {
