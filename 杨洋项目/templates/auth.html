@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录/注册 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-header h1 {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .auth-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .auth-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .switch-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .switch-form a:hover {
+            color: #5a6fd8;
+        }
+        
+        .error-message {
+            background: rgba(255, 87, 87, 0.2);
+            border: 1px solid rgba(255, 87, 87, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #ff5757;
+            display: none;
+        }
+        
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #4caf50;
+            display: none;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .form-toggle {
+            display: none;
+        }
+        
+        .form-toggle.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 返回按钮 -->
+    <a href="/" class="back-button" onclick="triggerReturnTransition()">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+    
+    <div class="auth-container">
+        <!-- 登录表单 -->
+        <div id="loginForm" class="form-toggle active">
+            <div class="auth-header">
+                <h1><i class="fas fa-sign-in-alt"></i> 用户登录</h1>
+                <p>欢迎回来，请登录您的账户</p>
+                {% if redirect_url %}
+                <p style="color: #667eea; font-size: 14px; margin-top: 10px;">
+                    <i class="fas fa-info-circle"></i> 登录后将跳转到您要访问的页面
+                </p>
+                {% endif %}
+            </div>
+            
+            <div class="error-message" id="loginError"></div>
+            <div class="success-message" id="loginSuccess"></div>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginUsername">用户名</label>
+                    <input type="text" id="loginUsername" name="username" placeholder="请输入用户名" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="请输入密码" required>
+                </div>
+                
+                <button type="submit" class="auth-button" id="loginButton">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+            </form>
+            
+            <div class="switch-form">
+                还没有账户？ <a href="#" onclick="switchForm('register')">立即注册</a>
+            </div>
+        </div>
+        
+        <!-- 注册表单 -->
+        <div id="registerForm" class="form-toggle">
+            <div class="auth-header">
+                <h1><i class="fas fa-user-plus"></i> 用户注册</h1>
+                <p>创建您的账户，开始使用AI智能面试系统</p>
+            </div>
+            
+            <div class="error-message" id="registerError"></div>
+            <div class="success-message" id="registerSuccess"></div>
+            
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" name="username" placeholder="请输入用户名" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerEmail">邮箱（可选）</label>
+                    <input type="email" id="registerEmail" name="email" placeholder="请输入邮箱地址">
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" name="password" placeholder="请输入密码（至少6位）" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerConfirmPassword">确认密码</label>
+                    <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="请再次输入密码" required>
+                </div>
+                
+                <button type="submit" class="auth-button" id="registerButton">
+                    <i class="fas fa-user-plus"></i> 注册
+                </button>
+            </form>
+            
+            <div class="switch-form">
+                已有账户？ <a href="#" onclick="switchForm('login')">立即登录</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        // 触发返回转场效果
+        function triggerReturnTransition() {
+            sessionStorage.setItem('returningToHome', 'true');
+        }
+        
+        // 切换表单
+        function switchForm(type) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            if (type === 'register') {
+                loginForm.classList.remove('active');
+                registerForm.classList.add('active');
+            } else {
+                registerForm.classList.remove('active');
+                loginForm.classList.add('active');
+            }
+            
+            // 清空错误和成功消息
+            clearMessages();
+        }
+        
+        // 清空消息
+        function clearMessages() {
+            document.querySelectorAll('.error-message, .success-message').forEach(msg => {
+                msg.style.display = 'none';
+            });
+        }
+        
+        // 显示消息
+        function showMessage(type, message, formType) {
+            const messageElement = document.getElementById(formType + type.charAt(0).toUpperCase() + type.slice(1));
+            messageElement.textContent = message;
+            messageElement.style.display = 'block';
+        }
+        
+        // 处理登录
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const button = document.getElementById('loginButton');
+            
+            if (!username || !password) {
+                showMessage('error', '请填写完整信息', 'login');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 登录中...';
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('success', data.message, 'login');
+                    // 保存用户信息到sessionStorage
+                    sessionStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // 检查是否有重定向URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectUrl = urlParams.get('redirect');
+                    
+                    // 延迟跳转
+                    setTimeout(() => {
+                        if (redirectUrl && redirectUrl !== window.location.href) {
+                            window.location.href = redirectUrl;
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 1500);
+                } else {
+                    showMessage('error', data.message, 'login');
+                }
+            } catch (error) {
+                showMessage('error', '网络错误，请稍后重试', 'login');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-sign-in-alt"></i> 登录';
+            }
+        }
+        
+        // 处理注册
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const button = document.getElementById('registerButton');
+            
+            if (!username || !password) {
+                showMessage('error', '请填写完整信息', 'register');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('error', '两次输入的密码不一致', 'register');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('error', '密码长度至少6位', 'register');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 注册中...';
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('success', data.message, 'register');
+                    // 延迟切换到登录表单
+                    setTimeout(() => {
+                        switchForm('login');
+                        document.getElementById('loginUsername').value = username;
+                    }, 1500);
+                } else {
+                    showMessage('error', data.message, 'register');
+                }
+            } catch (error) {
+                showMessage('error', '网络错误，请稍后重试', 'register');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-user-plus"></i> 注册';
+            }
+        }
+    </script>
+</body>
+</html> 

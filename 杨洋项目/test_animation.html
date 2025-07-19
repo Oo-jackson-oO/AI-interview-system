@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动画测试</title>
+    <link rel="stylesheet" href="static/css/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <h1 style="color: white; text-align: center; margin-top: 100px;">动画测试页面</h1>
+        <div style="text-align: center; margin-top: 50px;">
+            <button onclick="testAnimation()" style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+                margin: 10px;
+            ">测试动画</button>
+        </div>
+    </div>
+    
+    <script>
+        function testAnimation() {
+            const mainContainer = document.querySelector('.main-container');
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            
+            // 主页内容淡出
+            mainContainer.classList.add('fade-out');
+            
+            // 激活黑洞转场
+            blackholeTransition.classList.add('active', 'enter');
+            
+            setTimeout(() => {
+                blackholeTransition.classList.remove('enter');
+                
+                // 启动流光动画
+                startStreamAnimation();
+                
+                setTimeout(() => {
+                    alert('动画测试完成！');
+                    // 重置动画
+                    mainContainer.classList.remove('fade-out');
+                    blackholeTransition.classList.remove('active');
+                }, 3000);
+            }, 1500);
+        }
+        
+        function startStreamAnimation() {
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            if (blackholeTransition) {
+                const particles = blackholeTransition.querySelectorAll('.particle');
+                particles.forEach((particle, index) => {
+                    // 重置动画
+                    particle.style.animation = 'none';
+                    particle.offsetHeight; // 触发重排
+                    
+                    // 启动新的动画
+                    particle.style.animation = `particleOrbit 8s linear infinite`;
+                    particle.style.animationDelay = `${index * 0.2}s`;
+                    
+                    // 添加额外的发光效果
+                    particle.style.boxShadow = `0 0 12px rgba(0, 168, 255, 0.9), 0 0 24px rgba(0, 168, 255, 0.5)`;
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

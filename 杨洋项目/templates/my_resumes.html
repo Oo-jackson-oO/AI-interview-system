@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的简历 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 确保页面背景正确 */
+        body {
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .resume-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-header h1 {
+            color: white;
+            font-size: 36px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from {
+                filter: drop-shadow(0 0 5px rgba(102, 126, 234, 0.3));
+            }
+            to {
+                filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.6));
+            }
+        }
+        
+        .page-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+        }
+        
+        .resume-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .resume-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .resume-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .resume-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+        
+        .resume-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .resume-card:nth-child(1) { animation-delay: 0.1s; }
+        .resume-card:nth-child(2) { animation-delay: 0.2s; }
+        .resume-card:nth-child(3) { animation-delay: 0.3s; }
+        .resume-card:nth-child(4) { animation-delay: 0.4s; }
+        .resume-card:nth-child(5) { animation-delay: 0.5s; }
+        .resume-card:nth-child(6) { animation-delay: 0.6s; }
+        
+        .resume-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .resume-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .resume-icon i {
+            color: white;
+            font-size: 20px;
+        }
+        
+        .resume-info h3 {
+            color: white;
+            font-size: 18px;
+            margin: 0 0 5px 0;
+            font-weight: 600;
+        }
+        
+        .resume-info p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .resume-details {
+            margin: 20px 0;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .resume-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        /* 按钮点击特效 */
+        .action-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        /* 简历图标悬停特效 */
+        .resume-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .resume-card:hover .resume-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .loading i {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+        
+        .back-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        @media (max-width: 768px) {
+            .resume-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .resume-card {
+                padding: 20px;
+            }
+            
+            .page-header h1 {
+                font-size: 28px;
+            }
+        }
+        
+        @keyframes rocketFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 望远镜 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation big-dipper"></div>
+    <div class="constellation orion"></div>
+    
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station left"></div>
+    <div class="space-station right"></div>
+    
+    <!-- 返回按钮 -->
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+    
+    <div class="resume-container">
+        <div class="page-header">
+            <h1><i class="fas fa-folder-open"></i> 我的简历</h1>
+            <p>管理您上传的所有简历文件</p>
+        </div>
+        
+        <div id="resumeContent">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <p>正在加载简历列表...</p>
+            </div>
+        </div>
+        
+        <!-- 页面加载动画 -->
+        <div class="page-loading" id="pageLoading" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        ">
+            <div style="
+                text-align: center;
+                color: white;
+            ">
+                <i class="fas fa-rocket" style="
+                    font-size: 48px;
+                    margin-bottom: 20px;
+                    animation: rocketFloat 2s ease-in-out infinite;
+                "></i>
+                <h3>正在进入简历管理页面...</h3>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        // 页面加载时获取简历列表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 隐藏页面加载动画
+            setTimeout(() => {
+                const pageLoading = document.getElementById('pageLoading');
+                if (pageLoading) {
+                    pageLoading.style.opacity = '0';
+                    setTimeout(() => {
+                        pageLoading.style.display = 'none';
+                    }, 500);
+                }
+            }, 1000);
+            
+            loadResumes();
+            
+            // 初始化特效系统
+            initEffects();
+        });
+        
+        // 初始化特效
+        function initEffects() {
+            // 初始化火箭鼠标系统
+            if (typeof RocketCursorSystem !== 'undefined') {
+                new RocketCursorSystem();
+            }
+            
+            // 初始化高级粒子系统
+            if (typeof ParticleSystem !== 'undefined') {
+                new ParticleSystem();
+            }
+            
+            // 初始化星光系统
+            if (typeof StarSystem !== 'undefined') {
+                new StarSystem();
+            }
+            
+            // 初始化流星系统
+            if (typeof MeteorSystem !== 'undefined') {
+                new MeteorSystem();
+            }
+        }
+        
+        // 加载简历列表
+        async function loadResumes() {
+            try {
+                const response = await fetch('/api/resume/list', {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResumes(data.resumes);
+                } else {
+                    showError(data.error || '加载失败');
+                }
+            } catch (error) {
+                showError('网络错误，请稍后重试');
+            }
+        }
+        
+        // 显示简历列表
+        function displayResumes(resumes) {
+            const content = document.getElementById('resumeContent');
+            
+            if (resumes.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>暂无简历</h3>
+                        <p>您还没有上传任何简历文件</p>
+                        <a href="/resume" class="upload-btn">
+                            <i class="fas fa-upload"></i>
+                            上传简历
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 添加淡入动画
+            content.style.opacity = '0';
+            content.style.transform = 'translateY(20px)';
+            content.style.transition = 'all 0.5s ease';
+            
+            const resumesHtml = resumes.map(resume => `
+                <div class="resume-card" data-resume-id="${resume.id}">
+                    <div class="resume-header">
+                        <div class="resume-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="resume-info">
+                            <h3>${resume.filename}</h3>
+                            <p>上传时间: ${formatDate(resume.created_at)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="resume-details">
+                        <div class="detail-item">
+                            <span class="detail-label">文件类型</span>
+                            <span class="detail-value">${resume.file_type.toUpperCase()}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">文件大小</span>
+                            <span class="detail-value">${formatFileSize(resume.file_size)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">上传时间</span>
+                            <span class="detail-value">${formatDate(resume.upload_time || resume.created_at)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="resume-actions">
+                        <button class="action-btn download-btn" onclick="downloadResume('${resume.id}')">
+                            <i class="fas fa-download"></i>
+                            下载
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteResume('${resume.id}')">
+                            <i class="fas fa-trash"></i>
+                            删除
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            content.innerHTML = `
+                <div class="resume-grid">
+                    ${resumesHtml}
+                </div>
+            `;
+            
+            // 触发淡入动画
+            setTimeout(() => {
+                content.style.opacity = '1';
+                content.style.transform = 'translateY(0)';
+            }, 100);
+        }
+        
+        // 下载简历
+        async function downloadResume(resumeId) {
+            try {
+                window.open(`/api/resume/${resumeId}/download`, '_blank');
+            } catch (error) {
+                alert('下载失败，请稍后重试');
+            }
+        }
+        
+        // 删除简历
+        async function deleteResume(resumeId) {
+            if (!confirm('确定要删除这个简历吗？此操作不可恢复。')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/resume/${resumeId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 从页面中移除简历卡片
+                    const resumeCard = document.querySelector(`[data-resume-id="${resumeId}"]`);
+                    if (resumeCard) {
+                        // 添加删除动画
+                        resumeCard.style.transform = 'scale(0.8)';
+                        resumeCard.style.opacity = '0';
+                        resumeCard.style.transition = 'all 0.3s ease';
+                        
+                        setTimeout(() => {
+                            resumeCard.remove();
+                            
+                            // 检查是否还有其他简历
+                            const remainingCards = document.querySelectorAll('.resume-card');
+                            if (remainingCards.length === 0) {
+                                displayResumes([]);
+                            }
+                        }, 300);
+                    }
+                    
+                    alert('简历删除成功！');
+                } else {
+                    alert(data.message || '删除失败');
+                }
+            } catch (error) {
+                alert('删除失败，请稍后重试');
+            }
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            const content = document.getElementById('resumeContent');
+            content.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>加载失败</h3>
+                    <p>${message}</p>
+                    <button onclick="loadResumes()" class="upload-btn">
+                        <i class="fas fa-refresh"></i>
+                        重新加载
+                    </button>
+                </div>
+            `;
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return '未知';
+            
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (!bytes) return '未知';
+            
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多模型模拟面试 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 用户状态样式 */
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .user-status:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .user-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #4caf50;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            animation: online-pulse 2s infinite;
+        }
+        
+        @keyframes online-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+        
+        .username {
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .username:hover {
+            color: #667eea;
+            transform: translateY(-1px);
+        }
+        
+        .username::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .username:hover::after {
+            width: 100%;
+        }
+        
+        /* 用户头像悬停效果 */
+        .user-avatar {
+            transition: all 0.3s ease;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 添加脉冲动画 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .user-status:hover .user-avatar {
+            animation: pulse 1s ease-in-out;
+        }
+        
+        /* 用户信息提示框 */
+        .user-tooltip {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            margin-top: 5px;
+        }
+        
+        .user-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 4px solid rgba(0, 0, 0, 0.9);
+        }
+        
+        .username:hover + .user-tooltip,
+        .user-tooltip:hover {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* 欢迎消息动画 */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .logout-btn {
+            background: rgba(255, 87, 87, 0.2);
+            border: 1px solid rgba(255, 87, 87, 0.3);
+            color: #ff5757;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 87, 87, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 87, 87, 0.3);
+        }
+        
+        .login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 登录模态框样式 */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            min-width: 350px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: white;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .modal-login-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .modal-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .modal-footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .modal-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+        
+        .modal-footer a:hover {
+            color: #5a6fd8;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translate(-50%, -60%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+    
+    <!-- 导航栏切换按钮 -->
+    <div class="nav-toggle-btn" id="navToggleBtn">
+        <i class="fas fa-rocket"></i>
+    </div>
+    
+    <!-- 左侧导航栏 -->
+    <nav class="sidebar-nav" id="sidebarNav">
+        <div class="sidebar-logo">
+            <i class="fas fa-rocket"></i>
+        </div>
+        <ul class="sidebar-list">
+            <li><a href="/resume" onclick="checkLoginAndNavigate('/resume', event)"><i class="fas fa-file-alt"></i> 简历解析</a></li>
+            <li><a href="/my-resumes" onclick="checkLoginAndNavigate('/my-resumes', event)"><i class="fas fa-folder-open"></i> 我的简历 <span id="resumeCount" class="resume-count" style="display: none;">(0)</span></a></li>
+            <li><a href="/training" onclick="checkLoginAndNavigate('/training', event)"><i class="fas fa-graduation-cap"></i> 技能培训</a></li>
+            <li><a href="/learning" onclick="checkLoginAndNavigate('/learning', event)"><i class="fas fa-route"></i> 学习路径</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 望远镜 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation big-dipper"></div>
+    <div class="constellation orion"></div>
+    
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station left"></div>
+    <div class="space-station right"></div>
+    
+    <!-- 主要内容 -->
+    <div class="main-container">
+        <!-- 高级页眉 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1 class="title">多模型模拟面试</h1>
+                        <p class="subtitle">AI智能面试系统</p>
+                    </div>
+                </div>
+                
+                <nav class="header-nav">
+                    
+                    
+                    <!-- 用户状态显示 -->
+                    <div class="nav-item user-status" id="userStatus" style="display: none;">
+                        <div class="user-info">
+                            <div class="user-avatar" id="userAvatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="username" id="username" onclick="goToProfile()"></span>
+                            <div class="user-tooltip" id="userTooltip">点击查看个人详情</div>
+                        </div>
+                        <button onclick="logout()" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>登出</span>
+                        </button>
+                    </div>
+                    <!-- 登录按钮 -->
+                    <div class="nav-item auth-buttons" id="authButtons">
+                        <button onclick="showLoginModal()" class="login-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>登录</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+            
+            <!-- 高级进度条 -->
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </header>
+        
+        <!-- 高级泡泡导航区域 -->
+        <div class="bubbles-section">
+            <div class="bubbles-container">
+                <!-- 第一个泡泡 - 个人简历 -->
+                <div class="bubble-wrapper bubble-1-wrapper">
+                    <div class="bubble-card">
+                        <div class="bubble-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <a href="/resume" class="bubble bubble-1" id="resumeLink" onclick="checkLoginAndNavigate('/resume', event)">
+                            <div class="bubble-inner">
+                                <div class="bubble-content">
+                                    <h3>个人简历</h3>
+                                    <p>智能简历分析</p>
+                                </div>
+                                <div class="vortex-effect"></div>
+                            </div>
+                        </a>
+                        <div class="bubble-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-eye"></i>
+                                <span>1.2k</span>
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-star"></i>
+                                <span>4.8</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第二个泡泡 - 模拟面试 -->
+                <div class="bubble-wrapper bubble-2-wrapper">
+                    <div class="bubble-card">
+                        <div class="bubble-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <a href="/interview" class="bubble bubble-2" id="interviewLink" onclick="checkLoginAndNavigate('/interview', event)">
+                            <div class="bubble-inner">
+                                <div class="bubble-content">
+                                    <h3>模拟面试</h3>
+                                    <p>AI智能对话</p>
+                                </div>
+                                <div class="vortex-effect"></div>
+                            </div>
+                        </a>
+                        <div class="bubble-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-users"></i>
+                                <span>856</span>
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-star"></i>
+                                <span>4.9</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第三个泡泡 - 个性化学习路径 -->
+                <div class="bubble-wrapper bubble-3-wrapper">
+                    <div class="bubble-card">
+                        <div class="bubble-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <a href="/learning" class="bubble bubble-3" id="learningLink" onclick="checkLoginAndNavigate('/learning', event)">
+                            <div class="bubble-inner">
+                                <div class="bubble-content">
+                                    <h3>学习路径</h3>
+                                    <p>个性化推荐</p>
+                                </div>
+                                <div class="vortex-effect"></div>
+                            </div>
+                        </a>
+                        <div class="bubble-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>2.1k</span>
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-star"></i>
+                                <span>4.7</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 高级连接线 -->
+                <svg class="connectors" width="100%" height="100%">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                                refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="rgba(255,255,255,0.8)" />
+                        </marker>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge> 
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 登录模态框 -->
+    <div class="login-modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>用户登录</h2>
+                <button class="close-btn" onclick="closeLoginModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modalUsername">用户名</label>
+                    <input type="text" id="modalUsername" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="modalPassword">密码</label>
+                    <input type="password" id="modalPassword" placeholder="请输入密码">
+                </div>
+                <button onclick="handleModalLogin()" class="modal-login-btn">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+                <div class="modal-footer">
+                    <span>还没有账户？</span>
+                    <a href="/auth" onclick="triggerTransition()">立即注册</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 高级加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>系统初始化中...</p>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        // 用户认证相关功能
+        let currentUser = null;
+        
+        // 页面加载时检查用户状态
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserStatus();
+        });
+        
+        // 检查用户状态
+        function checkUserStatus() {
+            const user = sessionStorage.getItem('user');
+            if (user) {
+                try {
+                    currentUser = JSON.parse(user);
+                    showUserStatus();
+                } catch (e) {
+                    // 如果解析失败，清除无效数据
+                    sessionStorage.removeItem('user');
+                    showLoginButton();
+                }
+            } else {
+                showLoginButton();
+            }
+        }
+        
+        // 显示用户状态
+        function showUserStatus() {
+            document.getElementById('userStatus').style.display = 'flex';
+            document.getElementById('authButtons').style.display = 'none';
+            
+            // 设置用户名
+            document.getElementById('username').textContent = currentUser.username;
+            
+            // 设置用户头像（显示用户名首字母）
+            const userAvatar = document.getElementById('userAvatar');
+            const firstLetter = currentUser.username.charAt(0).toUpperCase();
+            userAvatar.innerHTML = firstLetter;
+            
+            // 添加用户头像悬停效果
+            userAvatar.title = `点击查看 ${currentUser.username} 的个人详情`;
+            
+            // 设置提示框内容
+            const userTooltip = document.getElementById('userTooltip');
+            userTooltip.textContent = `点击查看 ${currentUser.username} 的个人详情`;
+            
+            // 获取并显示简历数量
+            updateResumeCount();
+        }
+        
+        // 显示登录按钮
+        function showLoginButton() {
+            document.getElementById('userStatus').style.display = 'none';
+            document.getElementById('authButtons').style.display = 'flex';
+            
+            // 隐藏简历数量
+            const resumeCount = document.getElementById('resumeCount');
+            if (resumeCount) {
+                resumeCount.style.display = 'none';
+            }
+        }
+        
+        // 更新简历数量显示
+        async function updateResumeCount() {
+            try {
+                const response = await fetch('/api/resume/count', {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const resumeCount = document.getElementById('resumeCount');
+                    if (resumeCount) {
+                        resumeCount.textContent = `(${data.count})`;
+                        resumeCount.style.display = 'inline';
+                    }
+                }
+            } catch (error) {
+                console.error('获取简历数量失败:', error);
+            }
+        }
+        
+        // 显示登录模态框
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+        
+        // 关闭登录模态框
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+        
+        // 处理模态框登录
+        async function handleModalLogin() {
+            const username = document.getElementById('modalUsername').value;
+            const password = document.getElementById('modalPassword').value;
+            
+            if (!username || !password) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    sessionStorage.setItem('user', JSON.stringify(data.user));
+                    showUserStatus();
+                    closeLoginModal();
+                    closeLoginPrompt(); // 关闭登录提示
+                    showWelcomeMessage(username);
+                    
+                    // 刷新页面以确保session同步
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('网络错误，请稍后重试');
+            }
+        }
+        
+        // 登出
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    sessionStorage.removeItem('user');
+                    currentUser = null;
+                    showLoginButton();
+                    alert('登出成功！');
+                    
+                    // 刷新页面以确保session同步
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                // 即使网络错误也清除本地状态
+                sessionStorage.removeItem('user');
+                currentUser = null;
+                showLoginButton();
+                alert('登出成功！');
+                
+                // 刷新页面以确保session同步
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+        }
+        
+        // 点击模态框外部关闭
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLoginModal();
+            }
+        });
+        
+        // 跳转到个人详情页面
+        function goToProfile() {
+            if (currentUser) {
+                window.location.href = '/profile';
+            }
+        }
+        
+        // 显示欢迎消息
+        function showWelcomeMessage(username) {
+            // 创建欢迎消息元素
+            const welcomeMsg = document.createElement('div');
+            welcomeMsg.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                z-index: 1000;
+                animation: slideInRight 0.5s ease;
+                font-weight: 500;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            welcomeMsg.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                欢迎回来，${username}！
+            `;
+            
+            document.body.appendChild(welcomeMsg);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                welcomeMsg.style.animation = 'slideOutRight 0.5s ease';
+                setTimeout(() => {
+                    if (document.body.contains(welcomeMsg)) {
+                        document.body.removeChild(welcomeMsg);
+                    }
+                }, 500);
+            }, 3000);
+        }
+        
+        // 检查登录状态并导航
+        function checkLoginAndNavigate(url, event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                // 用户未登录，跳转到登录页面并传递重定向URL
+                window.location.href = `/auth?redirect=${encodeURIComponent(url)}`;
+                return false;
+            }
+            
+            // 用户已登录，播放离开动画后导航
+            playLeaveAnimation(url);
+            return true;
+        }
+        
+        // 播放离开动画
+        function playLeaveAnimation(targetUrl) {
+            const mainContainer = document.querySelector('.main-container');
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            
+            if (mainContainer && blackholeTransition) {
+                // 主页内容淡出
+                mainContainer.classList.add('fade-out');
+                
+                // 激活黑洞转场，中心黑洞扩散到全屏
+                blackholeTransition.classList.add('active', 'enter');
+                
+                setTimeout(() => {
+                    blackholeTransition.classList.remove('enter');
+                    
+                    // 启动流光动画
+                    startStreamAnimation();
+                    
+                    setTimeout(() => {
+                        // 跳转到目标页面
+                        window.location.href = targetUrl;
+                    }, 1500); // 增加动画时间，让效果更完整
+                }, 1500);
+            } else {
+                // 如果没有动画元素，直接跳转
+                window.location.href = targetUrl;
+            }
+        }
+        
+        // 启动流光动画
+        function startStreamAnimation() {
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            if (blackholeTransition) {
+                const particles = blackholeTransition.querySelectorAll('.particle');
+                particles.forEach((particle, index) => {
+                    // 重置动画
+                    particle.style.animation = 'none';
+                    particle.offsetHeight; // 触发重排
+                    
+                    // 启动新的动画
+                    particle.style.animation = `particleOrbit 8s linear infinite`;
+                    particle.style.animationDelay = `${index * 0.2}s`;
+                    
+                    // 添加额外的发光效果
+                    particle.style.boxShadow = `0 0 12px rgba(0, 168, 255, 0.9), 0 0 24px rgba(0, 168, 255, 0.5)`;
+                });
+                
+                // 添加额外的视觉效果
+                setTimeout(() => {
+                    particles.forEach((particle, index) => {
+                        particle.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            particle.style.transform = 'scale(1)';
+                        }, 200);
+                    });
+                }, 500);
+            }
+        }
+        
+        // 显示登录提示
+        function showLoginPrompt() {
+            // 创建登录提示模态框
+            const loginPrompt = document.createElement('div');
+            loginPrompt.id = 'loginPrompt';
+            loginPrompt.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                z-index: 2000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            loginPrompt.innerHTML = `
+                <div style="
+                    background: rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(20px);
+                    border-radius: 20px;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    padding: 30px;
+                    max-width: 400px;
+                    text-align: center;
+                    color: white;
+                    animation: slideIn 0.3s ease;
+                ">
+                    <div style="margin-bottom: 20px;">
+                        <i class="fas fa-lock" style="font-size: 48px; color: #667eea; margin-bottom: 15px;"></i>
+                        <h3 style="margin: 0 0 10px 0; font-size: 24px;">需要登录</h3>
+                        <p style="margin: 0; opacity: 0.8; line-height: 1.5;">
+                            请先登录您的账户以访问此功能
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="showLoginModal()" style="
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            border: none;
+                            color: white;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 500;
+                            transition: all 0.3s ease;
+                        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            <i class="fas fa-sign-in-alt"></i> 立即登录
+                        </button>
+                        <button onclick="closeLoginPrompt()" style="
+                            background: rgba(255, 255, 255, 0.1);
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            color: white;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 500;
+                            transition: all 0.3s ease;
+                        " onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+                            稍后再说
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(loginPrompt);
+        }
+        
+        // 关闭登录提示
+        function closeLoginPrompt() {
+            const loginPrompt = document.getElementById('loginPrompt');
+            if (loginPrompt) {
+                loginPrompt.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(loginPrompt)) {
+                        document.body.removeChild(loginPrompt);
+                    }
+                }, 300);
+            }
+        }
+        
+        // 添加淡出动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes slideIn {
+                from { 
+                    opacity: 0; 
+                    transform: translateY(-20px) scale(0.95);
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0) scale(1);
+                }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

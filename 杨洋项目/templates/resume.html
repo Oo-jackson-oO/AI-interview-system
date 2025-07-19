@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简历解析 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .resume-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .upload-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .file-upload {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: rgba(102, 126, 234, 0.6);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+        
+        .analysis-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .analysis-content {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            color: #e0e0e0;
+        }
+        
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #667eea;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .chat-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .message.user {
+            background: rgba(102, 126, 234, 0.2);
+            margin-left: 20%;
+        }
+        
+        .message.ai {
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: 20%;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .chat-input input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .chat-input button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #667eea;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .progress-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .progress-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 返回按钮 -->
+    <a href="/" class="back-button" onclick="triggerReturnTransition()">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+    
+    <div class="resume-container">
+        <h1 style="text-align: center; margin-bottom: 40px; color: white;">
+            <i class="fas fa-file-alt"></i> 智能简历解析
+        </h1>
+        
+        <!-- 文件上传区域 -->
+        <div class="upload-section">
+            <h2><i class="fas fa-upload"></i> 上传简历</h2>
+            <div class="file-upload" onclick="document.getElementById('resumeFile').click()">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">点击上传简历文件</div>
+                <div class="upload-hint">支持 PDF、DOCX、DOC 格式</div>
+                <input type="file" id="resumeFile" accept=".pdf,.docx,.doc" onchange="handleFileUpload(this)">
+            </div>
+        </div>
+        
+        <!-- 分析结果区域 -->
+        <div class="analysis-section" id="analysisSection" style="display: none;">
+            <h2><i class="fas fa-chart-line"></i> 简历分析结果</h2>
+            <div class="analysis-content" id="analysisContent"></div>
+        </div>
+        
+        <!-- AI对话区域 -->
+        <div class="chat-section" id="chatSection" style="display: none;">
+            <h2><i class="fas fa-comments"></i> AI智能助手</h2>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="输入您的问题..." onkeypress="handleChatKeyPress(event)">
+                <button onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        let chatMessages = [];
+        
+        // 触发返回转场效果
+        function triggerReturnTransition() {
+            // 设置返回标志
+            sessionStorage.setItem('returningToHome', 'true');
+        }
+        
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                uploadAndAnalyze(file);
+            }
+        }
+        
+        function uploadAndAnalyze(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // 显示加载状态
+            document.getElementById('analysisSection').style.display = 'block';
+            document.getElementById('analysisContent').innerHTML = `
+                <div class="progress-indicator">
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                </div>
+                <div class="loading">正在分析简历，请稍候...</div>
+            `;
+            
+            // 获取当前用户信息
+            const user = sessionStorage.getItem('user');
+            if (!user) {
+                alert('请先登录');
+                return;
+            }
+            
+            const userData = JSON.parse(user);
+            
+            fetch('/api/resume/analyze', {
+                method: 'POST',
+                headers: {
+                    'X-Username': userData.username
+                },
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`网络响应错误: ${response.status}`);
+                }
+                
+                // 检查响应类型
+                const contentType = response.headers.get('content-type');
+                console.log('Content-Type:', contentType);
+                
+                if (contentType && contentType.includes('application/json')) {
+                    // 如果是JSON响应，说明有错误
+                    return response.json().then(data => {
+                        throw new Error(data.error || '分析失败');
+                    });
+                }
+                
+                // 清空加载状态，准备接收流式数据
+                document.getElementById('analysisContent').innerHTML = '<span class="typing-cursor"></span>';
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let totalContent = '';
+                
+                function readStream() {
+                    return reader.read().then(({done, value}) => {
+                        if (done) {
+                            console.log('Stream completed, total content length:', totalContent.length);
+                            // 流式输出完成，移除光标并显示聊天区域
+                            const analysisContent = document.getElementById('analysisContent');
+                            const cursor = analysisContent.querySelector('.typing-cursor');
+                            if (cursor) cursor.remove();
+                            document.getElementById('chatSection').style.display = 'block';
+                            addMessage('AI', '您好！我已经分析了您的简历。请问您有什么具体问题需要咨询吗？');
+                            return;
+                        }
+                        
+                        // 解码并添加到缓冲区
+                        const chunk = decoder.decode(value, {stream: true});
+                        buffer += chunk;
+                        totalContent += chunk;
+                        
+                        console.log('Received chunk:', chunk.length, 'bytes');
+                        
+                        // 将新内容添加到分析结果区域
+                        const analysisContent = document.getElementById('analysisContent');
+                        // 移除光标，添加内容，然后重新添加光标
+                        const cursor = analysisContent.querySelector('.typing-cursor');
+                        if (cursor) cursor.remove();
+                        analysisContent.innerHTML += buffer + '<span class="typing-cursor"></span>';
+                        analysisContent.scrollTop = analysisContent.scrollHeight;
+                        
+                        // 清空缓冲区，继续读取
+                        buffer = '';
+                        
+                        return readStream();
+                    });
+                }
+                
+                return readStream();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('analysisContent').innerHTML = '上传失败：' + error.message;
+            });
+        }
+        
+        function addMessage(sender, content) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender.toLowerCase()}`;
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${content}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            if (sender === 'User') {
+                chatMessages.push({role: 'user', content: content});
+            } else {
+                chatMessages.push({role: 'assistant', content: content});
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage('User', message);
+                input.value = '';
+                
+                // 创建AI消息容器
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'message ai';
+                aiMessageDiv.innerHTML = '<strong>AI:</strong> <span class="ai-content"></span><span class="typing-cursor"></span>';
+                document.getElementById('chatMessages').appendChild(aiMessageDiv);
+                const aiContent = aiMessageDiv.querySelector('.ai-content');
+                const cursor = aiMessageDiv.querySelector('.typing-cursor');
+                
+                                fetch('/api/resume/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: chatMessages,
+                        message: message
+                    })
+                })
+                .then(response => {
+                    console.log('Chat response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`网络响应错误: ${response.status}`);
+                    }
+                    
+                    // 检查响应类型
+                    const contentType = response.headers.get('content-type');
+                    console.log('Chat Content-Type:', contentType);
+                    
+                    if (contentType && contentType.includes('application/json')) {
+                        // 如果是JSON响应，说明有错误
+                        return response.json().then(data => {
+                            throw new Error(data.error || '聊天失败');
+                        });
+                    }
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    let totalContent = '';
+                    
+                    function readStream() {
+                        return reader.read().then(({done, value}) => {
+                            if (done) {
+                                console.log('Chat stream completed, total content length:', totalContent.length);
+                                // 流式输出完成，移除光标并添加到聊天历史
+                                if (cursor) cursor.remove();
+                                const aiResponse = aiContent.textContent;
+                                chatMessages.push({role: 'assistant', content: aiResponse});
+                                return;
+                            }
+                            
+                            // 解码并添加到缓冲区
+                            const chunk = decoder.decode(value, {stream: true});
+                            buffer += chunk;
+                            totalContent += chunk;
+                            
+                            console.log('Chat received chunk:', chunk.length, 'bytes');
+                            
+                            // 将新内容添加到AI消息
+                            aiContent.textContent += buffer;
+                            
+                            // 滚动到底部
+                            const messagesDiv = document.getElementById('chatMessages');
+                            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                            
+                            // 清空缓冲区，继续读取
+                            buffer = '';
+                            
+                            return readStream();
+                        });
+                    }
+                    
+                    return readStream();
+                })
+                .catch(error => {
+                    console.error('Chat error:', error);
+                    aiContent.textContent = '抱歉，网络连接出现问题：' + error.message;
+                });
+            }
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html> 

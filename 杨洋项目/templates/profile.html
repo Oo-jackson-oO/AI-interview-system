@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人详情 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .profile-header h1 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .profile-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+        
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        
+        .profile-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .profile-info {
+            margin-bottom: 30px;
+        }
+        
+        .profile-avatar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .avatar-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 40px;
+            color: white;
+        }
+        
+        .profile-name {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .profile-username {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+        
+        .info-item {
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .resume-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .resume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .resume-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .resume-date {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        
+        .resume-content {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            color: #e0e0e0;
+        }
+        
+        .empty-resume {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .empty-resume i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .edit-profile-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .edit-profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 编辑模态框样式 */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            min-width: 400px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: white;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 返回按钮 -->
+    <a href="/" class="back-button" onclick="triggerReturnTransition()">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+    
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1><i class="fas fa-user-circle"></i> 个人详情</h1>
+            <p>查看和管理您的个人信息</p>
+        </div>
+        
+        <div class="profile-content">
+            <!-- 个人信息卡片 -->
+            <div class="profile-card">
+                <div class="profile-info">
+                    <div class="profile-avatar">
+                        <div class="avatar-circle">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-name" id="profileName">加载中...</div>
+                        <div class="profile-username" id="profileUsername">@username</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">姓名</div>
+                        <div class="info-value" id="userName">-</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">学科</div>
+                        <div class="info-value" id="userMajor">-</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">大学</div>
+                        <div class="info-value" id="userUniversity">-</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">邮箱</div>
+                        <div class="info-value" id="userEmail">-</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">注册时间</div>
+                        <div class="info-value" id="userCreatedAt">-</div>
+                    </div>
+                    
+                    <button class="edit-profile-btn" onclick="showEditModal()">
+                        <i class="fas fa-edit"></i> 编辑信息
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 最新简历卡片 -->
+            <div class="resume-section">
+                <div class="resume-header">
+                    <div class="resume-title">最新简历</div>
+                    <div class="resume-date" id="resumeDate">-</div>
+                </div>
+                
+                <div class="resume-content" id="resumeContent">
+                    <div class="empty-resume">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>暂无简历</h3>
+                        <p>上传您的第一份简历开始使用AI智能分析</p>
+                        <a href="/resume" class="edit-profile-btn">
+                            <i class="fas fa-upload"></i> 上传简历
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑个人信息模态框 -->
+    <div class="edit-modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑个人信息</h2>
+                <button class="close-btn" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editName">姓名</label>
+                    <input type="text" id="editName" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label for="editMajor">学科</label>
+                    <input type="text" id="editMajor" placeholder="请输入学科">
+                </div>
+                <div class="form-group">
+                    <label for="editUniversity">大学</label>
+                    <input type="text" id="editUniversity" placeholder="请输入大学">
+                </div>
+                <button class="save-btn" onclick="saveProfile()">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        let currentUser = null;
+        let userProfile = null;
+        
+        // 触发返回转场效果
+        function triggerReturnTransition() {
+            sessionStorage.setItem('returningToHome', 'true');
+        }
+        
+        // 页面加载时获取用户信息
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+        });
+        
+        // 加载用户信息
+        async function loadUserProfile() {
+            const user = sessionStorage.getItem('user');
+            if (!user) {
+                alert('请先登录');
+                window.location.href = '/';
+                return;
+            }
+            
+            currentUser = JSON.parse(user);
+            
+            try {
+                const response = await fetch('/api/profile/info', {
+                    method: 'GET',
+                    headers: {
+                        'X-Username': currentUser.username
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    userProfile = data.profile;
+                    displayUserProfile();
+                    loadLatestResume();
+                } else {
+                    console.error('获取用户信息失败:', data.error);
+                }
+            } catch (error) {
+                console.error('网络错误:', error);
+            }
+        }
+        
+        // 显示用户信息
+        function displayUserProfile() {
+            if (!userProfile) return;
+            
+            document.getElementById('profileName').textContent = userProfile.name || currentUser.username;
+            document.getElementById('profileUsername').textContent = '@' + currentUser.username;
+            document.getElementById('userName').textContent = userProfile.name || '-';
+            document.getElementById('userMajor').textContent = userProfile.major || '-';
+            document.getElementById('userUniversity').textContent = userProfile.university || '-';
+            document.getElementById('userEmail').textContent = userProfile.email || '-';
+            document.getElementById('userCreatedAt').textContent = formatDate(userProfile.created_at);
+        }
+        
+        // 加载最新简历
+        async function loadLatestResume() {
+            try {
+                const response = await fetch('/api/resume/list', {
+                    method: 'GET',
+                    headers: {
+                        'X-Username': currentUser.username
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.resumes.length > 0) {
+                    // 获取最新的简历
+                    const latestResume = data.resumes[data.resumes.length - 1];
+                    displayLatestResume(latestResume);
+                }
+            } catch (error) {
+                console.error('加载简历失败:', error);
+            }
+        }
+        
+        // 显示最新简历
+        function displayLatestResume(resume) {
+            document.getElementById('resumeDate').textContent = formatDate(resume.created_at);
+            
+            const resumeContent = document.getElementById('resumeContent');
+            resumeContent.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <strong>文件名:</strong> ${resume.filename}<br>
+                    <strong>文件类型:</strong> ${resume.file_type}<br>
+                    <strong>文件大小:</strong> ${formatFileSize(resume.file_size)}
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+                    <strong>简历内容:</strong><br>
+                    ${resume.text}
+                </div>
+            `;
+        }
+        
+        // 显示编辑模态框
+        function showEditModal() {
+            if (!userProfile) return;
+            
+            document.getElementById('editName').value = userProfile.name || '';
+            document.getElementById('editMajor').value = userProfile.major || '';
+            document.getElementById('editUniversity').value = userProfile.university || '';
+            
+            document.getElementById('editModal').style.display = 'block';
+        }
+        
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        // 保存个人信息
+        async function saveProfile() {
+            const name = document.getElementById('editName').value;
+            const major = document.getElementById('editMajor').value;
+            const university = document.getElementById('editUniversity').value;
+            
+            try {
+                const response = await fetch('/api/profile/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Username': currentUser.username
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        major: major,
+                        university: university
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('个人信息更新成功！');
+                    closeEditModal();
+                    loadUserProfile(); // 重新加载用户信息
+                } else {
+                    alert('更新失败: ' + data.error);
+                }
+            } catch (error) {
+                alert('网络错误，请稍后重试');
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN');
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 点击模态框外部关闭
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+    </script>
+</body>
+</html> 

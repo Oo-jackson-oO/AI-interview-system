@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个性化学习路径 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 学习路径页面样式 */
+        .learning-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .learning-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .learning-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .learning-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .form-group input:hover,
+        .form-group textarea:hover,
+        .form-group select:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* 修复select下拉框的字体颜色 */
+        .form-group select {
+            color: white;
+        }
+        
+        .form-group select option {
+            color: white;
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        /* 未选择时的占位符样式 */
+        .form-group select:invalid,
+        .form-group select option[value=""] {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .ai-chat {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: fit-content;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-chat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chat-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message.ai {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .message:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        
+        .chat-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .chat-input input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .send-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .learning-result {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .result-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .result-content {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 确保页面在生成过程中可以滚动 */
+        body {
+            overflow-y: auto !important;
+        }
+        
+        .learning-container {
+            overflow-y: visible !important;
+        }
+        
+        /* 控制按钮样式 */
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+            font-size: 12px;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: white;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .loading.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 加载进度条样式 */
+        .loading-text {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .loading-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            animation: progressFill 2s ease-in-out infinite;
+        }
+        
+        @keyframes progressFill {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .learning-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* 确保鼠标特效正常工作 */
+        .learning-container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .learning-form,
+        .ai-chat,
+        .learning-result {
+            position: relative;
+            z-index: 11;
+        }
+        
+        /* 波动效果样式 */
+        .rocket-wave {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: waveExpand 2s ease-out forwards;
+        }
+        
+        @keyframes waveExpand {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+                transform: translate(-50%, -50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 望远镜 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation big-dipper"></div>
+    <div class="constellation orion"></div>
+    
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station left"></div>
+    <div class="space-station right"></div>
+    
+    <!-- 返回按钮 -->
+    <button class="back-btn" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> 返回主页
+    </button>
+    
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+    
+    <div class="learning-container" style="position: relative; z-index: 10;">
+        <div class="page-header">
+            <h1>个性化学习路径</h1>
+            <p>AI智能分析，为您量身定制专属学习计划</p>
+        </div>
+        
+        <div class="learning-content">
+            <!-- 学习计划生成表单 -->
+            <div class="learning-form">
+                <h3 class="form-title">生成学习计划</h3>
+                <form id="learningForm">
+                    <div class="form-group">
+                        <label for="position">目标岗位</label>
+                        <input type="text" id="position" name="position" placeholder="例如：前端开发工程师" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="studyContent">学习内容</label>
+                        <textarea id="studyContent" name="studyContent" rows="3" placeholder="描述您想要学习的具体内容或技能" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="studyGoal">学习目标</label>
+                        <textarea id="studyGoal" name="studyGoal" rows="3" placeholder="描述您的学习目标，如掌握某项技能、通过某个考试等" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timeCommitment">时间投入</label>
+                        <select id="timeCommitment" name="timeCommitment" required>
+                            <option value="" disabled selected style="color: rgba(255, 255, 255, 0.5);">请选择时间投入</option>
+                            <option value="每天1-2小时">每天1-2小时</option>
+                            <option value="每天3-4小时">每天3-4小时</option>
+                            <option value="每天5-6小时">每天5-6小时</option>
+                            <option value="每周10-15小时">每周10-15小时</option>
+                            <option value="每周20-30小时">每周20-30小时</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="generate-btn" id="generateBtn">
+                        <i class="fas fa-magic"></i>
+                        生成学习计划
+                    </button>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在生成个性化学习计划...</div>
+                    <div class="loading-progress">
+                        <div class="progress-bar-inner"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI对话区域 -->
+            <div class="ai-chat">
+                <h3 class="chat-title">AI学习助手</h3>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai">
+                        您好！我是您的AI学习助手，可以为您提供学习建议、解答问题或帮助制定学习计划。请告诉我您需要什么帮助？
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="输入您的问题...">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 学习计划结果 -->
+        <div class="learning-result" id="learningResult">
+            <h3 class="result-title">您的个性化学习计划</h3>
+            <div class="result-content" id="resultContent"></div>
+            <div class="result-controls" style="margin-top: 15px; text-align: center;">
+                <button id="scrollToTop" class="control-btn" style="display: none;">
+                    <i class="fas fa-arrow-up"></i> 回到顶部
+                </button>
+                <button id="scrollToBottom" class="control-btn" style="display: none;">
+                    <i class="fas fa-arrow-down"></i> 滚动到底部
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        let chatMessages = [
+            { role: "assistant", content: "您好！我是您的AI学习助手，可以为您提供学习建议、解答问题或帮助制定学习计划。请告诉我您需要什么帮助？" }
+        ];
+        
+        // 初始化鼠标特效系统
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化火箭鼠标系统
+            new RocketCursorSystem();
+            
+            // 初始化高级粒子系统
+            new ParticleSystem();
+            
+            // 初始化星光系统
+            new StarSystem();
+            
+            // 初始化流星系统
+            new MeteorSystem();
+            
+            // 初始化加载系统
+            new LoadingSystem();
+        });
+        
+        // 生成学习计划
+        document.getElementById('learningForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                position: formData.get('position'),
+                studyContent: formData.get('studyContent'),
+                studyGoal: formData.get('studyGoal'),
+                timeCommitment: formData.get('timeCommitment')
+            };
+            
+            const generateBtn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('learningResult');
+            
+            generateBtn.disabled = true;
+            loading.classList.add('show');
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/learning/generate-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let resultContent = '';
+                    
+                    document.getElementById('resultContent').innerHTML = '';
+                    result.style.display = 'block';
+                    
+                    // 显示滚动控制按钮
+                    document.getElementById('scrollToTop').style.display = 'inline-block';
+                    document.getElementById('scrollToBottom').style.display = 'inline-block';
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value);
+                        resultContent += chunk;
+                        document.getElementById('resultContent').innerHTML = resultContent;
+                        
+                        // 只在内容较少时自动滚动，避免干扰用户
+                        if (resultContent.length < 500) {
+                            result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                } else {
+                    const errorData = await response.json();
+                    alert('生成失败：' + errorData.message);
+                }
+            } catch (error) {
+                alert('网络错误，请稍后重试');
+            } finally {
+                generateBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+        
+        // 发送聊天消息
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // 添加用户消息
+            addMessage('user', message);
+            input.value = '';
+            
+            // 添加AI消息占位符
+            const aiMessageElement = addMessage('ai', '正在思考...');
+            
+            try {
+                const response = await fetch('/api/learning/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: chatMessages,
+                        newMessage: message
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    aiMessageElement.textContent = data.response;
+                    chatMessages.push({ role: 'assistant', content: data.response });
+                } else {
+                    aiMessageElement.textContent = '抱歉，我遇到了一些问题，请稍后重试。';
+                }
+            } catch (error) {
+                aiMessageElement.textContent = '网络错误，请稍后重试。';
+            }
+        }
+        
+        // 添加消息到聊天区域
+        function addMessage(role, content) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${role}`;
+            messageElement.textContent = content;
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return messageElement;
+        }
+        
+        // 回车发送消息
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 返回主页
+        function goBack() {
+            // 触发黑洞转场效果
+            const blackhole = document.getElementById('blackholeTransition');
+            blackhole.style.display = 'flex';
+            blackhole.classList.add('active');
+            
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面加载动画
+            const learningForm = document.querySelector('.learning-form');
+            const aiChat = document.querySelector('.ai-chat');
+            const pageHeader = document.querySelector('.page-header');
+            
+            // 初始状态
+            learningForm.style.opacity = '0';
+            learningForm.style.transform = 'translateY(30px)';
+            aiChat.style.opacity = '0';
+            aiChat.style.transform = 'translateY(30px)';
+            pageHeader.style.opacity = '0';
+            pageHeader.style.transform = 'translateY(-20px)';
+            
+            // 动画序列
+            setTimeout(() => {
+                pageHeader.style.transition = 'all 0.8s ease-out';
+                pageHeader.style.opacity = '1';
+                pageHeader.style.transform = 'translateY(0)';
+                
+                setTimeout(() => {
+                    learningForm.style.transition = 'all 0.8s ease-out';
+                    learningForm.style.opacity = '1';
+                    learningForm.style.transform = 'translateY(0)';
+                    
+                    setTimeout(() => {
+                        aiChat.style.transition = 'all 0.8s ease-out';
+                        aiChat.style.opacity = '1';
+                        aiChat.style.transform = 'translateY(0)';
+                    }, 200);
+                }, 300);
+            }, 500);
+            // 为表单元素添加鼠标特效
+            const formElements = document.querySelectorAll('.form-group input, .form-group textarea, .form-group select');
+            formElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    // 创建波动效果
+                    const wave = document.createElement('div');
+                    wave.className = 'rocket-wave';
+                    wave.style.left = event.clientX + 'px';
+                    wave.style.top = event.clientY + 'px';
+                    document.body.appendChild(wave);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(wave)) {
+                            document.body.removeChild(wave);
+                        }
+                    }, 2000);
+                });
+            });
+            
+            // 为按钮添加鼠标特效
+            const buttons = document.querySelectorAll('.generate-btn, .send-btn, .back-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    const wave = document.createElement('div');
+                    wave.className = 'rocket-wave';
+                    wave.style.left = event.clientX + 'px';
+                    wave.style.top = event.clientY + 'px';
+                    document.body.appendChild(wave);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(wave)) {
+                            document.body.removeChild(wave);
+                        }
+                    }, 2000);
+                });
+            });
+            
+            // 为聊天消息添加鼠标特效
+            const chatMessages = document.querySelectorAll('.message');
+            chatMessages.forEach(message => {
+                message.addEventListener('mouseenter', function() {
+                    const wave = document.createElement('div');
+                    wave.className = 'rocket-wave';
+                    wave.style.left = event.clientX + 'px';
+                    wave.style.top = event.clientY + 'px';
+                    document.body.appendChild(wave);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(wave)) {
+                            document.body.removeChild(wave);
+                        }
+                    }, 2000);
+                });
+            });
+            
+            // 滚动控制按钮事件
+            document.getElementById('scrollToTop').addEventListener('click', function() {
+                document.getElementById('resultContent').scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            document.getElementById('scrollToBottom').addEventListener('click', function() {
+                const resultContent = document.getElementById('resultContent');
+                resultContent.scrollTo({
+                    top: resultContent.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
