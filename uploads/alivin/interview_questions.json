@@ -1,0 +1,45 @@
+{
+  "generated_at": "2025-07-19T19:00:41.494268",
+  "candidate_name": "alivin",
+  "interview_position": "python全栈",
+  "tech_domain": "python",
+  "strict_mode": false,
+  "questions": {
+    "能力评估": [
+      {
+        "question": "请描述您在Python项目中遇到的一个技术难题，以及您是如何解决的",
+        "importance": 1,
+        "difficulty": "medium"
+      },
+      {
+        "question": "您如何管理多个任务和项目的时间安排？",
+        "importance": 2,
+        "difficulty": "easy"
+      }
+    ],
+    "岗位匹配度": [
+      {
+        "question": "您认为Python全栈开发岗位需要哪些核心技能？",
+        "importance": 1,
+        "difficulty": "medium"
+      },
+      {
+        "question": "您为什么选择应聘华为的Python全栈岗位？",
+        "importance": 2,
+        "difficulty": "easy"
+      }
+    ],
+    "专业能力测试": [
+      {
+        "question": "请解释Python中的生成器与普通函数的区别，并给出一个实际应用场景",
+        "importance": 1,
+        "difficulty": "hard"
+      },
+      {
+        "question": "在Django框架中，如何实现一个自定义中间件？请简要描述步骤",
+        "importance": 2,
+        "difficulty": "medium"
+      }
+    ]
+  }
+}

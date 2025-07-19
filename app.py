@@ -621,5 +621,229 @@ def learning_chat():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# 面试相关路由
+@app.route('/interview-config')
+@login_required
+def interview_config_page():
+    return render_template('interview_config.html')
+
+@app.route('/api/interview/generate', methods=['POST'])
+@login_required
+def generate_interview():
+    try:
+        data = request.get_json()
+        
+        # 验证必填字段
+        required_fields = ['candidate_name', 'position', 'target_company', 'tech_domain', 'selected_sections']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'message': f'缺少必填字段: {field}'})
+        
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', data['candidate_name'])
+        
+        # 导入面试模块
+        import sys
+        import os
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        mock_interview_path = os.path.join(current_dir, 'modules', 'Mock_interview')
+        
+        # 添加模块路径
+        if mock_interview_path not in sys.path:
+            sys.path.insert(0, mock_interview_path)
+        
+        try:
+            # 使用绝对导入
+            from modules.Mock_interview.init import InterviewAgent
+        except ImportError:
+            try:
+                # 备用导入方式
+                from init import InterviewAgent
+            except ImportError as e:
+                print(f"导入面试模块失败: {e}")
+                return jsonify({'success': False, 'message': '面试模块导入失败'})
+        
+        # 创建面试智能体
+        agent = InterviewAgent()
+        
+        # 设置面试配置，使用用户名作为candidate_name
+        agent.interview_config = {
+            'candidate_name': username,  # 使用登录用户名
+            'position': data['position'],
+            'target_company': data['target_company'],
+            'tech_domain': data['tech_domain'],
+            'has_resume': data.get('has_resume', False),
+            'resume_path': '',  # 暂时为空，后续可以处理文件上传
+            'interview_type': '单人',  # 固定为单人模式
+            'strict_mode': data.get('strict_mode', False),
+            'selected_sections': data['selected_sections']
+        }
+        
+        # 处理简历内容（如果有）
+        if data.get('has_resume') and data.get('resume_content'):
+            agent.resume_content = data['resume_content']
+        
+        # 生成面试题目
+        import asyncio
+        questions = asyncio.run(agent.generate_interview_questions())
+        
+        # 保存面试配置和题目到用户特定文件夹
+        agent.save_interview_questions(questions)
+        
+        # 将面试配置存储到session中，供面试页面使用
+        session['interview_config'] = agent.interview_config
+        session['interview_questions'] = questions
+        
+        return jsonify({
+            'success': True,
+            'message': '面试题目生成成功',
+            'questions_count': len(questions)
+        })
+        
+    except Exception as e:
+        print(f"生成面试题目时出错: {str(e)}")
+        return jsonify({'success': False, 'message': f'生成面试题目失败: {str(e)}'})
+
+@app.route('/interview')
+@login_required
+def interview_page():
+    # 检查是否有面试配置
+    if 'interview_config' not in session or 'interview_questions' not in session:
+        return redirect('/interview-config')
+    
+    return render_template('interview.html')
+
+@app.route('/api/interview/data')
+@login_required
+def get_interview_data():
+    try:
+        # 从session中获取面试配置和题目
+        config = session.get('interview_config', {})
+        questions = session.get('interview_questions', {})
+        
+        if not config or not questions:
+            return jsonify({'success': False, 'message': '没有找到面试数据'})
+        
+        return jsonify({
+            'success': True,
+            'config': config,
+            'questions': questions
+        })
+        
+    except Exception as e:
+        print(f"获取面试数据时出错: {str(e)}")
+        return jsonify({'success': False, 'message': f'获取面试数据失败: {str(e)}'})
+
+@app.route('/api/interview/run', methods=['POST'])
+@login_required
+def run_interview():
+    """运行完整的面试流程"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        # 导入面试系统模块
+        import sys
+        import os
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        mock_interview_path = os.path.join(current_dir, 'modules', 'Mock_interview')
+        
+        # 添加模块路径
+        if mock_interview_path not in sys.path:
+            sys.path.insert(0, mock_interview_path)
+        
+        try:
+            # 导入面试系统
+            from modules.Mock_interview.main import InterviewSystem
+        except ImportError:
+            try:
+                from main import InterviewSystem
+            except ImportError as e:
+                print(f"导入面试系统失败: {e}")
+                return jsonify({'success': False, 'message': '面试系统导入失败'})
+        
+        # 创建面试系统实例
+        interview_system = InterviewSystem()
+        
+        # 设置配置文件路径为用户特定路径
+        user_folder = os.path.join('uploads', username)
+        os.makedirs(user_folder, exist_ok=True)
+        
+        interview_system.config_file = os.path.join(user_folder, "interview_config.json")
+        interview_system.questions_file = os.path.join(user_folder, "interview_questions.json")
+        
+        # 加载现有配置
+        if not interview_system.load_existing_config():
+            return jsonify({'success': False, 'message': '加载面试配置失败'})
+        
+        # 运行面试流程
+        import asyncio
+        asyncio.run(interview_system.run_complete_interview())
+        
+        return jsonify({
+            'success': True,
+            'message': '面试流程执行完成'
+        })
+        
+    except Exception as e:
+        print(f"运行面试流程时出错: {str(e)}")
+        return jsonify({'success': False, 'message': f'运行面试流程失败: {str(e)}'})
+
+@app.route('/api/interview/history')
+@login_required
+def get_interview_history():
+    """获取用户的面试历史记录"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        # 构建用户文件夹路径
+        user_folder = os.path.join('uploads', username)
+        
+        if not os.path.exists(user_folder):
+            return jsonify({
+                'success': True,
+                'history': []
+            })
+        
+        # 查找用户的面试配置文件
+        history = []
+        for filename in os.listdir(user_folder):
+            if filename.endswith('_config.json') or filename.endswith('interview_config.json'):
+                filepath = os.path.join(user_folder, filename)
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        config_data = json.load(f)
+                    
+                    # 提取面试信息
+                    interview_info = {
+                        'filename': filename,
+                        'created_at': config_data.get('generated_at', ''),
+                        'candidate_name': config_data.get('interview_config', {}).get('candidate_name', ''),
+                        'position': config_data.get('interview_config', {}).get('position', ''),
+                        'target_company': config_data.get('interview_config', {}).get('target_company', ''),
+                        'tech_domain': config_data.get('interview_config', {}).get('tech_domain', ''),
+                        'selected_sections': config_data.get('interview_config', {}).get('selected_sections', [])
+                    }
+                    history.append(interview_info)
+                except Exception as e:
+                    print(f"读取面试配置文件 {filename} 失败: {e}")
+                    continue
+        
+        # 按创建时间排序
+        history.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        
+        return jsonify({
+            'success': True,
+            'history': history
+        })
+        
+    except Exception as e:
+        print(f"获取面试历史时出错: {str(e)}")
+        return jsonify({'success': False, 'message': f'获取面试历史失败: {str(e)}'})
+
 if __name__ == '__main__':
     app.run(debug=True)

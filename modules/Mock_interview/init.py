@@ -51,7 +51,7 @@ class InterviewAgent:
                 resume_path = "resume.txt"
             self.resume_content = self._load_resume(resume_path)
         
-        # 6. 选择单人/多人面试
+        # 6. 选择单人/多人面试//暂时不需要多人
         interview_type = input("选择面试类型 (单人/多人): ").strip()
         
         # 7. 是否进行严格面试
@@ -279,11 +279,11 @@ class InterviewAgent:
             
             print(f"📊 [{task_id}] 技术题目生成统计:")
             print(f"   - 使用模型: generalv3.5")
-            print(f"   - AI响应长度: {len(result)} 字符")
+            print(f"   - AI响应长度: {len(result) if result else 0} 字符")
             print(f"   - 耗时: {task_time:.2f} 秒")
-            print(f"   - 响应前100字符: {result[:100]}...")
+            print(f"   - 响应前100字符: {result[:100] if result else 'None'}...")
             
-            result_dict = self._extract_json_from_response(result)
+            result_dict = self._extract_json_from_response(result) if result else {}
             result_dict['task_time'] = task_time
             return result_dict
         except Exception as e:
@@ -293,7 +293,7 @@ class InterviewAgent:
             print(f"   - 耗时: {task_time:.2f} 秒")
             
             # 返回默认题目
-            default_result = {
+            default_result: Dict = {
                 "能力评估": [
                     {"question": "请描述您解决过的最复杂的技术问题", "importance": 1, "difficulty": "medium"},
                     {"question": "您如何评估自己的学习能力？", "importance": 2, "difficulty": "easy"}
@@ -363,11 +363,11 @@ class InterviewAgent:
             
             print(f"📊 [{task_id}] 简历深挖题目生成统计:")
             print(f"   - 使用模型: generalv3.5")
-            print(f"   - AI响应长度: {len(result)} 字符")
+            print(f"   - AI响应长度: {len(result) if result else 0} 字符")
             print(f"   - 耗时: {task_time:.2f} 秒")
-            print(f"   - 响应前100字符: {result[:100]}...")
+            print(f"   - 响应前100字符: {result[:100] if result else 'None'}...")
             
-            result_dict = self._extract_json_from_response(result)
+            result_dict = self._extract_json_from_response(result) if result else {}
             result_dict['task_time'] = task_time
             return result_dict
         except Exception as e:
@@ -377,7 +377,7 @@ class InterviewAgent:
             print(f"   - 耗时: {task_time:.2f} 秒")
             
             # 返回默认题目
-            default_result = {
+            default_result: Dict = {
                 "candidate_name": candidate_name if candidate_name else "",
                 "简历深挖": [
                     {"question": "您在贵泽实业有限公司担任行政主管期间，最大的挑战是什么？", "importance": 1, "difficulty": "medium", "focus_area": "工作经验"},
@@ -402,34 +402,70 @@ class InterviewAgent:
     
     def save_interview_config(self, filename: str = "interview_config.json"):
         """保存面试配置"""
+        # 获取用户名，如果没有则使用默认名称
+        candidate_name = self.interview_config.get('candidate_name', 'unknown_user')
+        if not candidate_name or candidate_name.strip() == '':
+            candidate_name = 'unknown_user'
+        
+        # 创建用户文件夹路径
+        user_folder = os.path.join('uploads', candidate_name)
+        os.makedirs(user_folder, exist_ok=True)
+        
+        # 构建完整的文件路径
+        config_filepath = os.path.join(user_folder, filename)
+        
         config_data = {
             "interview_config": self.interview_config,
             "resume_content": self.resume_content
         }
         
         try:
-            with open(filename, 'w', encoding='utf-8') as f:
+            with open(config_filepath, 'w', encoding='utf-8') as f:
                 json.dump(config_data, f, ensure_ascii=False, indent=2)
-            print(f"面试配置已保存到 {filename}")
+            print(f"面试配置已保存到 {config_filepath}")
         except Exception as e:
             print(f"保存配置时出错: {e}")
     
     def load_interview_config(self, filename: str = "interview_config.json"):
         """加载面试配置"""
+        # 获取用户名，如果没有则使用默认名称
+        candidate_name = self.interview_config.get('candidate_name', 'unknown_user')
+        if not candidate_name or candidate_name.strip() == '':
+            candidate_name = 'unknown_user'
+        
+        # 创建用户文件夹路径
+        user_folder = os.path.join('uploads', candidate_name)
+        
+        # 构建完整的文件路径
+        config_filepath = os.path.join(user_folder, filename)
+        
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(config_filepath, 'r', encoding='utf-8') as f:
                 config_data = json.load(f)
                 self.interview_config = config_data["interview_config"]
                 self.resume_content = config_data["resume_content"]
-            print(f"面试配置已从 {filename} 加载")
+            print(f"面试配置已从 {config_filepath} 加载")
         except FileNotFoundError:
-            print(f"配置文件 {filename} 未找到")
+            print(f"配置文件 {config_filepath} 未找到")
         except Exception as e:
             print(f"加载配置时出错: {e}")
     
     def save_interview_questions(self, questions: Dict, config_filename: str = "interview_config.json", questions_filename: str = "interview_questions.json"):
         """分别保存面试配置和题目到不同的JSON文件"""
         try:
+            # 获取用户名，如果没有则使用默认名称
+            candidate_name = self.interview_config.get('candidate_name', 'unknown_user')
+            if not candidate_name or candidate_name.strip() == '':
+                candidate_name = 'unknown_user'
+            
+            # 创建用户文件夹路径
+            user_folder = os.path.join('uploads', candidate_name)
+            os.makedirs(user_folder, exist_ok=True)
+            
+            # 构建完整的文件路径
+            config_filepath = os.path.join(user_folder, config_filename)
+            questions_filepath = os.path.join(user_folder, questions_filename)
+            
             # 保存面试配置
             config_data = {
                 "generated_at": datetime.now().isoformat(),
@@ -437,9 +473,9 @@ class InterviewAgent:
                 "resume_content": self.resume_content
             }
             
-            with open(config_filename, 'w', encoding='utf-8') as f:
+            with open(config_filepath, 'w', encoding='utf-8') as f:
                 json.dump(config_data, f, ensure_ascii=False, indent=2)
-            print(f"✅ 面试配置已保存到 {config_filename}")
+            print(f"✅ 面试配置已保存到 {config_filepath}")
             print(f"📊 配置信息包含: 面试者姓名、岗位、技术领域、面试类型、严格模式、选择板块等")
             
             # 保存面试题目
@@ -452,11 +488,11 @@ class InterviewAgent:
                 "questions": questions
             }
             
-            with open(questions_filename, 'w', encoding='utf-8') as f:
+            with open(questions_filepath, 'w', encoding='utf-8') as f:
                 json.dump(questions_data, f, ensure_ascii=False, indent=2)
-            print(f"✅ 面试题目已保存到 {questions_filename}")
+            print(f"✅ 面试题目已保存到 {questions_filepath}")
             print(f"📊 保存的题目板块数: {len(questions)}")
-            print(f"📝 题目文件大小: {os.path.getsize(questions_filename)} 字节")
+            print(f"📝 题目文件大小: {os.path.getsize(questions_filepath)} 字节")
             
             # 统计题目数量
             total_questions = 0

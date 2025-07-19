@@ -1,0 +1,21 @@
+{
+  "generated_at": "2025-07-19T17:53:27.597602",
+  "interview_config": {
+    "candidate_name": "杨洋",
+    "position": "python全栈",
+    "target_company": "华为",
+    "tech_domain": "python",
+    "has_resume": false,
+    "resume_path": "",
+    "interview_type": "单人",
+    "strict_mode": false,
+    "selected_sections": [
+      "自我介绍",
+      "能力评估",
+      "岗位匹配度",
+      "专业能力测试",
+      "反问环节"
+    ]
+  },
+  "resume_content": ""
+}

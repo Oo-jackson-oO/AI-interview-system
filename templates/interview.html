@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模拟面试 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基本样式 */
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a4a 25%, #2a2a6a 50%, #1a1a4a 75%, #0a0a2a 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .interview-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: calc(100vh - 40px);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .header-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+
+        .interview-header {
+            text-align: left;
+            margin-bottom: 0;
+        }
+
+        .interview-title {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .interview-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .interview-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .config-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .config-item {
+            color: white;
+            padding: 10px;
+        }
+
+        .config-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .config-value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .question-text {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .interview-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-container {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+
+        .interview-status {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .status-icon.completed {
+            background: #4CAF50;
+        }
+
+        .status-icon.pending {
+            background: #FF9800;
+        }
+
+        .status-icon.failed {
+            background: #F44336;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .history-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .close {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .checkbox-input {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* 鼠标特效 */
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+        }
+
+        .cursor.hover {
+            transform: scale(1.5);
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        /* 背景粒子 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 流星效果 */
+        .meteor {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: meteor 3s linear infinite;
+        }
+
+        @keyframes meteor {
+            0% {
+                transform: translateX(-100px) translateY(-100px) rotate(45deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px)) translateY(calc(100vh + 100px)) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* 星星效果 */
+        .star {
+            position: fixed;
+            width: 1px;
+            height: 1px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: twinkle 4s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* 火箭光标 */
+        .rocket-cursor {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s ease;
+        }
+
+        .rocket-cursor svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 5px rgba(102, 126, 234, 0.8));
+        }
+
+        .rocket-cursor.hover {
+            transform: scale(1.2) rotate(15deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- 鼠标特效元素 -->
+    <div class="cursor" id="cursor"></div>
+    <div class="rocket-cursor" id="rocketCursor">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="#667eea"/>
+        </svg>
+    </div>
+    
+    <!-- 背景特效 -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="interview-container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="header-left">
+                <div class="interview-header">
+                    <h1 class="interview-title">模拟面试</h1>
+                    <p class="interview-subtitle">基于您的配置生成的个性化面试系统</p>
+                </div>
+            </div>
+            <div class="header-buttons">
+                <a href="/" class="header-btn">
+                    <i class="fas fa-home"></i>
+                    返回主页
+                </a>
+                <a href="/interview-config" class="header-btn">
+                    <i class="fas fa-cog"></i>
+                    面试配置
+                </a>
+            </div>
+        </div>
+
+        <!-- 面试控制按钮 -->
+        <div class="interview-controls">
+            <button class="control-btn" onclick="loadInterviewData()">
+                <i class="fas fa-sync-alt"></i>
+                加载面试数据
+            </button>
+            <button class="control-btn secondary" onclick="runCompleteInterview()">
+                <i class="fas fa-play"></i>
+                运行完整面试
+            </button>
+            <button class="control-btn secondary" onclick="showInterviewHistory()">
+                <i class="fas fa-history"></i>
+                面试历史
+            </button>
+            <button class="control-btn secondary" onclick="showNewInterviewModal()">
+                <i class="fas fa-plus"></i>
+                新建面试
+            </button>
+        </div>
+
+        <!-- 面试状态 -->
+        <div class="interview-status" id="interviewStatus" style="display: none;">
+            <h3 style="color: white; margin-bottom: 15px;">
+                <i class="fas fa-chart-line"></i>
+                面试状态
+            </h3>
+            <div id="statusContent"></div>
+        </div>
+
+        <!-- 面试标签页 -->
+        <div class="interview-tabs">
+            <button class="tab-btn active" onclick="showTab('overview')">
+                <i class="fas fa-eye"></i>
+                面试概览
+            </button>
+            <button class="tab-btn" onclick="showTab('questions')">
+                <i class="fas fa-question-circle"></i>
+                面试题目
+            </button>
+            <button class="tab-btn" onclick="showTab('modules')">
+                <i class="fas fa-cogs"></i>
+                面试模块
+            </button>
+            <button class="tab-btn" onclick="showTab('history')">
+                <i class="fas fa-clock"></i>
+                历史记录
+            </button>
+        </div>
+
+        <!-- 面试概览 -->
+        <div id="overview" class="tab-content active">
+            <div id="overviewContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在加载面试数据...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面试题目 -->
+        <div id="questions" class="tab-content">
+            <div id="questionsContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在加载面试题目...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面试模块 -->
+        <div id="modules" class="tab-content">
+            <div id="modulesContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在加载面试模块...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div id="history" class="tab-content">
+            <div id="historyContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在加载历史记录...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建面试模态框 -->
+    <div id="newInterviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">新建面试</h3>
+                <span class="close" onclick="closeModal('newInterviewModal')">&times;</span>
+            </div>
+            <form id="newInterviewForm">
+                <div class="form-group">
+                    <label class="form-label">面试者姓名</label>
+                    <input type="text" class="form-input" name="candidate_name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">目标岗位</label>
+                    <input type="text" class="form-input" name="position" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">目标公司</label>
+                    <input type="text" class="form-input" name="target_company" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">技术领域</label>
+                    <input type="text" class="form-input" name="tech_domain" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">面试板块</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" class="checkbox-input" name="selected_sections" value="自我介绍">
+                            自我介绍
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" class="checkbox-input" name="selected_sections" value="简历深挖">
+                            简历深挖
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" class="checkbox-input" name="selected_sections" value="能力评估">
+                            能力评估
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" class="checkbox-input" name="selected_sections" value="岗位匹配度">
+                            岗位匹配度
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" class="checkbox-input" name="selected_sections" value="专业能力测试">
+                            专业能力测试
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" class="checkbox-input" name="selected_sections" value="反问环节">
+                            反问环节
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" class="checkbox-input" name="strict_mode">
+                        严格模式（抗压训练）
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" class="checkbox-input" name="has_resume">
+                        有简历内容
+                    </label>
+                </div>
+                <div class="interview-controls">
+                    <button type="submit" class="control-btn">
+                        <i class="fas fa-save"></i>
+                        生成面试
+                    </button>
+                    <button type="button" class="control-btn secondary" onclick="closeModal('newInterviewModal')">
+                        取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentInterviewData = null;
+        let interviewHistory = [];
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInterviewData();
+            loadInterviewHistory();
+        });
+
+        // 标签页切换
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // 移除所有标签按钮的active类
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // 显示选中的标签页
+            document.getElementById(tabName).classList.add('active');
+            
+            // 添加active类到对应的按钮
+            event.target.classList.add('active');
+            
+            // 根据标签页加载相应内容
+            switch(tabName) {
+                case 'overview':
+                    loadOverviewContent();
+                    break;
+                case 'questions':
+                    loadQuestionsContent();
+                    break;
+                case 'modules':
+                    loadModulesContent();
+                    break;
+                case 'history':
+                    loadHistoryContent();
+                    break;
+            }
+        }
+
+        // 加载面试数据
+        async function loadInterviewData() {
+            try {
+                console.log('开始加载面试数据...');
+                const response = await fetch('/api/interview/data');
+                console.log('API响应状态:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('面试数据:', data);
+                
+                if (data.success) {
+                    currentInterviewData = data;
+                    loadOverviewContent();
+                    loadQuestionsContent();
+                    loadModulesContent();
+                } else {
+                    showError('加载面试数据失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('加载面试数据时出错:', error);
+                showError('网络错误，请稍后重试: ' + error.message);
+            }
+        }
+
+        // 加载面试概览
+        function loadOverviewContent() {
+            const container = document.getElementById('overviewContent');
+            
+            if (!currentInterviewData) {
+                container.innerHTML = '<div class="error-container"><p>没有找到面试数据</p></div>';
+                return;
+            }
+
+            const { config, questions } = currentInterviewData;
+            
+            let html = `
+                <div class="config-info">
+                    <h3 style="color: white; margin-bottom: 15px;">
+                        <i class="fas fa-cog"></i>
+                        面试配置
+                    </h3>
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <div class="config-label">面试者</div>
+                            <div class="config-value">${config.candidate_name || '未提供'}</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">目标岗位</div>
+                            <div class="config-value">${config.position || '未提供'}</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">目标公司</div>
+                            <div class="config-value">${config.target_company || '未提供'}</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">技术领域</div>
+                            <div class="config-value">${config.tech_domain || '未提供'}</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">面试模式</div>
+                            <div class="config-value">${config.strict_mode ? '严格模式' : '标准模式'}</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">简历状态</div>
+                            <div class="config-value">${config.has_resume ? '已上传' : '无简历'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 显示面试模块状态
+            if (config.selected_sections && config.selected_sections.length > 0) {
+                html += `
+                    <div class="interview-status">
+                        <h3 style="color: white; margin-bottom: 15px;">
+                            <i class="fas fa-list"></i>
+                            面试模块 (${config.selected_sections.length}个)
+                        </h3>
+                        <div class="config-grid">
+                `;
+                
+                config.selected_sections.forEach((section, index) => {
+                    html += `
+                        <div class="config-item">
+                            <div class="status-item">
+                                <div class="status-icon pending">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <div class="config-value">${section}</div>
+                                    <div class="config-label">待执行</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 加载面试题目
+        function loadQuestionsContent() {
+            const container = document.getElementById('questionsContent');
+            
+            if (!currentInterviewData) {
+                container.innerHTML = '<div class="error-container"><p>没有找到面试数据</p></div>';
+                return;
+            }
+
+            const { questions } = currentInterviewData;
+            
+            if (questions && typeof questions === 'object') {
+                let html = '';
+                
+                for (const [sectionName, sectionQuestions] of Object.entries(questions)) {
+                    if (Array.isArray(sectionQuestions) && sectionQuestions.length > 0) {
+                        html += `
+                            <div class="section-card">
+                                <h3 class="section-title">
+                                    <i class="fas fa-list"></i>
+                                    ${sectionName}
+                                </h3>
+                        `;
+                        
+                        sectionQuestions.forEach((question, index) => {
+                            const difficulty = question.difficulty || 'medium';
+                            const importance = question.importance || 1;
+                            
+                            html += `
+                                <div class="question-item">
+                                    <div class="question-text">
+                                        <strong>${index + 1}.</strong> ${question.question}
+                                    </div>
+                                    <div class="question-meta">
+                                        <span class="meta-tag">
+                                            <i class="fas fa-signal"></i>
+                                            难度: ${difficulty}
+                                        </span>
+                                        <span class="meta-tag">
+                                            <i class="fas fa-star"></i>
+                                            重要性: ${importance}
+                                        </span>
+                                        ${question.focus_area ? `
+                                            <span class="meta-tag">
+                                                <i class="fas fa-bullseye"></i>
+                                                ${question.focus_area}
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `</div>`;
+                    }
+                }
+                
+                if (!html) {
+                    html = '<div class="section-card"><p style="color: white;">暂无面试题目数据</p></div>';
+                }
+                
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div class="error-container"><p>暂无面试题目数据</p></div>';
+            }
+        }
+
+        // 加载面试模块
+        function loadModulesContent() {
+            const container = document.getElementById('modulesContent');
+            
+            if (!currentInterviewData) {
+                container.innerHTML = '<div class="error-container"><p>没有找到面试数据</p></div>';
+                return;
+            }
+
+            const { config } = currentInterviewData;
+            
+            const modules = [
+                { name: "自我介绍", icon: "fas fa-user", description: "自我介绍环节" },
+                { name: "简历深挖", icon: "fas fa-file-alt", description: "简历深挖面试" },
+                { name: "能力评估", icon: "fas fa-chart-bar", description: "能力评估面试" },
+                { name: "岗位匹配度", icon: "fas fa-bullseye", description: "岗位匹配度面试" },
+                { name: "专业能力测试", icon: "fas fa-code", description: "专业能力测试面试" },
+                { name: "反问环节", icon: "fas fa-question-circle", description: "反问环节" }
+            ];
+
+            let html = '<div class="config-grid">';
+            
+            modules.forEach(module => {
+                const isSelected = config.selected_sections && config.selected_sections.includes(module.name);
+                const isAvailable = module.name !== "简历深挖" || config.has_resume;
+                
+                html += `
+                    <div class="section-card" style="opacity: ${isAvailable ? '1' : '0.5'}">
+                        <div class="section-title">
+                            <i class="${module.icon}"></i>
+                            ${module.name}
+                            ${isSelected ? '<span style="color: #4CAF50;"><i class="fas fa-check"></i></span>' : ''}
+                        </div>
+                        <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 15px;">
+                            ${module.description}
+                        </p>
+                        ${!isAvailable ? '<p style="color: #FF9800; font-size: 0.9rem;">需要简历</p>' : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // 加载历史记录
+        async function loadInterviewHistory() {
+            try {
+                const response = await fetch('/api/interview/history');
+                const data = await response.json();
+                
+                if (data.success) {
+                    interviewHistory = data.history;
+                    loadHistoryContent();
+                }
+            } catch (error) {
+                console.error('加载面试历史失败:', error);
+            }
+        }
+
+        function loadHistoryContent() {
+            const container = document.getElementById('historyContent');
+            
+            if (!interviewHistory || interviewHistory.length === 0) {
+                container.innerHTML = '<div class="error-container"><p>暂无面试历史记录</p></div>';
+                return;
+            }
+
+            let html = '';
+            
+            interviewHistory.forEach((item, index) => {
+                html += `
+                    <div class="history-item" onclick="loadHistoryItem('${item.filename}')">
+                        <div class="history-title">
+                            ${item.candidate_name} - ${item.position}
+                        </div>
+                        <div class="history-meta">
+                            <span><i class="fas fa-building"></i> ${item.target_company}</span>
+                            <span><i class="fas fa-code"></i> ${item.tech_domain}</span>
+                            <span><i class="fas fa-calendar"></i> ${item.created_at}</span>
+                            <span><i class="fas fa-list"></i> ${item.selected_sections.length}个模块</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 运行完整面试
+        async function runCompleteInterview() {
+            try {
+                const response = await fetch('/api/interview/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('面试流程执行完成！');
+                    loadInterviewData();
+                } else {
+                    alert('面试流程执行失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('运行面试流程失败:', error);
+                alert('运行面试流程失败: ' + error.message);
+            }
+        }
+
+        // 显示面试历史
+        function showInterviewHistory() {
+            showTab('history');
+        }
+
+        // 显示新建面试模态框
+        function showNewInterviewModal() {
+            document.getElementById('newInterviewModal').style.display = 'block';
+        }
+
+        // 关闭模态框
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 加载历史记录项
+        function loadHistoryItem(filename) {
+            // 这里可以实现加载特定历史记录的功能
+            console.log('加载历史记录:', filename);
+        }
+
+        // 显示错误
+        function showError(message) {
+            console.error('显示错误:', message);
+            const container = document.getElementById('overviewContent');
+            container.innerHTML = `
+                <div class="error-container">
+                    <div style="font-size: 4rem; color: #ff6b6b; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>加载失败</h3>
+                    <p>${message}</p>
+                    <button class="retry-btn" onclick="loadInterviewData()">
+                        <i class="fas fa-redo"></i>
+                        重试
+                    </button>
+                </div>
+            `;
+        }
+
+        // 新建面试表单提交
+        document.getElementById('newInterviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                candidate_name: formData.get('candidate_name'),
+                position: formData.get('position'),
+                target_company: formData.get('target_company'),
+                tech_domain: formData.get('tech_domain'),
+                selected_sections: formData.getAll('selected_sections'),
+                strict_mode: formData.has('strict_mode'),
+                has_resume: formData.has('has_resume')
+            };
+            
+            try {
+                const response = await fetch('/api/interview/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('面试生成成功！');
+                    closeModal('newInterviewModal');
+                    loadInterviewData();
+                } else {
+                    alert('面试生成失败: ' + result.message);
+                }
+            } catch (error) {
+                console.error('生成面试失败:', error);
+                alert('生成面试失败: ' + error.message);
+            }
+        });
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // 鼠标特效
+        document.addEventListener('DOMContentLoaded', function() {
+            initMouseEffects();
+            initBackgroundEffects();
+        });
+
+        function initMouseEffects() {
+            const cursor = document.getElementById('cursor');
+            const rocketCursor = document.getElementById('rocketCursor');
+            
+            // 隐藏默认光标
+            document.body.style.cursor = 'none';
+            
+            // 鼠标移动事件
+            document.addEventListener('mousemove', function(e) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                rocketCursor.style.left = e.clientX + 'px';
+                rocketCursor.style.top = e.clientY + 'px';
+            });
+            
+            // 鼠标悬停效果
+            const hoverElements = document.querySelectorAll('button, a, .tab-btn, .history-item, .question-item');
+            hoverElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    cursor.classList.add('hover');
+                    rocketCursor.classList.add('hover');
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    cursor.classList.remove('hover');
+                    rocketCursor.classList.remove('hover');
+                });
+            });
+        }
+
+        function initBackgroundEffects() {
+            const particlesContainer = document.getElementById('particles');
+            
+            // 创建粒子
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+                
+                // 动画结束后移除粒子
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 9000);
+            }
+            
+            // 创建星星
+            function createStar() {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                particlesContainer.appendChild(star);
+            }
+            
+            // 创建流星
+            function createMeteor() {
+                const meteor = document.createElement('div');
+                meteor.className = 'meteor';
+                meteor.style.left = Math.random() * 100 + '%';
+                meteor.style.top = Math.random() * 50 + '%';
+                particlesContainer.appendChild(meteor);
+                
+                // 动画结束后移除流星
+                setTimeout(() => {
+                    if (meteor.parentNode) {
+                        meteor.parentNode.removeChild(meteor);
+                    }
+                }, 3000);
+            }
+            
+            // 定期创建特效
+            setInterval(createParticle, 2000);
+            setInterval(createStar, 5000);
+            setInterval(createMeteor, 8000);
+            
+            // 初始创建一些星星
+            for (let i = 0; i < 20; i++) {
+                createStar();
+            }
+        }
+    </script>
+</body>
+</html> 
