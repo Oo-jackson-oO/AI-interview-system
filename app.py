@@ -474,6 +474,10 @@ def upload_book():
 @app.route('/api/training/pdf/<path:filename>')
 def get_pdf(filename):
     try:
+        # 安全检查：防止路径遍历攻击
+        if '..' in filename or '/' in filename:
+            return jsonify({'error': '无效的文件名'}), 400
+        
         # 首先检查pdf文件夹
         pdf_path = os.path.join('modules', 'modules', 'book', 'pdf', filename)
         if not os.path.exists(pdf_path):
@@ -481,10 +485,17 @@ def get_pdf(filename):
             pdf_path = os.path.join('modules', 'modules', 'book', filename)
         
         if os.path.exists(pdf_path):
-            return send_file(pdf_path, mimetype='application/pdf')
+            # 添加CORS头，允许跨域访问
+            response = send_file(pdf_path, mimetype='application/pdf')
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+            return response
         else:
-            return jsonify({'error': '文件不存在'}), 404
+            print(f"PDF文件不存在: {pdf_path}")
+            return jsonify({'error': f'文件不存在: {filename}'}), 404
     except Exception as e:
+        print(f"PDF访问错误: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/training/cover/<path:filename>')

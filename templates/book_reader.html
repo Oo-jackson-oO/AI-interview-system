@@ -58,92 +58,32 @@
             margin-bottom: 20px;
         }
         
-        .reader-controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+
+        
+        .reader-content {
+            height: calc(100vh - 200px);
         }
         
         .control-btn {
-            padding: 12px 20px;
+            padding: 8px 15px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-        }
-        
-        .control-btn.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .control-btn.secondary {
+            gap: 6px;
             background: rgba(255, 255, 255, 0.1);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .control-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
-        
-        .reader-content {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 30px;
-            height: calc(100vh - 300px);
-        }
-        
-        .sidebar {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            overflow-y: auto;
-        }
-        
-        .sidebar-section {
-            margin-bottom: 30px;
-        }
-        
-        .sidebar-title {
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .toc-item {
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            color: rgba(255, 255, 255, 0.8);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-        }
-        
-        .toc-item:hover {
-            background: rgba(102, 126, 234, 0.2);
-            border-left-color: #667eea;
-            color: white;
-        }
-        
-        .toc-item.active {
-            background: rgba(102, 126, 234, 0.3);
-            border-left-color: #667eea;
-            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 0.2);
         }
         
         .pdf-viewer {
@@ -152,6 +92,7 @@
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             position: relative;
+            height: 100%;
         }
         
         .pdf-toolbar {
@@ -200,10 +141,83 @@
             color: rgba(255, 255, 255, 0.9);
         }
         
-        .pdf-iframe {
+        .pdf-container {
+            position: relative;
             width: 100%;
             height: calc(100% - 60px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pdf-iframe {
+            width: 100%;
+            height: 100%;
             border: none;
+            min-height: 600px;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        /* 全屏模式下的样式 */
+        .pdf-viewer.fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            border-radius: 0 !important;
+            background: white !important;
+            box-shadow: none !important;
+        }
+        
+        .pdf-viewer.fullscreen .pdf-container {
+            height: calc(100vh - 60px) !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .pdf-viewer.fullscreen .pdf-iframe {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: auto !important;
+            border: none !important;
+        }
+        
+        .pdf-viewer.fullscreen .pdf-toolbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 10 !important;
+        }
+        
+        .pdf-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #667eea;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .pdf-loading i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .pdf-loading p {
+            margin: 0;
+            font-size: 1rem;
+            color: #666;
         }
         
         .back-button {
@@ -366,83 +380,43 @@
                 <div class="book-description" id="bookDescription">
                     正在加载书籍信息...
                 </div>
-                <div class="reader-controls">
-                    <button class="control-btn primary" onclick="downloadBook()">
-                        <i class="fas fa-download"></i> 下载PDF
-                    </button>
-                    <button class="control-btn secondary" onclick="toggleFullscreen()">
-                        <i class="fas fa-expand"></i> 全屏阅读
-                    </button>
-                    <button class="control-btn secondary" onclick="printBook()">
-                        <i class="fas fa-print"></i> 打印
-                    </button>
-                    <button class="control-btn secondary" onclick="shareBook()">
-                        <i class="fas fa-share"></i> 分享
-                    </button>
-                </div>
+
             </div>
         </div>
         
-        <!-- 阅读器主体 -->
-        <div class="reader-content">
-            <!-- 侧边栏 -->
-            <div class="sidebar">
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">
-                        <i class="fas fa-list"></i> 目录
-                    </h3>
-                    <div id="tableOfContents">
-                        <div class="loading">
-                            <div class="loading-spinner"></div>
-                            加载目录中...
-                        </div>
+        <!-- PDF阅读器 -->
+        <div class="pdf-viewer">
+            <div class="pdf-toolbar">
+                                    <div class="toolbar-left">
+                        <button class="control-btn secondary" onclick="downloadBook()">
+                            <i class="fas fa-download"></i> 下载
+                        </button>
+                        <button class="control-btn secondary" onclick="printBook()">
+                            <i class="fas fa-print"></i> 打印
+                        </button>
+                        <button class="control-btn secondary" onclick="shareBook()">
+                            <i class="fas fa-share"></i> 分享
+                        </button>
+                        
                     </div>
-                </div>
-                
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">
-                        <i class="fas fa-bookmark"></i> 书签
-                    </h3>
-                    <div id="bookmarks">
-                        <div style="color: rgba(255, 255, 255, 0.6); font-size: 14px;">
-                            暂无书签
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">
-                        <i class="fas fa-history"></i> 阅读进度
-                    </h3>
-                    <div id="readingProgress">
-                        <div style="color: rgba(255, 255, 255, 0.6); font-size: 14px;">
-                            开始阅读以记录进度
-                        </div>
+                <div class="toolbar-right">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomOut()">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <span id="zoomLevel" style="min-width: 50px; text-align: center;">100%</span>
+                        <button class="zoom-btn" onclick="zoomIn()">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <!-- PDF阅读器 -->
-            <div class="pdf-viewer">
-                <div class="pdf-toolbar">
-                    <div class="toolbar-left">
-                        <span id="currentPage">第 1 页</span>
-                        <span style="margin: 0 10px;">/</span>
-                        <span id="totalPages">共 ? 页</span>
-                    </div>
-                    <div class="toolbar-right">
-                        <div class="zoom-controls">
-                            <button class="zoom-btn" onclick="zoomOut()">
-                                <i class="fas fa-search-minus"></i>
-                            </button>
-                            <span id="zoomLevel" style="min-width: 50px; text-align: center;">100%</span>
-                            <button class="zoom-btn" onclick="zoomIn()">
-                                <i class="fas fa-search-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div id="pdfContainer" class="pdf-container">
                 <iframe id="pdfIframe" class="pdf-iframe" src=""></iframe>
+                <div id="pdfLoading" class="pdf-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>正在加载PDF...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -451,8 +425,6 @@
     <script>
         let currentBook = null;
         let currentZoom = 100;
-        let currentPage = 1;
-        let totalPages = 0;
         
         // 触发返回转场效果
         function triggerReturnTransition() {
@@ -488,7 +460,51 @@
             // 生成PDF URL
             const pdfFilename = pdfPath;  // pdfPath现在直接是文件名
             const pdfUrl = `/api/training/pdf/${encodeURIComponent(pdfFilename)}`;
-            document.getElementById('pdfIframe').src = pdfUrl;
+            
+            // 显示加载状态
+            const pdfLoading = document.getElementById('pdfLoading');
+            const pdfIframe = document.getElementById('pdfIframe');
+            
+            pdfLoading.style.display = 'block';
+            pdfIframe.style.opacity = '0.3';
+            
+            // 直接使用PDF URL，确保能正常加载
+            pdfIframe.src = pdfUrl;
+            
+            // 监听PDF加载完成
+            pdfIframe.onload = function() {
+                pdfLoading.style.display = 'none';
+                pdfIframe.style.opacity = '1';
+                console.log('PDF加载成功:', pdfUrl);
+            };
+            
+            // 监听PDF加载错误
+            pdfIframe.onerror = function() {
+                console.log('PDF加载失败，尝试备用方案');
+                pdfLoading.style.display = 'none';
+                // 显示错误信息
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(255, 0, 0, 0.1);
+                    color: #ff0000;
+                    padding: 20px;
+                    border-radius: 10px;
+                    text-align: center;
+                `;
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>PDF加载失败</p>
+                    <p>请检查文件是否存在</p>
+                    <button onclick="location.reload()" style="margin-top: 10px; padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        重新加载
+                    </button>
+                `;
+                document.querySelector('.pdf-container').appendChild(errorDiv);
+            };
             
             // 设置书籍描述
             document.getElementById('bookDescription').textContent = 
@@ -498,59 +514,16 @@
             setTimeout(() => {
                 const randomPages = Math.floor(Math.random() * 200) + 50;
                 document.getElementById('bookPages').textContent = randomPages;
-                document.getElementById('totalPages').textContent = `共 ${randomPages} 页`;
-                totalPages = randomPages;
                 
                 // 计算阅读时间
                 const readingTime = Math.ceil(randomPages / 2);
                 document.getElementById('readingTime').textContent = readingTime;
-                
-                // 生成目录
-                generateTableOfContents(randomPages);
             }, 1000);
         }
         
-        // 生成目录
-        function generateTableOfContents(pages) {
-            const tocContainer = document.getElementById('tableOfContents');
-            tocContainer.innerHTML = '';
-            
-            const sections = [
-                '前言',
-                '第一章 基础知识',
-                '第二章 核心概念',
-                '第三章 实践应用',
-                '第四章 案例分析',
-                '第五章 总结与展望',
-                '附录'
-            ];
-            
-            sections.forEach((section, index) => {
-                const tocItem = document.createElement('div');
-                tocItem.className = 'toc-item';
-                tocItem.textContent = section;
-                tocItem.onclick = () => navigateToSection(index);
-                tocContainer.appendChild(tocItem);
-            });
-        }
+
         
-        // 导航到指定章节
-        function navigateToSection(sectionIndex) {
-            // 这里可以实现跳转到PDF的特定页面
-            const targetPage = Math.floor((sectionIndex + 1) * totalPages / 7);
-            currentPage = targetPage;
-            updatePageInfo();
-            
-            // 高亮当前章节
-            document.querySelectorAll('.toc-item').forEach((item, index) => {
-                item.classList.toggle('active', index === sectionIndex);
-            });
-        }
-        
-        // 更新页面信息
-        function updatePageInfo() {
-            document.getElementById('currentPage').textContent = `第 ${currentPage} 页`;
-        }
+
         
         // 缩放功能
         function zoomIn() {
@@ -565,8 +538,53 @@
         
         function updateZoom() {
             document.getElementById('zoomLevel').textContent = `${currentZoom}%`;
-            // 这里可以实现PDF的缩放功能
+            
+            // 实现PDF的缩放功能
+            const pdfIframe = document.getElementById('pdfIframe');
+            if (pdfIframe) {
+                pdfIframe.style.transform = `scale(${currentZoom / 100})`;
+                pdfIframe.style.transformOrigin = 'top left';
+            }
         }
+        
+        // 全屏阅读功能
+        function toggleFullscreen() {
+            const pdfViewer = document.querySelector('.pdf-viewer');
+            const readerContainer = document.querySelector('.reader-container');
+            const backButton = document.querySelector('.back-button');
+            const pdfIframe = document.getElementById('pdfIframe');
+            
+            if (!pdfViewer.classList.contains('fullscreen')) {
+                // 进入全屏模式
+                readerContainer.style.display = 'none';
+                backButton.style.display = 'none';
+                pdfViewer.classList.add('fullscreen');
+                
+                // 确保PDF iframe正确显示
+                setTimeout(() => {
+                    if (pdfIframe) {
+                        pdfIframe.style.width = '100%';
+                        pdfIframe.style.height = '100%';
+                        pdfIframe.style.minHeight = 'auto';
+                    }
+                }, 100);
+                
+            } else {
+                // 退出全屏模式
+                readerContainer.style.display = 'block';
+                backButton.style.display = 'block';
+                pdfViewer.classList.remove('fullscreen');
+                
+                // 恢复PDF iframe样式
+                if (pdfIframe) {
+                    pdfIframe.style.width = '100%';
+                    pdfIframe.style.height = '100%';
+                    pdfIframe.style.minHeight = '600px';
+                }
+            }
+        }
+        
+
         
         // 下载书籍
         function downloadBook() {
@@ -583,15 +601,7 @@
             }
         }
         
-        // 全屏阅读
-        function toggleFullscreen() {
-            const pdfViewer = document.querySelector('.pdf-viewer');
-            if (!document.fullscreenElement) {
-                pdfViewer.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        }
+
         
         // 打印功能
         function printBook() {
