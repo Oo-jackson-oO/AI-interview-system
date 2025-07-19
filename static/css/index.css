@@ -674,35 +674,6 @@ body::before {
     gap: 16px;
 }
 
-.bubble-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: white;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-    position: relative;
-    z-index: 6;
-}
-
-.bubble-icon::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 18px;
-    z-index: -1;
-    opacity: 0.5;
-    filter: blur(8px);
-}
-
 /* 泡泡包装器 */
 .bubble-wrapper {
     position: absolute;
@@ -740,41 +711,50 @@ body::before {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .bubble-content {
     text-align: center;
-    z-index: 3;
+    z-index: 5;
     position: relative;
     color: #ffffff;
 }
 
 .bubble-content h3 {
-    font-size: 1.8rem;
-    font-weight: 600;
+    font-size: 1.9rem;
+    font-weight: 700;
     margin: 0 0 8px 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
+    text-shadow: 
+        -2px -2px 0 #000000,
+        2px -2px 0 #000000,
+        -2px 2px 0 #000000,
+        2px 2px 0 #000000,
+        0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 .bubble-content p {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    color: #ffffff;
     margin: 0;
-    font-weight: 400;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-shadow: 
+        -1px -1px 0 #000000,
+        1px -1px 0 #000000,
+        -1px 1px 0 #000000,
+        1px 1px 0 #000000;
 }
 
 /* 旋涡效果 */
@@ -797,7 +777,7 @@ body::before {
         transparent 100%
     );
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.5s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     animation: vortexRotate 8s linear infinite;
 }
 
@@ -812,26 +792,35 @@ body::before {
 
 /* 泡泡悬停效果 */
 .bubble:hover {
-    transform: scale(1.1) translateY(-10px);
+    transform: scale(1.1) translateY(-10px) rotate(5deg);
 }
 
 .bubble:hover .bubble-inner {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(102, 126, 234, 0.6);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(102, 126, 234, 0.4);
     box-shadow: 
-        0 20px 60px rgba(102, 126, 234, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        0 20px 60px rgba(102, 126, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: rotate(3deg);
 }
 
 .bubble:hover .vortex-effect {
     opacity: 1;
+    transform: rotate(-8deg);
+}
+
+.bubble:hover .bubble-content {
+    transform: translateY(-2px) rotate(-3deg);
 }
 
 .bubble:hover .bubble-content h3 {
-    background: linear-gradient(135deg, #ffffff 0%, #667eea 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
+    text-shadow: 
+        -2px -2px 0 #000000,
+        2px -2px 0 #000000,
+        -2px 2px 0 #000000,
+        2px 2px 0 #000000,
+        0 0 12px rgba(255, 255, 255, 0.5);
 }
 
 /* 泡泡统计信息 */
@@ -857,6 +846,127 @@ body::before {
     font-size: 12px;
     color: #667eea;
 }
+
+/* 星球SVG样式 */
+.planet-svg {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    z-index: 2;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.planet-svg img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4)) brightness(1.1) contrast(1.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 星球悬停动画 */
+.bubble:hover .planet-svg {
+    transform: translate(-50%, -50%) scale(1.2) rotate(12deg);
+    opacity: 1;
+    filter: 
+        drop-shadow(0 12px 25px rgba(102, 126, 234, 0.5))
+        drop-shadow(0 0 20px rgba(102, 126, 234, 0.4));
+}
+
+.bubble:hover .planet-svg img {
+    filter: 
+        drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5))
+        drop-shadow(0 0 25px rgba(102, 126, 234, 0.6))
+        brightness(1.2) contrast(1.2);
+    animation: planetFloat 3s ease-in-out infinite;
+    transform: rotate(-5deg);
+}
+
+/* 星球浮动动画 */
+@keyframes planetFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(-5deg);
+    }
+    25% {
+        transform: translateY(-3px) rotate(-3deg);
+    }
+    50% {
+        transform: translateY(0px) rotate(-5deg);
+    }
+    75% {
+        transform: translateY(-2px) rotate(-7deg);
+    }
+}
+
+/* 不同星球的特殊效果 */
+.planet-svg-1 {
+    animation: planetOrbit1 20s linear infinite;
+}
+
+.planet-svg-2 {
+    animation: planetOrbit2 25s linear infinite;
+}
+
+.planet-svg-3 {
+    animation: planetOrbit3 30s linear infinite;
+}
+
+/* 星球轨道动画 */
+@keyframes planetOrbit1 {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes planetOrbit2 {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(-360deg);
+    }
+}
+
+@keyframes planetOrbit3 {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* 星球发光效果 */
+.bubble:hover .planet-svg-1 img {
+    filter: 
+        drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 0 25px rgba(255, 165, 0, 0.6))
+        drop-shadow(0 0 35px rgba(255, 165, 0, 0.3));
+}
+
+.bubble:hover .planet-svg-2 img {
+    filter: 
+        drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 0 25px rgba(30, 144, 255, 0.6))
+        drop-shadow(0 0 35px rgba(30, 144, 255, 0.3));
+}
+
+.bubble:hover .planet-svg-3 img {
+    filter: 
+        drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 0 25px rgba(147, 112, 219, 0.6))
+        drop-shadow(0 0 35px rgba(147, 112, 219, 0.3));
+}
+
+/* 星球层次优化 */
 
 /* 高级连接线 */
 .connectors {
@@ -1088,6 +1198,16 @@ body::before {
         font-size: 0.9rem;
     }
     
+    /* 移动端星球适配 */
+    .planet-svg {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .bubble-content {
+        padding: 10px;
+    }
+
     /* 移动端隐藏部分装饰元素 */
     .planet, .telescope, .stargazer, .constellation, .meteor-trail, .space-station {
         display: none;

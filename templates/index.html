@@ -535,16 +535,16 @@
                 <!-- 第一个泡泡 - 个人简历 -->
                 <div class="bubble-wrapper bubble-1-wrapper">
                     <div class="bubble-card">
-                        <div class="bubble-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
                         <a href="/resume" class="bubble bubble-1" id="resumeLink" onclick="checkLoginAndNavigate('/resume', event)">
                             <div class="bubble-inner">
+                                <div class="vortex-effect"></div>
+                                <div class="planet-svg planet-svg-1">
+                                    <img src="{{ url_for('static', filename='星球1.svg') }}" alt="星球1">
+                                </div>
                                 <div class="bubble-content">
                                     <h3>个人简历</h3>
                                     <p>智能简历分析</p>
                                 </div>
-                                <div class="vortex-effect"></div>
                             </div>
                         </a>
                         <div class="bubble-stats">
@@ -563,16 +563,16 @@
                 <!-- 第二个泡泡 - 模拟面试 -->
                 <div class="bubble-wrapper bubble-2-wrapper">
                     <div class="bubble-card">
-                        <div class="bubble-icon">
-                            <i class="fas fa-comments"></i>
-                        </div>
                         <a href="/interview" class="bubble bubble-2" id="interviewLink" onclick="checkLoginAndNavigate('/interview', event)">
                             <div class="bubble-inner">
+                                <div class="vortex-effect"></div>
+                                <div class="planet-svg planet-svg-2">
+                                    <img src="{{ url_for('static', filename='星球2.svg') }}" alt="星球2">
+                                </div>
                                 <div class="bubble-content">
                                     <h3>模拟面试</h3>
                                     <p>AI智能对话</p>
                                 </div>
-                                <div class="vortex-effect"></div>
                             </div>
                         </a>
                         <div class="bubble-stats">
@@ -591,16 +591,16 @@
                 <!-- 第三个泡泡 - 个性化学习路径 -->
                 <div class="bubble-wrapper bubble-3-wrapper">
                     <div class="bubble-card">
-                        <div class="bubble-icon">
-                            <i class="fas fa-route"></i>
-                        </div>
                         <a href="/learning" class="bubble bubble-3" id="learningLink" onclick="checkLoginAndNavigate('/learning', event)">
                             <div class="bubble-inner">
+                                <div class="vortex-effect"></div>
+                                <div class="planet-svg planet-svg-3">
+                                    <img src="{{ url_for('static', filename='星球3.svg') }}" alt="星球3">
+                                </div>
                                 <div class="bubble-content">
                                     <h3>学习路径</h3>
                                     <p>个性化推荐</p>
                                 </div>
-                                <div class="vortex-effect"></div>
                             </div>
                         </a>
                         <div class="bubble-stats">
