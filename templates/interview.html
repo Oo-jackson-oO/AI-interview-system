@@ -8,45 +8,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 基本样式 */
-        body {
-            font-family: 'Inter', 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a4a 25%, #2a2a6a 50%, #1a1a4a 75%, #0a0a2a 100%);
-            min-height: 100vh;
-            color: #ffffff;
-            margin: 0;
+        /* 面试页面样式 */
+        .interview-container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
         }
 
-        .interview-container {
-            max-width: 1600px;
-            margin: 0 auto;
+        .interview-content {
             background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 30px;
-            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            min-height: calc(100vh - 40px);
+            transition: all 0.3s ease;
         }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        
+        .interview-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .header-buttons {
             display: flex;
             gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
         }
 
         .header-btn {
@@ -73,28 +81,12 @@
             border-color: transparent;
         }
 
-        .interview-header {
-            text-align: left;
-            margin-bottom: 0;
-        }
-
-        .interview-title {
-            color: white;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .interview-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1rem;
-        }
-
         .interview-tabs {
             display: flex;
             gap: 8px;
             margin-bottom: 25px;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .tab-btn {
@@ -119,6 +111,7 @@
 
         .tab-btn:hover {
             background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .tab-content {
@@ -127,6 +120,43 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        .interview-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .config-info {
@@ -139,8 +169,20 @@
 
         .config-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
+        }
+
+        @media (max-width: 1024px) {
+            .config-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .config-item {
@@ -209,81 +251,6 @@
             font-weight: 500;
         }
 
-        .interview-controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .control-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .control-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .control-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .loading {
-            text-align: center;
-            color: white;
-            padding: 40px;
-        }
-
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-container {
-            text-align: center;
-            color: white;
-            padding: 40px;
-        }
-
-        .retry-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            margin-top: 20px;
-        }
-
         .interview-status {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
@@ -333,6 +300,7 @@
 
         .history-item:hover {
             background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
 
         .history-title {
@@ -350,6 +318,87 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        .loading {
+            display: none;
+            text-align: center;
+            color: white;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loading.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-container {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -358,7 +407,8 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
         }
 
         .modal-content {
@@ -415,11 +465,17 @@
             background: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         .form-input:focus {
             outline: none;
             border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .checkbox-group {
@@ -439,147 +495,147 @@
         .checkbox-input {
             width: 18px;
             height: 18px;
+            accent-color: #667eea;
         }
 
-        /* 鼠标特效 */
-        .cursor {
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .interview-controls, .header-buttons, .interview-tabs {
+                justify-content: center;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn, .header-btn, .tab-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+
+        /* 确保鼠标特效正常工作 */
+        .interview-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        .interview-content {
+            position: relative;
+            z-index: 11;
+        }
+
+        /* 波动效果样式 */
+        .rocket-wave {
             position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #667eea;
-            border-radius: 50%;
             pointer-events: none;
             z-index: 9999;
-            transition: transform 0.1s ease;
-        }
-
-        .cursor.hover {
-            transform: scale(1.5);
-            background: rgba(102, 126, 234, 0.3);
-        }
-
-        /* 背景粒子 */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            animation: float 6s infinite linear;
+            animation: waveExpand 2s ease-out forwards;
         }
 
-        @keyframes float {
+        @keyframes waveExpand {
             0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
+                width: 0;
+                height: 0;
                 opacity: 1;
-            }
-            90% {
-                opacity: 1;
+                transform: translate(-50%, -50%);
             }
             100% {
-                transform: translateY(-100px) rotate(360deg);
+                width: 200px;
+                height: 200px;
                 opacity: 0;
+                transform: translate(-50%, -50%);
             }
-        }
-
-        /* 流星效果 */
-        .meteor {
-            position: fixed;
-            width: 2px;
-            height: 2px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: -1;
-            animation: meteor 3s linear infinite;
-        }
-
-        @keyframes meteor {
-            0% {
-                transform: translateX(-100px) translateY(-100px) rotate(45deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(calc(100vw + 100px)) translateY(calc(100vh + 100px)) rotate(45deg);
-                opacity: 0;
-            }
-        }
-
-        /* 星星效果 */
-        .star {
-            position: fixed;
-            width: 1px;
-            height: 1px;
-            background: white;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: -1;
-            animation: twinkle 4s infinite;
-        }
-
-        @keyframes twinkle {
-            0%, 100% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-        }
-
-        /* 火箭光标 */
-        .rocket-cursor {
-            position: fixed;
-            width: 30px;
-            height: 30px;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.1s ease;
-        }
-
-        .rocket-cursor svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 5px rgba(102, 126, 234, 0.8));
-        }
-
-        .rocket-cursor.hover {
-            transform: scale(1.2) rotate(15deg);
-        }
-        
-        /* 淡出动画 */
-        .interview-container.fade-out {
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.5s ease;
         }
     </style>
 </head>
 <body>
-    <!-- 鼠标特效元素 -->
-    <div class="cursor" id="cursor"></div>
+    <!-- 火箭鼠标样式 -->
     <div class="rocket-cursor" id="rocketCursor">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="#667eea"/>
-        </svg>
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
     </div>
     
-    <!-- 背景特效 -->
-    <div class="particles" id="particles"></div>
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 火箭 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation orion">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 0%; left: 30%;"></div>
+        <div class="star" style="top: 20%; left: 40%;"></div>
+        <div class="star" style="top: 40%; left: 35%;"></div>
+        <div class="star" style="top: 30%; left: 20%;"></div>
+        <div class="star" style="top: 60%; left: 10%;"></div>
+        <div class="star" style="top: 70%; left: 50%;"></div>
+        <div class="star" style="top: 20%; left: 10%;"></div>
+
+        <!-- 线段连接（用绝对定位和 transform 绘制虚线） -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="30" y1="0" x2="40" y2="20" />
+            <line x1="40" y1="20" x2="35" y2="40" />
+            <line x1="20" y1="30" x2="40" y2="20" />
+            <line x1="10" y1="20" x2="20" y2="30" />
+            <line x1="10" y1="20" x2="30" y2="0" />
+            <line x1="10" y1="60" x2="20" y2="30" />
+            <line x1="35" y1="40" x2="50" y2="70" />
+        </svg>
+    </div>
+    <div class="constellation big-dipper">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 20%; left: 0%;"></div>
+        <div class="star" style="top: 10%; left: 25%;"></div>
+        <div class="star" style="top: 20%; left: 50%;"></div>
+        <div class="star" style="top: 10%; left: 75%;"></div>
+        <div class="star" style="top: 20%; left: 100%;"></div>
+
+        <!-- 连接线 -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="0" y1="20" x2="25" y2="10" />
+            <line x1="25" y1="10" x2="50" y2="20" />
+            <line x1="50" y1="20" x2="75" y2="10" />
+            <line x1="75" y1="10" x2="100" y2="20" />
+        </svg>
+    </div>
+
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station right"></div>
+    
+    <!-- 返回按钮 -->
+    <a href="#" class="back-btn" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> 返回主页
+    </a>
     
     <!-- 黑洞转场效果 -->
     <div class="blackhole-transition" id="blackholeTransition">
@@ -618,113 +674,93 @@
             <div class="particle"></div>
         </div>
     </div>
-    
-    <div class="interview-container">
-        <!-- 页面头部 -->
+
+    <div class="interview-container" style="position: relative; z-index: 10;">
         <div class="page-header">
-            <div class="header-left">
-                <div class="interview-header">
-                    <h1 class="interview-title">模拟面试</h1>
-                    <p class="interview-subtitle">基于您的配置生成的个性化面试系统</p>
-                </div>
+            <h1>模拟面试</h1>
+            <p>基于您的配置生成的个性化面试系统</p>
+        </div>
+
+        <div class="interview-content">
+
+            <!-- 面试控制按钮 -->
+            <div class="interview-controls">
+
+
+
+                                
+                <button class="control-btn" onclick="runCompleteInterview()">
+                    <i class="fas fa-play"></i>
+                    开始完整面试
+                </button>
             </div>
-            <div class="header-buttons">
-                <a href="#" class="header-btn" onclick="goBack()">
-                    <i class="fas fa-home"></i>
-                    返回主页
-                </a>
-                <a href="#" class="header-btn" onclick="goToConfig()">
+
+            <!-- 面试状态 -->
+            <div class="interview-status" id="interviewStatus" style="display: none;">
+                <h3 style="color: white; margin-bottom: 15px;">
+                    <i class="fas fa-chart-line"></i>
+                    面试状态
+                </h3>
+                <div id="statusContent"></div>
+            </div>
+
+            <!-- 面试标签页 -->
+            <div class="interview-tabs">
+                <button class="tab-btn active" onclick="showTab('overview')">
+                    <i class="fas fa-eye"></i>
+                    面试概览
+                </button>
+                <button class="tab-btn" onclick="showTab('questions')">
+                    <i class="fas fa-question-circle"></i>
+                    初始题目
+                </button>
+                <button class="tab-btn" onclick="showTab('modules')">
+                    <i class="fas fa-cogs"></i>
+                    面试模块
+                </button>
+                <button class="tab-btn" onclick="goToConfig()">
                     <i class="fas fa-cog"></i>
-                    面试配置
-                </a>
+                    重新配置面试
+                </button>
             </div>
-        </div>
 
-        <!-- 面试控制按钮 -->
-        <div class="interview-controls">
-            <button class="control-btn" onclick="loadInterviewData()">
-                <i class="fas fa-sync-alt"></i>
-                加载面试数据
-            </button>
-            <button class="control-btn secondary" onclick="runCompleteInterview()">
-                <i class="fas fa-play"></i>
-                运行完整面试
-            </button>
-            <button class="control-btn secondary" onclick="showInterviewHistory()">
-                <i class="fas fa-history"></i>
-                面试历史
-            </button>
-            <button class="control-btn secondary" onclick="showNewInterviewModal()">
-                <i class="fas fa-plus"></i>
-                新建面试
-            </button>
-        </div>
-
-        <!-- 面试状态 -->
-        <div class="interview-status" id="interviewStatus" style="display: none;">
-            <h3 style="color: white; margin-bottom: 15px;">
-                <i class="fas fa-chart-line"></i>
-                面试状态
-            </h3>
-            <div id="statusContent"></div>
-        </div>
-
-        <!-- 面试标签页 -->
-        <div class="interview-tabs">
-            <button class="tab-btn active" onclick="showTab('overview')">
-                <i class="fas fa-eye"></i>
-                面试概览
-            </button>
-            <button class="tab-btn" onclick="showTab('questions')">
-                <i class="fas fa-question-circle"></i>
-                面试题目
-            </button>
-            <button class="tab-btn" onclick="showTab('modules')">
-                <i class="fas fa-cogs"></i>
-                面试模块
-            </button>
-            <button class="tab-btn" onclick="showTab('history')">
-                <i class="fas fa-clock"></i>
-                历史记录
-            </button>
-        </div>
-
-        <!-- 面试概览 -->
-        <div id="overview" class="tab-content active">
-            <div id="overviewContent">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>正在加载面试数据...</p>
+            <!-- 面试概览 -->
+            <div id="overview" class="tab-content active">
+                <div id="overviewContent">
+                    <div class="loading show">
+                        <div class="loading-spinner"></div>
+                        <span>正在加载面试数据...</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 面试题目 -->
-        <div id="questions" class="tab-content">
-            <div id="questionsContent">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>正在加载面试题目...</p>
+            <!-- 面试题目 -->
+            <div id="questions" class="tab-content">
+                <div id="questionsContent">
+                    <div class="loading show">
+                        <div class="loading-spinner"></div>
+                        <span>正在加载面试题目...</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 面试模块 -->
-        <div id="modules" class="tab-content">
-            <div id="modulesContent">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>正在加载面试模块...</p>
+            <!-- 面试模块 -->
+            <div id="modules" class="tab-content">
+                <div id="modulesContent">
+                    <div class="loading show">
+                        <div class="loading-spinner"></div>
+                        <span>正在加载面试模块...</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 历史记录 -->
-        <div id="history" class="tab-content">
-            <div id="historyContent">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>正在加载历史记录...</p>
+            <!-- 历史记录 -->
+            <div id="history" class="tab-content">
+                <div id="historyContent">
+                    <div class="loading show">
+                        <div class="loading-spinner"></div>
+                        <span>正在加载历史记录...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -740,19 +776,19 @@
             <form id="newInterviewForm">
                 <div class="form-group">
                     <label class="form-label">面试者姓名</label>
-                    <input type="text" class="form-input" name="candidate_name" required>
+                    <input type="text" class="form-input" name="candidate_name" placeholder="请输入面试者姓名" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">目标岗位</label>
-                    <input type="text" class="form-input" name="position" required>
+                    <input type="text" class="form-input" name="position" placeholder="例如：Python开发工程师" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">目标公司</label>
-                    <input type="text" class="form-input" name="target_company" required>
+                    <input type="text" class="form-input" name="target_company" placeholder="例如：腾讯、阿里巴巴" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">技术领域</label>
-                    <input type="text" class="form-input" name="tech_domain" required>
+                    <input type="text" class="form-input" name="tech_domain" placeholder="例如：Python、Java、前端开发" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">面试板块</label>
@@ -808,15 +844,78 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script>
         let currentInterviewData = null;
         let interviewHistory = [];
 
-        // 页面加载时初始化
+        // 初始化鼠标特效系统
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化火箭鼠标系统
+            new RocketCursorSystem();
+            
+            // 初始化高级粒子系统
+            new ParticleSystem();
+            
+            // 初始化星光系统
+            new StarSystem();
+            
+            // 初始化流星系统
+            new MeteorSystem();
+            
+            // 初始化加载系统
+            new LoadingSystem();
+            
+            // 加载面试数据和历史
             loadInterviewData();
             loadInterviewHistory();
+            
+            // 初始化页面动画
+            initPageAnimations();
         });
+
+        // 初始化页面动画
+        function initPageAnimations() {
+            const interviewContent = document.querySelector('.interview-content');
+            const pageHeader = document.querySelector('.page-header');
+            
+            // 初始状态
+            interviewContent.style.opacity = '0';
+            interviewContent.style.transform = 'translateY(30px)';
+            pageHeader.style.opacity = '0';
+            pageHeader.style.transform = 'translateY(-20px)';
+            
+            // 动画序列
+            setTimeout(() => {
+                pageHeader.style.transition = 'all 0.8s ease-out';
+                pageHeader.style.opacity = '1';
+                pageHeader.style.transform = 'translateY(0)';
+                
+                setTimeout(() => {
+                    interviewContent.style.transition = 'all 0.8s ease-out';
+                    interviewContent.style.opacity = '1';
+                    interviewContent.style.transform = 'translateY(0)';
+                }, 300);
+            }, 500);
+            
+            // 为按钮添加鼠标特效
+            const buttons = document.querySelectorAll('.control-btn, .header-btn, .tab-btn, .back-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function(event) {
+                    const wave = document.createElement('div');
+                    wave.className = 'rocket-wave';
+                    wave.style.left = event.clientX + 'px';
+                    wave.style.top = event.clientY + 'px';
+                    document.body.appendChild(wave);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(wave)) {
+                            document.body.removeChild(wave);
+                        }
+                    }, 2000);
+                });
+            });
+        }
 
         // 标签页切换
         function showTab(tabName) {
@@ -1155,7 +1254,6 @@
 
         // 加载历史记录项
         function loadHistoryItem(filename) {
-            // 这里可以实现加载特定历史记录的功能
             console.log('加载历史记录:', filename);
         }
 
@@ -1227,170 +1325,28 @@
             });
         }
 
-        // 播放离开动画
-        function playLeaveAnimation(targetUrl) {
-            const mainContainer = document.querySelector('.interview-container');
-            const blackholeTransition = document.getElementById('blackholeTransition');
-            
-            if (mainContainer && blackholeTransition) {
-                // 页面内容淡出
-                mainContainer.classList.add('fade-out');
-                
-                // 激活黑洞转场，中心黑洞扩散到全屏
-                blackholeTransition.classList.add('active', 'enter');
-                
-                setTimeout(() => {
-                    blackholeTransition.classList.remove('enter');
-                    
-                    // 启动流光动画
-                    startStreamAnimation();
-                    
-                    setTimeout(() => {
-                        // 跳转到目标页面
-                        window.location.href = targetUrl;
-                    }, 1500);
-                }, 1500);
-            } else {
-                // 如果没有动画元素，直接跳转
-                window.location.href = targetUrl;
-            }
-        }
-        
-
-        
-        // 启动流光动画
-        function startStreamAnimation() {
-            const blackholeTransition = document.getElementById('blackholeTransition');
-            if (blackholeTransition) {
-                const particles = blackholeTransition.querySelectorAll('.particle');
-                particles.forEach((particle, index) => {
-                    // 重置动画
-                    particle.style.animation = 'none';
-                    particle.offsetHeight; // 触发重排
-                    
-                    // 启动新的动画
-                    particle.style.animation = `particleOrbit 8s linear infinite`;
-                    particle.style.animationDelay = `${index * 0.2}s`;
-                    
-                    // 添加额外的发光效果
-                    particle.style.boxShadow = `0 0 12px rgba(0, 168, 255, 0.9), 0 0 24px rgba(0, 168, 255, 0.5)`;
-                });
-                
-                // 添加额外的视觉效果
-                setTimeout(() => {
-                    particles.forEach((particle, index) => {
-                        particle.style.transform = 'scale(1.2)';
-                        setTimeout(() => {
-                            particle.style.transform = 'scale(1)';
-                        }, 200);
-                    });
-                }, 500);
-            }
-        }
-        
         // 返回主页
         function goBack() {
-            // 使用和简历分析页面相同的转场逻辑
-            sessionStorage.setItem('returningToHome', 'true');
-            window.location.href = '/';
+            // 触发黑洞转场效果
+            const blackhole = document.getElementById('blackholeTransition');
+            blackhole.style.display = 'flex';
+            blackhole.classList.add('active');
+            
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
         }
         
         // 跳转到面试配置
         function goToConfig() {
-            playLeaveAnimation('/interview-config');
-        }
-        
-        // 鼠标特效
-        document.addEventListener('DOMContentLoaded', function() {
-            initMouseEffects();
-            initBackgroundEffects();
-        });
-
-        function initMouseEffects() {
-            const cursor = document.getElementById('cursor');
-            const rocketCursor = document.getElementById('rocketCursor');
+            // 触发黑洞转场效果
+            const blackhole = document.getElementById('blackholeTransition');
+            blackhole.style.display = 'flex';
+            blackhole.classList.add('active');
             
-            // 隐藏默认光标
-            document.body.style.cursor = 'none';
-            
-            // 鼠标移动事件
-            document.addEventListener('mousemove', function(e) {
-                cursor.style.left = e.clientX + 'px';
-                cursor.style.top = e.clientY + 'px';
-                rocketCursor.style.left = e.clientX + 'px';
-                rocketCursor.style.top = e.clientY + 'px';
-            });
-            
-            // 鼠标悬停效果
-            const hoverElements = document.querySelectorAll('button, a, .tab-btn, .history-item, .question-item');
-            hoverElements.forEach(element => {
-                element.addEventListener('mouseenter', function() {
-                    cursor.classList.add('hover');
-                    rocketCursor.classList.add('hover');
-                });
-                
-                element.addEventListener('mouseleave', function() {
-                    cursor.classList.remove('hover');
-                    rocketCursor.classList.remove('hover');
-                });
-            });
-        }
-
-        function initBackgroundEffects() {
-            const particlesContainer = document.getElementById('particles');
-            
-            // 创建粒子
-            function createParticle() {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                particlesContainer.appendChild(particle);
-                
-                // 动画结束后移除粒子
-                setTimeout(() => {
-                    if (particle.parentNode) {
-                        particle.parentNode.removeChild(particle);
-                    }
-                }, 9000);
-            }
-            
-            // 创建星星
-            function createStar() {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 4 + 's';
-                particlesContainer.appendChild(star);
-            }
-            
-            // 创建流星
-            function createMeteor() {
-                const meteor = document.createElement('div');
-                meteor.className = 'meteor';
-                meteor.style.left = Math.random() * 100 + '%';
-                meteor.style.top = Math.random() * 50 + '%';
-                particlesContainer.appendChild(meteor);
-                
-                // 动画结束后移除流星
-                setTimeout(() => {
-                    if (meteor.parentNode) {
-                        meteor.parentNode.removeChild(meteor);
-                    }
-                }, 3000);
-            }
-            
-            // 定期创建特效
-            setInterval(createParticle, 2000);
-            setInterval(createStar, 5000);
-            setInterval(createMeteor, 8000);
-            
-            // 初始创建一些星星
-            for (let i = 0; i < 20; i++) {
-                createStar();
-            }
+            setTimeout(() => {
+                window.location.href = '/interview-config';
+            }, 1000);
         }
     </script>
 </body>

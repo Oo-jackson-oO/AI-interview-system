@@ -638,19 +638,12 @@
                             <div class="toggle-switch" id="resumeToggle">
                                 <div class="toggle-slider"></div>
                             </div>
-                            <span class="checkbox-label">是否有简历？</span>
+                            <span class="checkbox-label">自动检测简历状态</span>
                         </div>
                         
                         <div class="resume-upload" id="resumeUpload">
-                            <div class="file-input-wrapper">
-                                <input type="file" class="file-input" id="resumeFile" accept=".txt,.pdf,.doc,.docx">
-                                <label for="resumeFile" class="file-input-label">
-                                    <i class="fas fa-upload"></i>
-                                    <span>选择简历文件</span>
-                                </label>
-                            </div>
-                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-top: 8px;">
-                                支持格式：TXT、PDF、DOC、DOCX
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">
+                                系统将自动检测您上传的最新简历文件
                             </p>
                         </div>
                     </div>
@@ -739,13 +732,13 @@
 
                 <button type="submit" class="submit-btn" id="submitBtn">
                     <i class="fas fa-rocket"></i>
-                    生成面试题目
+                    生成面试场景
                 </button>
             </form>
 
             <div class="loading" id="loading">
                 <div class="loading-spinner"></div>
-                <div class="loading-text">正在生成面试题目，请稍候...</div>
+                <div class="loading-text">正在生成面试场景，请稍候...</div>
                 <div class="loading-progress">
                     <div class="progress-bar-inner"></div>
                 </div>
@@ -782,26 +775,69 @@
             
             const strictModeToggle = document.getElementById('strictModeToggle');
             
-            // 简历开关
-            resumeToggle.addEventListener('click', function() {
-                this.classList.toggle('active');
-                resumeUpload.classList.toggle('show');
-                
-                // 如果没有简历，禁用简历深挖选项
-                if (!this.classList.contains('active')) {
+            // 检查当前用户是否有简历
+            checkUserResume().then(hasResume => {
+                if (hasResume) {
+                    // 有简历：自动启用简历开关，启用简历深挖
+                    resumeToggle.classList.add('active');
+                    resumeUpload.classList.add('show');
+                    resumeDiggingCheckbox.checked = true;
+                    resumeDiggingItem.style.opacity = '1';
+                    resumeDiggingItem.style.pointerEvents = 'none'; // 禁止用户修改
+                    
+                    // 添加提示信息
+                    const resumeInfo = document.createElement('p');
+                    resumeInfo.style.color = '#4CAF50';
+                    resumeInfo.style.fontSize = '0.85rem';
+                    resumeInfo.style.marginTop = '8px';
+                    resumeInfo.innerHTML = '<i class="fas fa-check-circle"></i> 已检测到您的简历文件';
+                    resumeUpload.appendChild(resumeInfo);
+                } else {
+                    // 没有简历：禁用简历深挖选项
                     resumeDiggingCheckbox.checked = false;
                     resumeDiggingItem.style.opacity = '0.5';
                     resumeDiggingItem.style.pointerEvents = 'none';
-                } else {
-                    resumeDiggingItem.style.opacity = '1';
-                    resumeDiggingItem.style.pointerEvents = 'auto';
+                    
+                    // 添加提示信息
+                    const noResumeInfo = document.createElement('p');
+                    noResumeInfo.style.color = '#FF9800';
+                    noResumeInfo.style.fontSize = '0.85rem';
+                    noResumeInfo.style.marginTop = '8px';
+                    noResumeInfo.innerHTML = '<i class="fas fa-exclamation-triangle"></i> 未检测到简历文件，简历深挖板块不可用';
+                    resumeDiggingItem.appendChild(noResumeInfo);
                 }
+            });
+            
+            // 简历开关（仅用于显示，不影响实际功能）
+            resumeToggle.addEventListener('click', function() {
+                // 检查是否有简历，如果有则保持开启状态
+                checkUserResume().then(hasResume => {
+                    if (hasResume) {
+                        this.classList.add('active');
+                        resumeUpload.classList.add('show');
+                    } else {
+                        this.classList.toggle('active');
+                        resumeUpload.classList.toggle('show');
+                    }
+                });
             });
             
             // 严格模式开关
             strictModeToggle.addEventListener('click', function() {
                 this.classList.toggle('active');
             });
+        }
+        
+        // 检查用户是否有简历
+        async function checkUserResume() {
+            try {
+                const response = await fetch('/api/user/resume-status');
+                const data = await response.json();
+                return data.has_resume || false;
+            } catch (error) {
+                console.error('检查简历状态失败:', error);
+                return false;
+            }
         }
         
         // 表单提交处理
@@ -824,7 +860,6 @@
                 position: formData.get('position'),
                 target_company: formData.get('target_company'),
                 tech_domain: formData.get('tech_domain'),
-                has_resume: document.getElementById('resumeToggle').classList.contains('active'),
                 strict_mode: document.getElementById('strictModeToggle').classList.contains('active'),
                 selected_sections: Array.from(formData.getAll('sections'))
             };
@@ -838,13 +873,6 @@
             if (data.selected_sections.length === 0) {
                 showError('请至少选择一个面试板块');
                 return;
-            }
-            
-            // 处理简历文件
-            const resumeFile = document.getElementById('resumeFile').files[0];
-            if (data.has_resume && resumeFile) {
-                // 这里可以添加文件上传逻辑
-                console.log('简历文件:', resumeFile.name);
             }
             
             // 显示加载状态
@@ -864,9 +892,10 @@
                 
                 if (result.success) {
                     showSuccess('面试题目生成成功！正在跳转到面试页面...');
-                    // 使用黑洞转场动画跳转到面试页面
+                    
+                    // 直接跳转到面试页面
                     setTimeout(() => {
-                        playLeaveAnimationWithPageLoad('/interview');
+                        window.location.href = '/interview';
                     }, 1500);
                 } else {
                     showError(result.message || '生成面试题目失败');

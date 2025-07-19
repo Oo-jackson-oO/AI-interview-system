@@ -641,11 +641,47 @@ def generate_interview():
         
         # 获取当前登录用户
         current_user = session.get('user', {})
-        username = current_user.get('username', data['candidate_name'])
+        username = current_user.get('username', 'unknown_user')
+        
+        # 检查用户文件夹中的最新简历
+        user_folder = os.path.join('uploads', username)
+        latest_resume_path = ""
+        resume_content = ""
+        has_resume = False
+        
+        if os.path.exists(user_folder):
+            # 查找简历文件（匹配"简历"字样，数字越大越新）
+            resume_files = []
+            for file in os.listdir(user_folder):
+                if "简历" in file and file.endswith('.txt'):
+                    # 提取文件名中的数字
+                    import re
+                    numbers = re.findall(r'_(\d+)\.txt$', file)
+                    if numbers:
+                        resume_files.append((file, int(numbers[-1])))
+            
+            if resume_files:
+                # 按数字排序，取最大的（最新的）
+                resume_files.sort(key=lambda x: x[1], reverse=True)
+                latest_resume_file = resume_files[0][0]
+                latest_resume_path = os.path.join(user_folder, latest_resume_file)
+                has_resume = True
+                
+                # 读取简历内容
+                try:
+                    with open(latest_resume_path, 'r', encoding='utf-8') as f:
+                        resume_content = f.read()
+                    print(f"✅ 找到最新简历: {latest_resume_file}")
+                except Exception as e:
+                    print(f"❌ 读取简历文件失败: {e}")
+                    has_resume = False
+        
+        # 如果没有简历，确保selected_sections中没有"简历深挖"
+        selected_sections = data['selected_sections']
+        if not has_resume and "简历深挖" in selected_sections:
+            selected_sections = [s for s in selected_sections if s != "简历深挖"]
         
         # 导入面试模块
-        import sys
-        import os
         current_dir = os.path.dirname(os.path.abspath(__file__))
         mock_interview_path = os.path.join(current_dir, 'modules', 'Mock_interview')
         
@@ -675,29 +711,30 @@ def generate_interview():
         # 创建面试智能体
         agent = InterviewAgent()
         
-        # 设置面试配置，使用用户名作为candidate_name
+        # 设置面试配置，使用用户输入的候选人姓名
         agent.interview_config = {
-            'candidate_name': username,  # 使用登录用户名
+            'candidate_name': data['candidate_name'],  # 使用用户输入的候选人姓名
+            'current_username': username,  # 添加当前登录用户名，用于确定保存路径
             'position': data['position'],
             'target_company': data['target_company'],
             'tech_domain': data['tech_domain'],
-            'has_resume': data.get('has_resume', False),
-            'resume_path': '',  # 暂时为空，后续可以处理文件上传
+            'has_resume': has_resume,
+            'resume_path': latest_resume_path,
             'interview_type': '单人',  # 固定为单人模式
             'strict_mode': data.get('strict_mode', False),
-            'selected_sections': data['selected_sections']
+            'selected_sections': selected_sections
         }
         
-        # 处理简历内容（如果有）
-        if data.get('has_resume') and data.get('resume_content'):
-            agent.resume_content = data['resume_content']
+        # 设置简历内容
+        if has_resume and resume_content:
+            agent.resume_content = resume_content
         
         # 生成面试题目
         import asyncio
         questions = asyncio.run(agent.generate_interview_questions())
         
-        # 保存面试配置和题目到用户特定文件夹
-        agent.save_interview_questions(questions)
+        # 保存面试配置和题目到用户特定文件夹，传递当前用户名
+        agent.save_interview_questions(questions, current_username=username)
         
         # 将面试配置存储到session中，供面试页面使用
         session['interview_config'] = agent.interview_config
@@ -706,7 +743,10 @@ def generate_interview():
         return jsonify({
             'success': True,
             'message': '面试题目生成成功',
-            'questions_count': len(questions)
+            'questions_count': len(questions),
+            'redirect_url': '/interview',  # 添加跳转URL
+            'has_resume': has_resume,
+            'resume_file': os.path.basename(latest_resume_path) if latest_resume_path else None
         })
         
     except Exception as e:
@@ -753,8 +793,6 @@ def run_interview():
         username = current_user.get('username', 'unknown_user')
         
         # 导入面试系统模块
-        import sys
-        import os
         current_dir = os.path.dirname(os.path.abspath(__file__))
         mock_interview_path = os.path.join(current_dir, 'modules', 'Mock_interview')
         
@@ -861,6 +899,51 @@ def get_interview_history():
     except Exception as e:
         print(f"获取面试历史时出错: {str(e)}")
         return jsonify({'success': False, 'message': f'获取面试历史失败: {str(e)}'})
+
+@app.route('/api/user/resume-status')
+@login_required
+def check_resume_status():
+    """检查当前用户是否有简历文件"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        # 检查用户文件夹中的简历文件
+        user_folder = os.path.join('uploads', username)
+        has_resume = False
+        latest_resume_file = None
+        
+        if os.path.exists(user_folder):
+            # 查找简历文件（匹配"简历"字样）
+            resume_files = []
+            for file in os.listdir(user_folder):
+                if "简历" in file and file.endswith('.txt'):
+                    # 提取文件名中的数字
+                    import re
+                    numbers = re.findall(r'_(\d+)\.txt$', file)
+                    if numbers:
+                        resume_files.append((file, int(numbers[-1])))
+            
+            if resume_files:
+                # 按数字排序，取最大的（最新的）
+                resume_files.sort(key=lambda x: x[1], reverse=True)
+                latest_resume_file = resume_files[0][0]
+                has_resume = True
+        
+        return jsonify({
+            'success': True,
+            'has_resume': has_resume,
+            'latest_resume_file': latest_resume_file
+        })
+        
+    except Exception as e:
+        print(f"检查简历状态时出错: {str(e)}")
+        return jsonify({
+            'success': False,
+            'has_resume': False,
+            'message': f'检查简历状态失败: {str(e)}'
+        })
 
 if __name__ == '__main__':
     app.run(debug=True)

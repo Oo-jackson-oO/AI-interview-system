@@ -402,13 +402,18 @@ class InterviewAgent:
     
     def save_interview_config(self, filename: str = "interview_config.json"):
         """保存面试配置"""
-        # 获取用户名，如果没有则使用默认名称
-        candidate_name = self.interview_config.get('candidate_name', 'unknown_user')
-        if not candidate_name or candidate_name.strip() == '':
-            candidate_name = 'unknown_user'
+        # 获取保存路径的用户名
+        # 优先使用interview_config中的current_username，否则使用candidate_name
+        if 'current_username' in self.interview_config:
+            save_username = self.interview_config['current_username']
+        else:
+            save_username = self.interview_config.get('candidate_name', 'unknown_user')
+            
+        if not save_username or save_username.strip() == '':
+            save_username = 'unknown_user'
         
         # 创建用户文件夹路径
-        user_folder = os.path.join('uploads', candidate_name)
+        user_folder = os.path.join('uploads', save_username)
         os.makedirs(user_folder, exist_ok=True)
         
         # 构建完整的文件路径
@@ -450,16 +455,23 @@ class InterviewAgent:
         except Exception as e:
             print(f"加载配置时出错: {e}")
     
-    def save_interview_questions(self, questions: Dict, config_filename: str = "interview_config.json", questions_filename: str = "interview_questions.json"):
+    def save_interview_questions(self, questions: Dict, config_filename: str = "interview_config.json", questions_filename: str = "interview_questions.json", current_username: str = None):
         """分别保存面试配置和题目到不同的JSON文件"""
         try:
-            # 获取用户名，如果没有则使用默认名称
-            candidate_name = self.interview_config.get('candidate_name', 'unknown_user')
-            if not candidate_name or candidate_name.strip() == '':
-                candidate_name = 'unknown_user'
+            # 获取保存路径的用户名
+            # 优先使用传入的current_username，否则使用interview_config中的current_username，最后使用candidate_name
+            if current_username:
+                save_username = current_username
+            elif 'current_username' in self.interview_config:
+                save_username = self.interview_config['current_username']
+            else:
+                save_username = self.interview_config.get('candidate_name', 'unknown_user')
+                
+            if not save_username or save_username.strip() == '':
+                save_username = 'unknown_user'
             
             # 创建用户文件夹路径
-            user_folder = os.path.join('uploads', candidate_name)
+            user_folder = os.path.join('uploads', save_username)
             os.makedirs(user_folder, exist_ok=True)
             
             # 构建完整的文件路径

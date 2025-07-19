@@ -1,65 +1,65 @@
 {
-  "generated_at": "2025-07-19T20:50:29.478112",
-  "candidate_name": "yangyang",
+  "generated_at": "2025-07-19T23:15:37.841606",
+  "candidate_name": "杨洋",
   "interview_position": "python工程师",
   "tech_domain": "python",
   "strict_mode": true,
   "questions": {
     "能力评估": [
       {
-        "question": "请描述您在分布式系统中处理过的一个高并发问题，并详细说明您的解决方案和最终效果。",
+        "question": "请描述您在处理大规模分布式系统时遇到的一个技术挑战，并详细说明您是如何解决这个问题的。",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "在开发过程中，您如何确保代码的质量和可维护性？请结合具体案例说明。",
+        "question": "您如何评估自己在高压环境下的工作表现？请举例说明。",
         "importance": 2,
         "difficulty": "medium"
       }
     ],
     "岗位匹配度": [
       {
-        "question": "阿里巴巴以技术驱动为核心，您认为Python工程师在这个环境中需要具备哪些核心竞争力？",
+        "question": "您认为Python工程师在京东这样的电商公司中需要具备哪些核心能力？",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "您如何理解阿里巴巴的技术文化？您认为自己能为团队带来哪些独特价值？",
+        "question": "请结合京东的业务特点，谈谈您对Python在电商领域应用的理解。",
         "importance": 2,
         "difficulty": "medium"
       }
     ],
     "专业能力测试": [
       {
-        "question": "请实现一个基于Python的异步任务调度系统，要求支持任务优先级、失败重试和资源隔离，并解释其设计原理。",
+        "question": "请实现一个高效的算法来解决京东订单系统中的库存分配问题，要求考虑并发和性能优化。",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "假设您需要优化一个高流量的Django应用，请列出至少三种性能优化方案，并详细说明每种方案的实现思路和预期效果。",
+        "question": "请解释Python中的GIL（全局解释器锁）及其对多线程编程的影响，并讨论在京东这样的高并发环境中如何应对。",
         "importance": 2,
         "difficulty": "medium"
       }
     ],
-    "candidate_name": "yangyang",
+    "candidate_name": "杨洋",
     "简历深挖": [
       {
-        "question": "您在Python开发工程师的工作经历中，最引以为傲的项目是什么？请详细描述项目背景、技术挑战以及您在其中扮演的角色和贡献。",
+        "question": "您在贵泽实业有限公司担任行政主管期间，如何通过优化流程或制度来解决跨部门协作中的具体矛盾？请举例说明。",
         "importance": 1,
         "difficulty": "hard",
-        "focus_area": "项目经历"
+        "focus_area": "工作经验与问题解决能力"
       },
       {
-        "question": "阿里巴巴作为一家技术驱动型公司，对代码质量和系统性能有着极高要求。请分享一个您在优化代码性能或提升系统稳定性方面的实际案例，包括遇到的问题、解决思路及最终成果。",
+        "question": "京东作为一家技术驱动的电商公司，行政岗位需要与技术团队高频协作。您过往在团队管理中如何处理与技术部门的沟通和资源协调？",
         "importance": 2,
         "difficulty": "hard",
-        "focus_area": "技能匹配度"
+        "focus_area": "技能匹配度与跨部门协作"
       },
       {
-        "question": "在您的简历中提到了熟悉Django框架，能否谈谈您在Django项目中遇到的最具挑战性的问题，以及您是如何克服它的？",
+        "question": "您在简历中提到熟练使用Excel，但目标岗位是Python工程师。您认为Excel技能如何与Python技术栈结合？是否有过自动化脚本开发经验？",
         "importance": 3,
         "difficulty": "medium",
-        "focus_area": "技能匹配度"
+        "focus_area": "技能匹配度与技术延展性"
       }
     ]
   }
