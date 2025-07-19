@@ -659,8 +659,16 @@ def generate_interview():
         except ImportError:
             try:
                 # 备用导入方式
-                from init import InterviewAgent
-            except ImportError as e:
+                sys.path.insert(0, mock_interview_path)
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("init", os.path.join(mock_interview_path, "init.py"))
+                if spec and spec.loader:
+                    init_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(init_module)
+                    InterviewAgent = init_module.InterviewAgent
+                else:
+                    raise ImportError("无法加载init模块")
+            except Exception as e:
                 print(f"导入面试模块失败: {e}")
                 return jsonify({'success': False, 'message': '面试模块导入失败'})
         
@@ -759,8 +767,17 @@ def run_interview():
             from modules.Mock_interview.main import InterviewSystem
         except ImportError:
             try:
-                from main import InterviewSystem
-            except ImportError as e:
+                # 备用导入方式
+                sys.path.insert(0, mock_interview_path)
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("main", os.path.join(mock_interview_path, "main.py"))
+                if spec and spec.loader:
+                    main_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(main_module)
+                    InterviewSystem = main_module.InterviewSystem
+                else:
+                    raise ImportError("无法加载main模块")
+            except Exception as e:
                 print(f"导入面试系统失败: {e}")
                 return jsonify({'success': False, 'message': '面试系统导入失败'})
         

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-07-19T19:00:41.494268",
+  "generated_at": "2025-07-19T19:31:52.183881",
   "candidate_name": "alivin",
   "interview_position": "python全栈",
   "tech_domain": "python",
@@ -7,36 +7,36 @@
   "questions": {
     "能力评估": [
       {
-        "question": "请描述您在Python项目中遇到的一个技术难题，以及您是如何解决的",
+        "question": "请描述您在Python全栈开发中遇到的最具挑战性的技术问题，并说明您是如何解决的。",
         "importance": 1,
-        "difficulty": "medium"
+        "difficulty": "hard"
       },
       {
-        "question": "您如何管理多个任务和项目的时间安排？",
+        "question": "在团队项目中，您如何确保代码质量和项目进度？请举例说明。",
         "importance": 2,
-        "difficulty": "easy"
+        "difficulty": "medium"
       }
     ],
     "岗位匹配度": [
       {
-        "question": "您认为Python全栈开发岗位需要哪些核心技能？",
+        "question": "您认为华为对Python全栈工程师的核心要求是什么？您如何符合这些要求？",
         "importance": 1,
         "difficulty": "medium"
       },
       {
-        "question": "您为什么选择应聘华为的Python全栈岗位？",
+        "question": "请结合华为的业务特点，谈谈您如何将Python全栈技术应用到实际业务中。",
         "importance": 2,
         "difficulty": "easy"
       }
     ],
     "专业能力测试": [
       {
-        "question": "请解释Python中的生成器与普通函数的区别，并给出一个实际应用场景",
+        "question": "请编写一个Python函数，实现一个简单的RESTful API，并解释其设计思路和实现细节。",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "在Django框架中，如何实现一个自定义中间件？请简要描述步骤",
+        "question": "在Django框架中，如何实现用户认证和权限管理？请结合代码示例说明。",
         "importance": 2,
         "difficulty": "medium"
       }
