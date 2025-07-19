@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-07-19T23:15:37.841606",
+  "generated_at": "2025-07-20T02:00:57.006698",
   "candidate_name": "杨洋",
   "interview_position": "python工程师",
   "tech_domain": "python",
@@ -7,36 +7,36 @@
   "questions": {
     "能力评估": [
       {
-        "question": "请描述您在处理大规模分布式系统时遇到的一个技术挑战，并详细说明您是如何解决这个问题的。",
+        "question": "请描述您在处理高并发场景下优化Python代码的具体案例，包括遇到的问题、解决方案及最终效果",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "您如何评估自己在高压环境下的工作表现？请举例说明。",
+        "question": "在京东这样的电商平台中，如何利用Python实现一个高效的库存管理系统？请结合具体技术点进行说明",
         "importance": 2,
         "difficulty": "medium"
       }
     ],
     "岗位匹配度": [
       {
-        "question": "您认为Python工程师在京东这样的电商公司中需要具备哪些核心能力？",
+        "question": "京东的业务场景中，您认为Python工程师需要具备哪些核心能力来支撑其业务发展？请结合实例说明",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "请结合京东的业务特点，谈谈您对Python在电商领域应用的理解。",
+        "question": "您如何理解京东对于技术创新的重视？请结合您的经验，谈谈如何在Python开发中推动技术创新",
         "importance": 2,
         "difficulty": "medium"
       }
     ],
     "专业能力测试": [
       {
-        "question": "请实现一个高效的算法来解决京东订单系统中的库存分配问题，要求考虑并发和性能优化。",
+        "question": "请实现一个基于Python的分布式任务调度系统，要求能够处理高并发任务，并保证任务的可靠性和顺序性",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "请解释Python中的GIL（全局解释器锁）及其对多线程编程的影响，并讨论在京东这样的高并发环境中如何应对。",
+        "question": "京东的推荐系统中，如何利用Python进行特征工程和模型训练？请详细描述数据处理流程和模型选择依据",
         "importance": 2,
         "difficulty": "medium"
       }
@@ -44,22 +44,22 @@
     "candidate_name": "杨洋",
     "简历深挖": [
       {
-        "question": "您在贵泽实业有限公司担任行政主管期间，如何通过优化流程或制度来解决跨部门协作中的具体矛盾？请举例说明。",
+        "question": "您在贵泽实业有限公司担任行政主管期间，如何通过人力资源管理和团队协调来推动公司战略目标的实现？请结合具体案例说明。",
         "importance": 1,
         "difficulty": "hard",
-        "focus_area": "工作经验与问题解决能力"
+        "focus_area": "工作经验与管理能力"
       },
       {
-        "question": "京东作为一家技术驱动的电商公司，行政岗位需要与技术团队高频协作。您过往在团队管理中如何处理与技术部门的沟通和资源协调？",
+        "question": "京东作为一家技术驱动的电商公司，对行政岗位的数字化管理能力有较高要求。您在过往工作中是如何利用计算机技能（如Excel、PowerPoint）提升行政效率的？能否举例说明您处理过的复杂数据分析或自动化任务？",
         "importance": 2,
         "difficulty": "hard",
-        "focus_area": "技能匹配度与跨部门协作"
+        "focus_area": "技能匹配与项目经历"
       },
       {
-        "question": "您在简历中提到熟练使用Excel，但目标岗位是Python工程师。您认为Excel技能如何与Python技术栈结合？是否有过自动化脚本开发经验？",
+        "question": "您在团队组建和扩充方面积累了丰富经验，但如果需要将行政团队的工作模式与京东的技术驱动文化（如快速迭代、数据驱动决策）相结合，您会如何调整管理策略？",
         "importance": 3,
-        "difficulty": "medium",
-        "focus_area": "技能匹配度与技术延展性"
+        "difficulty": "hard",
+        "focus_area": "团队能力与公司背景适配"
       }
     ]
   }
