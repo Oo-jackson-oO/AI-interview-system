@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-07-19T19:31:52.183881",
+  "generated_at": "2025-07-19T21:22:18.172804",
   "candidate_name": "alivin",
   "interview_position": "python全栈",
   "tech_domain": "python",
@@ -7,36 +7,36 @@
   "questions": {
     "能力评估": [
       {
-        "question": "请描述您在Python全栈开发中遇到的最具挑战性的技术问题，并说明您是如何解决的。",
+        "question": "请描述您在Python项目中遇到的一个技术难题，以及您是如何解决的",
         "importance": 1,
-        "difficulty": "hard"
+        "difficulty": "medium"
       },
       {
-        "question": "在团队项目中，您如何确保代码质量和项目进度？请举例说明。",
+        "question": "您如何评估自己的学习能力和适应新技术的速度？",
         "importance": 2,
-        "difficulty": "medium"
+        "difficulty": "easy"
       }
     ],
     "岗位匹配度": [
       {
-        "question": "您认为华为对Python全栈工程师的核心要求是什么？您如何符合这些要求？",
+        "question": "您认为Python全栈开发岗位需要哪些核心技能？",
         "importance": 1,
         "difficulty": "medium"
       },
       {
-        "question": "请结合华为的业务特点，谈谈您如何将Python全栈技术应用到实际业务中。",
+        "question": "您为什么选择申请华为的Python全栈岗位？",
         "importance": 2,
         "difficulty": "easy"
       }
     ],
     "专业能力测试": [
       {
-        "question": "请编写一个Python函数，实现一个简单的RESTful API，并解释其设计思路和实现细节。",
+        "question": "请解释Python中的生成器与普通函数的区别，并给出一个实际应用场景",
         "importance": 1,
         "difficulty": "hard"
       },
       {
-        "question": "在Django框架中，如何实现用户认证和权限管理？请结合代码示例说明。",
+        "question": "Django和Flask在构建Web应用时的主要区别是什么？请结合华为的业务特点进行说明",
         "importance": 2,
         "difficulty": "medium"
       }

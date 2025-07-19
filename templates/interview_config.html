@@ -432,6 +432,13 @@
             position: relative;
             z-index: 11;
         }
+        
+        /* 淡出动画 */
+        .interview-config-container.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.5s ease;
+        }
 
         /* 波动效果样式 */
         .rocket-wave {
@@ -857,10 +864,10 @@
                 
                 if (result.success) {
                     showSuccess('面试题目生成成功！正在跳转到面试页面...');
-                    // 跳转到面试页面
+                    // 使用黑洞转场动画跳转到面试页面
                     setTimeout(() => {
-                        window.location.href = '/interview';
-                    }, 2000);
+                        playLeaveAnimationWithPageLoad('/interview');
+                    }, 1500);
                 } else {
                     showError(result.message || '生成面试题目失败');
                 }
@@ -885,16 +892,72 @@
             successMessage.style.display = 'block';
         }
         
+        // 播放离开动画
+        function playLeaveAnimation(targetUrl) {
+            const mainContainer = document.querySelector('.interview-container');
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            
+            if (mainContainer && blackholeTransition) {
+                // 页面内容淡出
+                mainContainer.classList.add('fade-out');
+                
+                // 激活黑洞转场，中心黑洞扩散到全屏
+                blackholeTransition.classList.add('active', 'enter');
+                
+                setTimeout(() => {
+                    blackholeTransition.classList.remove('enter');
+                    
+                    // 启动流光动画
+                    startStreamAnimation();
+                    
+                    setTimeout(() => {
+                        // 跳转到目标页面
+                        window.location.href = targetUrl;
+                    }, 1500);
+                }, 1500);
+            } else {
+                // 如果没有动画元素，直接跳转
+                window.location.href = targetUrl;
+            }
+        }
+        
+
+        
+        // 启动流光动画
+        function startStreamAnimation() {
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            if (blackholeTransition) {
+                const particles = blackholeTransition.querySelectorAll('.particle');
+                particles.forEach((particle, index) => {
+                    // 重置动画
+                    particle.style.animation = 'none';
+                    particle.offsetHeight; // 触发重排
+                    
+                    // 启动新的动画
+                    particle.style.animation = `particleOrbit 8s linear infinite`;
+                    particle.style.animationDelay = `${index * 0.2}s`;
+                    
+                    // 添加额外的发光效果
+                    particle.style.boxShadow = `0 0 12px rgba(0, 168, 255, 0.9), 0 0 24px rgba(0, 168, 255, 0.5)`;
+                });
+                
+                // 添加额外的视觉效果
+                setTimeout(() => {
+                    particles.forEach((particle, index) => {
+                        particle.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            particle.style.transform = 'scale(1)';
+                        }, 200);
+                    });
+                }, 500);
+            }
+        }
+        
         // 返回主页
         function goBack() {
-            // 触发黑洞转场效果
-            const blackhole = document.getElementById('blackholeTransition');
-            blackhole.style.display = 'flex';
-            blackhole.classList.add('active');
-            
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1000);
+            // 使用和简历分析页面相同的转场逻辑
+            sessionStorage.setItem('returningToHome', 'true');
+            window.location.href = '/';
         }
         
         // 初始化

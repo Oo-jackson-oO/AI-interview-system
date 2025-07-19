@@ -560,6 +560,13 @@
         .rocket-cursor.hover {
             transform: scale(1.2) rotate(15deg);
         }
+        
+        /* 淡出动画 */
+        .interview-container.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.5s ease;
+        }
     </style>
 </head>
 <body>
@@ -574,6 +581,44 @@
     <!-- 背景特效 -->
     <div class="particles" id="particles"></div>
     
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+    
     <div class="interview-container">
         <!-- 页面头部 -->
         <div class="page-header">
@@ -584,11 +629,11 @@
                 </div>
             </div>
             <div class="header-buttons">
-                <a href="/" class="header-btn">
+                <a href="#" class="header-btn" onclick="goBack()">
                     <i class="fas fa-home"></i>
                     返回主页
                 </a>
-                <a href="/interview-config" class="header-btn">
+                <a href="#" class="header-btn" onclick="goToConfig()">
                     <i class="fas fa-cog"></i>
                     面试配置
                 </a>
@@ -1182,6 +1227,79 @@
             });
         }
 
+        // 播放离开动画
+        function playLeaveAnimation(targetUrl) {
+            const mainContainer = document.querySelector('.interview-container');
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            
+            if (mainContainer && blackholeTransition) {
+                // 页面内容淡出
+                mainContainer.classList.add('fade-out');
+                
+                // 激活黑洞转场，中心黑洞扩散到全屏
+                blackholeTransition.classList.add('active', 'enter');
+                
+                setTimeout(() => {
+                    blackholeTransition.classList.remove('enter');
+                    
+                    // 启动流光动画
+                    startStreamAnimation();
+                    
+                    setTimeout(() => {
+                        // 跳转到目标页面
+                        window.location.href = targetUrl;
+                    }, 1500);
+                }, 1500);
+            } else {
+                // 如果没有动画元素，直接跳转
+                window.location.href = targetUrl;
+            }
+        }
+        
+
+        
+        // 启动流光动画
+        function startStreamAnimation() {
+            const blackholeTransition = document.getElementById('blackholeTransition');
+            if (blackholeTransition) {
+                const particles = blackholeTransition.querySelectorAll('.particle');
+                particles.forEach((particle, index) => {
+                    // 重置动画
+                    particle.style.animation = 'none';
+                    particle.offsetHeight; // 触发重排
+                    
+                    // 启动新的动画
+                    particle.style.animation = `particleOrbit 8s linear infinite`;
+                    particle.style.animationDelay = `${index * 0.2}s`;
+                    
+                    // 添加额外的发光效果
+                    particle.style.boxShadow = `0 0 12px rgba(0, 168, 255, 0.9), 0 0 24px rgba(0, 168, 255, 0.5)`;
+                });
+                
+                // 添加额外的视觉效果
+                setTimeout(() => {
+                    particles.forEach((particle, index) => {
+                        particle.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            particle.style.transform = 'scale(1)';
+                        }, 200);
+                    });
+                }, 500);
+            }
+        }
+        
+        // 返回主页
+        function goBack() {
+            // 使用和简历分析页面相同的转场逻辑
+            sessionStorage.setItem('returningToHome', 'true');
+            window.location.href = '/';
+        }
+        
+        // 跳转到面试配置
+        function goToConfig() {
+            playLeaveAnimation('/interview-config');
+        }
+        
         // 鼠标特效
         document.addEventListener('DOMContentLoaded', function() {
             initMouseEffects();
