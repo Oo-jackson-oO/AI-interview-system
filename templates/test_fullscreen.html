@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全屏功能测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .pdf-viewer {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            height: 500px;
+            margin: 20px 0;
+        }
+        
+        .pdf-toolbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+        
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 60px);
+            display: block;
+        }
+        
+        .pdf-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            min-height: 400px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 全屏模式下的样式 */
+        .pdf-viewer.fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            border-radius: 0 !important;
+            background: white !important;
+            box-shadow: none !important;
+            transition: all 0.3s ease !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .pdf-viewer.fullscreen .pdf-container {
+            height: calc(100vh - 60px) !important;
+            width: 100% !important;
+            display: block !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        
+        .pdf-viewer.fullscreen .pdf-iframe {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: auto !important;
+            max-height: none !important;
+            border: none !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 1 !important;
+        }
+        
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>全屏功能测试</h1>
+        
+        <div>
+            <button class="test-button" onclick="loadTestPDF()">加载测试PDF</button>
+            <button class="test-button" onclick="testFullscreen()">测试全屏</button>
+            <button class="test-button" onclick="toggleFullscreen()">切换全屏</button>
+        </div>
+        
+        <div class="pdf-viewer">
+            <div class="pdf-toolbar">
+                <div>PDF阅读器</div>
+                <div>
+                    <button class="zoom-btn" onclick="toggleFullscreen()">
+                        <i class="fas fa-expand"></i> 全屏
+                    </button>
+                </div>
+            </div>
+            <div class="pdf-container">
+                <iframe id="pdfIframe" class="pdf-iframe" src=""></iframe>
+            </div>
+        </div>
+        
+        <div>
+            <h3>测试说明：</h3>
+            <ol>
+                <li>点击"加载测试PDF"加载一个测试PDF</li>
+                <li>点击"切换全屏"进入全屏模式</li>
+                <li>按ESC键或再次点击按钮退出全屏</li>
+                <li>查看控制台获取调试信息</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        function loadTestPDF() {
+            const pdfIframe = document.getElementById('pdfIframe');
+            pdfIframe.src = '/api/training/pdf/军事理论.pdf';
+            console.log('加载测试PDF');
+        }
+        
+        function testFullscreen() {
+            const pdfViewer = document.querySelector('.pdf-viewer');
+            const pdfIframe = document.getElementById('pdfIframe');
+            
+            console.log('=== 全屏功能测试 ===');
+            console.log('PDF Viewer:', pdfViewer);
+            console.log('PDF iframe:', pdfIframe);
+            console.log('PDF iframe src:', pdfIframe ? pdfIframe.src : 'null');
+            console.log('PDF Viewer classes:', pdfViewer ? pdfViewer.className : 'null');
+            
+            const isFullscreen = pdfViewer.classList.contains('fullscreen');
+            console.log('当前全屏状态:', isFullscreen);
+            
+            alert(`全屏测试完成\n当前全屏状态: ${isFullscreen}\nPDF URL: ${pdfIframe ? pdfIframe.src : 'null'}\n请查看控制台获取详细信息`);
+        }
+        
+        function toggleFullscreen() {
+            const pdfViewer = document.querySelector('.pdf-viewer');
+            const pdfIframe = document.getElementById('pdfIframe');
+            const fullscreenBtn = document.querySelector('button[onclick="toggleFullscreen()"]');
+            
+            console.log('切换全屏模式');
+            console.log('当前状态:', pdfViewer.classList.contains('fullscreen'));
+            
+            if (!pdfViewer.classList.contains('fullscreen')) {
+                // 进入全屏模式
+                console.log('进入全屏模式');
+                pdfViewer.classList.add('fullscreen');
+                
+                // 更新按钮图标和文本
+                if (fullscreenBtn) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> 退出全屏';
+                }
+                
+                // 强制重新加载PDF以确保显示
+                if (pdfIframe && pdfIframe.src) {
+                    console.log('重新加载PDF以确保全屏显示');
+                    const currentSrc = pdfIframe.src;
+                    pdfIframe.src = '';
+                    setTimeout(() => {
+                        pdfIframe.src = currentSrc;
+                        console.log('PDF重新加载完成');
+                    }, 300);
+                }
+                
+                // 添加键盘快捷键支持
+                document.addEventListener('keydown', handleFullscreenKeydown);
+                
+            } else {
+                // 退出全屏模式
+                console.log('退出全屏模式');
+                pdfViewer.classList.remove('fullscreen');
+                
+                // 恢复按钮图标和文本
+                if (fullscreenBtn) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> 全屏';
+                }
+                
+                // 重新加载PDF以确保正常显示
+                if (pdfIframe && pdfIframe.src) {
+                    console.log('退出全屏，重新加载PDF');
+                    const currentSrc = pdfIframe.src;
+                    pdfIframe.src = '';
+                    setTimeout(() => {
+                        pdfIframe.src = currentSrc;
+                    }, 300);
+                }
+                
+                // 移除键盘事件监听
+                document.removeEventListener('keydown', handleFullscreenKeydown);
+            }
+        }
+        
+        // 全屏模式下的键盘快捷键
+        function handleFullscreenKeydown(event) {
+            if (event.key === 'Escape') {
+                toggleFullscreen();
+            }
+        }
+    </script>
+</body>
+</html> 

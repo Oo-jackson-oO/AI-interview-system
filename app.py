@@ -474,17 +474,24 @@ def upload_book():
 @app.route('/api/training/pdf/<path:filename>')
 def get_pdf(filename):
     try:
+        print(f"请求PDF文件: {filename}")
+        
         # 安全检查：防止路径遍历攻击
         if '..' in filename or '/' in filename:
+            print(f"无效的文件名: {filename}")
             return jsonify({'error': '无效的文件名'}), 400
         
         # 首先检查pdf文件夹
         pdf_path = os.path.join('modules', 'modules', 'book', 'pdf', filename)
+        print(f"检查PDF路径: {pdf_path}")
+        
         if not os.path.exists(pdf_path):
             # 如果不在pdf文件夹，检查根目录
             pdf_path = os.path.join('modules', 'modules', 'book', filename)
+            print(f"检查备用PDF路径: {pdf_path}")
         
         if os.path.exists(pdf_path):
+            print(f"PDF文件存在，大小: {os.path.getsize(pdf_path)} 字节")
             # 添加CORS头，允许跨域访问
             response = send_file(pdf_path, mimetype='application/pdf')
             response.headers['Access-Control-Allow-Origin'] = '*'
@@ -514,10 +521,44 @@ def get_cover(filename):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/training/pdf-info/<path:filename>')
+def get_pdf_info(filename):
+    try:
+        # 安全检查：防止路径遍历攻击
+        if '..' in filename or '/' in filename:
+            return jsonify({'error': '无效的文件名'}), 400
+        
+        # 首先检查pdf文件夹
+        pdf_path = os.path.join('modules', 'modules', 'book', 'pdf', filename)
+        if not os.path.exists(pdf_path):
+            # 如果不在pdf文件夹，检查根目录
+            pdf_path = os.path.join('modules', 'modules', 'book', filename)
+        
+        if os.path.exists(pdf_path):
+            # 获取PDF页数
+            page_count = skill_manager.get_pdf_page_count(pdf_path)
+            return jsonify({
+                'success': True,
+                'page_count': page_count,
+                'filename': filename
+            })
+        else:
+            return jsonify({'error': '文件不存在'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/book-reader')
 @login_required
 def book_reader_page():
     return render_template('book_reader.html')
+
+@app.route('/test-book-reader')
+def test_book_reader():
+    return render_template('test_book_reader.html')
+
+@app.route('/test-fullscreen')
+def test_fullscreen():
+    return render_template('test_fullscreen.html')
 
 # 学习路径相关路由
 @app.route('/learning')

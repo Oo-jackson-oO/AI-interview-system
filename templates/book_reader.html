@@ -157,6 +157,8 @@
             min-height: 600px;
             max-width: 100%;
             max-height: 100%;
+            position: relative;
+            z-index: 1;
         }
         
         /* 全屏模式下的样式 */
@@ -170,6 +172,9 @@
             border-radius: 0 !important;
             background: white !important;
             box-shadow: none !important;
+            transition: all 0.3s ease !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         
         .pdf-viewer.fullscreen .pdf-container {
@@ -178,13 +183,18 @@
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
+            position: relative !important;
+            overflow: hidden !important;
         }
         
         .pdf-viewer.fullscreen .pdf-iframe {
             width: 100% !important;
             height: 100% !important;
             min-height: auto !important;
+            max-height: none !important;
             border: none !important;
+            position: relative !important;
+            z-index: 1 !important;
         }
         
         .pdf-viewer.fullscreen .pdf-toolbar {
@@ -192,6 +202,25 @@
             position: sticky !important;
             top: 0 !important;
             z-index: 10 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* 全屏模式下的按钮样式 */
+        .pdf-viewer.fullscreen .zoom-btn {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .pdf-viewer.fullscreen .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.3) !important;
+            transform: translateY(-1px) !important;
+        }
+        
+        /* 全屏模式下的页面信息样式 */
+        .pdf-viewer.fullscreen .page-info {
+            font-weight: 500 !important;
+            color: rgba(255, 255, 255, 0.95) !important;
         }
         
         .pdf-loading {
@@ -464,9 +493,6 @@
             <div class="book-info">
                 <h1 id="bookTitle" class="book-title">加载中...</h1>
                 <div class="book-meta">
-                    <i class="fas fa-file-pdf"></i> <span id="bookPages">页数未知</span> 页
-                    <span style="margin: 0 10px;">|</span>
-                    <i class="fas fa-clock"></i> 阅读时间约 <span id="readingTime">未知</span> 分钟
                 </div>
                 <div class="book-description" id="bookDescription">
                     正在加载书籍信息...
@@ -500,6 +526,15 @@
                             <i class="fas fa-search-plus"></i>
                         </button>
                     </div>
+                    <div class="page-info" style="margin: 0 15px;">
+                        <i class="fas fa-file-alt"></i> 
+                        
+                        
+                    </div>
+                    <button class="zoom-btn" onclick="toggleFullscreen()" style="margin-left: 15px;">
+                        <i class="fas fa-expand"></i> 全屏
+                    </button>
+                    
                 </div>
             </div>
             <div id="pdfContainer" class="pdf-container">
@@ -567,6 +602,9 @@
             const pdfFilename = pdfPath;  // pdfPath现在直接是文件名
             const pdfUrl = `/api/training/pdf/${encodeURIComponent(pdfFilename)}`;
             
+            console.log('PDF URL:', pdfUrl);
+            console.log('PDF文件名:', pdfFilename);
+            
             // 显示加载状态
             const pdfLoading = document.getElementById('pdfLoading');
             const pdfIframe = document.getElementById('pdfIframe');
@@ -574,8 +612,44 @@
             pdfLoading.style.display = 'block';
             pdfIframe.style.opacity = '0.3';
             
+            // 获取PDF页数信息
+            fetch(`/api/training/pdf-info/${encodeURIComponent(pdfFilename)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const pageCount = data.page_count;
+                        document.getElementById('bookPages').textContent = pageCount;
+                        document.getElementById('totalPages').textContent = pageCount;
+                        
+                        // 计算阅读时间（每页3分钟）
+                        const readingTime = Math.ceil(pageCount * 3);
+                        document.getElementById('readingTime').textContent = readingTime;
+                    } else {
+                        console.error('获取PDF页数失败:', data.error);
+                        document.getElementById('bookPages').textContent = '未知';
+                        document.getElementById('readingTime').textContent = '未知';
+                        document.getElementById('totalPages').textContent = '?';
+                    }
+                })
+                .catch(error => {
+                    console.error('获取PDF信息失败:', error);
+                    document.getElementById('bookPages').textContent = '未知';
+                    document.getElementById('readingTime').textContent = '未知';
+                    document.getElementById('totalPages').textContent = '?';
+                });
+            
             // 直接使用PDF URL，确保能正常加载
+            console.log('设置PDF iframe src:', pdfUrl);
             pdfIframe.src = pdfUrl;
+            
+            // 添加额外的错误检查
+            setTimeout(() => {
+                if (pdfIframe.contentDocument && pdfIframe.contentDocument.body) {
+                    console.log('PDF iframe内容已加载');
+                } else {
+                    console.log('PDF iframe内容未加载，可能需要检查URL');
+                }
+            }, 2000);
             
             // 监听PDF加载完成
             pdfIframe.onload = function() {
@@ -605,6 +679,7 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     <p>PDF加载失败</p>
                     <p>请检查文件是否存在</p>
+                    <p>URL: ${pdfUrl}</p>
                     <button onclick="location.reload()" style="margin-top: 10px; padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
                         重新加载
                     </button>
@@ -612,19 +687,38 @@
                 document.querySelector('.pdf-container').appendChild(errorDiv);
             };
             
+            // 添加超时处理
+            setTimeout(() => {
+                if (pdfLoading.style.display !== 'none') {
+                    console.log('PDF加载超时');
+                    pdfLoading.style.display = 'none';
+                    const timeoutDiv = document.createElement('div');
+                    timeoutDiv.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(255, 165, 0, 0.1);
+                        color: #ff8c00;
+                        padding: 20px;
+                        border-radius: 10px;
+                        text-align: center;
+                    `;
+                    timeoutDiv.innerHTML = `
+                        <i class="fas fa-clock"></i>
+                        <p>PDF加载超时</p>
+                        <p>请检查网络连接</p>
+                        <button onclick="location.reload()" style="margin-top: 10px; padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            重新加载
+                        </button>
+                    `;
+                    document.querySelector('.pdf-container').appendChild(timeoutDiv);
+                }
+            }, 10000); // 10秒超时
+            
             // 设置书籍描述
             document.getElementById('bookDescription').textContent = 
                 `这是一本关于${title}的学习资料，包含了详细的理论知识和实践案例。`;
-            
-            // 模拟加载页数信息
-            setTimeout(() => {
-                const randomPages = Math.floor(Math.random() * 200) + 50;
-                document.getElementById('bookPages').textContent = randomPages;
-                
-                // 计算阅读时间
-                const readingTime = Math.ceil(randomPages / 2);
-                document.getElementById('readingTime').textContent = readingTime;
-            }, 1000);
         }
         
 
@@ -659,35 +753,143 @@
             const readerContainer = document.querySelector('.reader-container');
             const backButton = document.querySelector('.back-button');
             const pdfIframe = document.getElementById('pdfIframe');
+            const fullscreenBtn = document.querySelector('button[onclick="toggleFullscreen()"]');
+            
+            console.log('切换全屏模式');
+            console.log('当前状态:', pdfViewer.classList.contains('fullscreen'));
+            console.log('PDF iframe:', pdfIframe);
+            console.log('PDF iframe src:', pdfIframe ? pdfIframe.src : 'null');
             
             if (!pdfViewer.classList.contains('fullscreen')) {
                 // 进入全屏模式
+                console.log('进入全屏模式');
+                
+                // 隐藏其他元素
                 readerContainer.style.display = 'none';
                 backButton.style.display = 'none';
+                
+                // 添加全屏类
                 pdfViewer.classList.add('fullscreen');
+                
+                // 更新按钮图标和文本
+                if (fullscreenBtn) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> 退出全屏';
+                }
                 
                 // 确保PDF iframe正确显示
                 setTimeout(() => {
                     if (pdfIframe) {
-                        pdfIframe.style.width = '100%';
-                        pdfIframe.style.height = '100%';
-                        pdfIframe.style.minHeight = 'auto';
+                        console.log('PDF iframe样式已更新');
+                        console.log('PDF iframe当前src:', pdfIframe.src);
+                        
+                        // 确保PDF重新加载
+                        if (pdfIframe.src) {
+                            const currentSrc = pdfIframe.src;
+                            pdfIframe.src = '';
+                            setTimeout(() => {
+                                pdfIframe.src = currentSrc;
+                                console.log('PDF重新加载完成');
+                            }, 100);
+                        }
                     }
                 }, 100);
                 
+                // 添加键盘快捷键支持
+                document.addEventListener('keydown', handleFullscreenKeydown);
+                
             } else {
                 // 退出全屏模式
+                console.log('退出全屏模式');
+                
+                // 显示其他元素
                 readerContainer.style.display = 'block';
                 backButton.style.display = 'block';
+                
+                // 移除全屏类
                 pdfViewer.classList.remove('fullscreen');
                 
-                // 恢复PDF iframe样式
-                if (pdfIframe) {
-                    pdfIframe.style.width = '100%';
-                    pdfIframe.style.height = '100%';
-                    pdfIframe.style.minHeight = '600px';
+                // 恢复按钮图标和文本
+                if (fullscreenBtn) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> 全屏';
                 }
+                
+                // 确保PDF iframe正确显示
+                setTimeout(() => {
+                    if (pdfIframe) {
+                        console.log('退出全屏，恢复PDF样式');
+                        // 重新加载PDF以确保正常显示
+                        if (pdfIframe.src) {
+                            const currentSrc = pdfIframe.src;
+                            pdfIframe.src = '';
+                            setTimeout(() => {
+                                pdfIframe.src = currentSrc;
+                            }, 100);
+                        }
+                    }
+                }, 100);
+                
+                // 移除键盘事件监听
+                document.removeEventListener('keydown', handleFullscreenKeydown);
             }
+        }
+        
+        // 全屏模式下的键盘快捷键
+        function handleFullscreenKeydown(event) {
+            if (event.key === 'Escape') {
+                toggleFullscreen();
+            }
+        }
+        
+        // 测试全屏功能
+        function testFullscreen() {
+            const pdfViewer = document.querySelector('.pdf-viewer');
+            const pdfIframe = document.getElementById('pdfIframe');
+            
+            console.log('=== 全屏功能测试 ===');
+            console.log('PDF Viewer:', pdfViewer);
+            console.log('PDF iframe:', pdfIframe);
+            console.log('PDF iframe src:', pdfIframe ? pdfIframe.src : 'null');
+            console.log('PDF iframe style:', pdfIframe ? pdfIframe.style.cssText : 'null');
+            console.log('PDF Viewer classes:', pdfViewer ? pdfViewer.className : 'null');
+            console.log('当前缩放:', currentZoom);
+            
+            // 检查PDF是否已加载
+            if (pdfIframe && pdfIframe.contentDocument) {
+                console.log('PDF内容已加载');
+            } else {
+                console.log('PDF内容未加载');
+            }
+            
+            // 检查全屏状态
+            const isFullscreen = pdfViewer.classList.contains('fullscreen');
+            console.log('当前全屏状态:', isFullscreen);
+            
+            alert(`全屏测试完成\n当前全屏状态: ${isFullscreen}\nPDF URL: ${pdfIframe ? pdfIframe.src : 'null'}\n请查看控制台获取详细信息`);
+        }
+        
+        // 页面导航功能
+        function goToPage() {
+            const totalPages = parseInt(document.getElementById('totalPages').textContent);
+            if (isNaN(totalPages) || totalPages <= 1) {
+                alert('无法获取总页数信息');
+                return;
+            }
+            
+            const pageNumber = prompt(`请输入页码 (1-${totalPages}):`);
+            if (pageNumber === null) return;
+            
+            const page = parseInt(pageNumber);
+            if (isNaN(page) || page < 1 || page > totalPages) {
+                alert(`请输入有效的页码 (1-${totalPages})`);
+                return;
+            }
+            
+            // 更新当前页码显示
+            document.getElementById('currentPage').textContent = page;
+            
+            // 这里可以添加PDF页面跳转逻辑
+            // 由于PDF iframe的限制，我们只能显示提示
+            alert(`已跳转到第 ${page} 页`);
         }
         
 
