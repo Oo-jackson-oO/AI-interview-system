@@ -13,6 +13,28 @@ class ResumeParser:
             base_url='https://spark-api-open.xf-yun.com/v1/'
         )
         
+    def save_resume_to_mock_interview(self, text):
+        """将简历文本保存到 modules/Mock_interview/resume.txt"""
+        try:
+            # 获取当前文件的目录路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # 构建目标路径：从 modules/resume_parsing/backend 到 modules/Mock_interview
+            mock_interview_dir = os.path.join(current_dir, '..', '..', 'Mock_interview')
+            # 确保目录存在
+            os.makedirs(mock_interview_dir, exist_ok=True)
+            # 目标文件路径
+            resume_file_path = os.path.join(mock_interview_dir, 'resume.txt')
+            
+            # 写入文件（如果存在则覆盖）
+            with open(resume_file_path, 'w', encoding='utf-8') as f:
+                f.write(text)
+            
+            print(f"简历文本已保存到: {resume_file_path}")
+            return True
+        except Exception as e:
+            print(f"保存简历文本到 Mock_interview 目录失败: {str(e)}")
+            return False
+        
     def extract_text_from_file(self, file):
         """从文件中提取文本（支持PDF、DOCX、DOC）"""
         # 获取文件名并处理可能的None情况
@@ -46,14 +68,20 @@ class ResumeParser:
             else:
                 raise ValueError(f"无法识别文件格式，文件名: {filename}，头部字节: {header}")
         
+        # 提取文本
         if file_extension == 'pdf':
-            return self.extract_text_from_pdf(file)
+            text = self.extract_text_from_pdf(file)
         elif file_extension == 'docx':
-            return self.extract_text_from_docx(file)
+            text = self.extract_text_from_docx(file)
         elif file_extension == 'doc':
-            return self.extract_text_from_doc(file)
+            text = self.extract_text_from_doc(file)
         else:
             raise ValueError(f"不支持的文件格式: {file_extension}，文件名: {filename}")
+        
+        # 保存简历文本到 Mock_interview 目录
+        self.save_resume_to_mock_interview(text)
+        
+        return text
     
     def extract_text_from_pdf(self, file):
         """从PDF文件中提取文本"""
