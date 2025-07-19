@@ -256,10 +256,11 @@ class ConnectorSystem {
         const rect2 = bubble2.getBoundingClientRect();
         const containerRect = this.svg.getBoundingClientRect();
         
+        // 连接点位置调整到星球位置
         const x1 = rect1.left + rect1.width/2 - containerRect.left;
-        const y1 = rect1.top + rect1.height/2 - containerRect.top;
+        const y1 = rect1.top - rect1.height * 0.10 - containerRect.top;
         const x2 = rect2.left + rect2.width/2 - containerRect.left;
-        const y2 = rect2.top + rect2.height/2 - containerRect.top;
+        const y2 = rect2.top - rect2.height * 0.10 - containerRect.top;
         
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('class', 'connector-line');
