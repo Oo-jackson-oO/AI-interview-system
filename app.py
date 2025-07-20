@@ -588,6 +588,34 @@ def get_interview_result_data():
         print(f"获取面试结果数据失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取数据失败: {str(e)}'})
 
+@app.route('/uploads/<username>/<filename>')
+@login_required
+def get_user_file(username, filename):
+    """获取用户文件"""
+    try:
+        # 安全检查：确保只能访问uploads目录下的文件
+        file_path = os.path.join('uploads', username, filename)
+        
+        # 检查文件是否存在
+        if not os.path.exists(file_path):
+            return jsonify({'error': '文件不存在'}), 404
+        
+        # 检查文件是否在uploads目录下
+        if not os.path.abspath(file_path).startswith(os.path.abspath('uploads')):
+            return jsonify({'error': '访问被拒绝'}), 403
+        
+        # 根据文件类型返回相应的内容类型
+        if filename.endswith('.json'):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        else:
+            return send_file(file_path)
+            
+    except Exception as e:
+        print(f"获取用户文件失败: {str(e)}")
+        return jsonify({'error': f'获取文件失败: {str(e)}'}), 500
+
 @app.route('/book-reader')
 @login_required
 def book_reader_page():

@@ -9,18 +9,167 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 火箭 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation orion">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 0%; left: 30%;"></div>   <!-- Bellatrix -->
+        <div class="star" style="top: 20%; left: 40%;"></div>  <!-- Alnilam -->
+        <div class="star" style="top: 40%; left: 35%;"></div>  <!-- Mintaka -->
+        <div class="star" style="top: 30%; left: 20%;"></div>  <!-- Alnitak -->
+        <div class="star" style="top: 60%; left: 10%;"></div>  <!-- Saiph -->
+        <div class="star" style="top: 70%; left: 50%;"></div>  <!-- Rigel -->
+        <div class="star" style="top: 20%; left: 10%;"></div>  <!-- Betelgeuse -->
+
+        <!-- 线段连接（用绝对定位和 transform 绘制虚线） -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="30" y1="0" x2="40" y2="20" />
+            <line x1="40" y1="20" x2="35" y2="40" />
+            <line x1="20" y1="30" x2="40" y2="20" />
+            <line x1="10" y1="20" x2="20" y2="30" />
+            <line x1="10" y1="20" x2="30" y2="0" />
+            <line x1="10" y1="60" x2="20" y2="30" />
+            <line x1="35" y1="40" x2="50" y2="70" />
+        </svg>
+    </div>
+    <div class="constellation big-dipper">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 20%; left: 0%;"></div>    <!-- 星1 -->
+        <div class="star" style="top: 10%; left: 25%;"></div>   <!-- 星2 -->
+        <div class="star" style="top: 20%; left: 50%;"></div>   <!-- 星3 -->
+        <div class="star" style="top: 10%; left: 75%;"></div>   <!-- 星4 -->
+        <div class="star" style="top: 20%; left: 100%;"></div>  <!-- 星5 -->
+      
+        <!-- 连接线 -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="0" y1="20" x2="25" y2="10" />
+            <line x1="25" y1="10" x2="50" y2="20" />
+            <line x1="50" y1="20" x2="75" y2="10" />
+            <line x1="75" y1="10" x2="100" y2="20" />
+        </svg>
+    </div>
+    
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station right"></div>
+
     <!-- 星空背景 -->
     <div class="stars-container">
-        <div class="star small" style="top: 10%; left: 20%;"></div>
-        <div class="star medium" style="top: 15%; left: 80%;"></div>
-        <div class="star large" style="top: 25%; left: 50%;"></div>
-        <div class="star small" style="top: 35%; left: 10%;"></div>
-        <div class="star medium" style="top: 45%; left: 90%;"></div>
-        <div class="star large" style="top: 55%; left: 30%;"></div>
-        <div class="star small" style="top: 65%; left: 70%;"></div>
-        <div class="star medium" style="top: 75%; left: 15%;"></div>
-        <div class="star large" style="top: 85%; left: 60%;"></div>
-        <div class="star small" style="top: 95%; left: 40%;"></div>
+        <div class="star star-1"></div>
+        <div class="star star-2"></div>
+        <div class="star star-3"></div>
+        <div class="star star-4"></div>
+        <div class="star star-5"></div>
+        <div class="star star-6"></div>
+        <div class="star star-7"></div>
+        <div class="star star-8"></div>
+        <div class="star star-9"></div>
+        <div class="star star-10"></div>
+        <div class="star star-11"></div>
+        <div class="star star-12"></div>
+        <div class="star star-13"></div>
+        <div class="star star-14"></div>
+        <div class="star star-15"></div>
+    </div>
+
+    <!-- 流星效果 -->
+    <div class="meteor-container">
+        <div class="meteor meteor-1"></div>
+        <div class="meteor meteor-2"></div>
+        <div class="meteor meteor-3"></div>
+        <div class="meteor meteor-4"></div>
+        <div class="meteor meteor-5"></div>
+    </div>
+
+    <!-- 粒子效果 -->
+    <div class="particles-container">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+        <div class="particle particle-5"></div>
+        <div class="particle particle-6"></div>
+        <div class="particle particle-7"></div>
+        <div class="particle particle-8"></div>
+    </div>
+
+    <!-- 光环效果 -->
+    <div class="aurora-container">
+        <div class="aurora aurora-1"></div>
+        <div class="aurora aurora-2"></div>
+        <div class="aurora aurora-3"></div>
     </div>
 
     <!-- 主容器 -->
@@ -30,35 +179,47 @@
             <div class="header-content">
                 <div class="logo-section">
                     <div class="logo-icon">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="fas fa-rocket"></i>
+                        <div class="logo-glow"></div>
                     </div>
                     <div class="logo-text">
-                        <div class="title">面试结果分析</div>
-                        <div class="subtitle">深度解析您的面试表现</div>
+                        <h1 class="title">面试结果分析</h1>
+                        <p class="subtitle">AI智能面试评估系统</p>
+                        <div class="title-underline"></div>
                     </div>
                 </div>
-                <div class="header-nav">
+                <nav class="header-nav">
                     <a href="/" class="nav-item">
                         <i class="fas fa-home"></i>
-                        <span>返回主页</span>
+                        <span>返回首页</span>
+                        <div class="nav-glow"></div>
                     </a>
-                </div>
+                    <a href="/interview" class="nav-item">
+                        <i class="fas fa-microphone"></i>
+                        <span>开始面试</span>
+                        <div class="nav-glow"></div>
+                    </a>
+                </nav>
             </div>
         </header>
 
-        <!-- 总评分区域 -->
+        <!-- 总分展示区域 -->
         <div class="total-score-section">
             <div class="score-card">
+                <div class="score-glow"></div>
                 <div class="score-header">
-                    <h2>总体评分</h2>
+                    <h2><i class="fas fa-chart-line"></i> 总体评分</h2>
+                    <div class="header-decoration"></div>
                 </div>
                 <div class="total-score">
                     <span id="totalScore">0</span>
                     <span class="score-max">/ 100</span>
+                    <div class="score-particles"></div>
                 </div>
                 <div class="score-progress">
                     <div class="progress-bar">
                         <div class="progress-fill" id="totalProgress"></div>
+                        <div class="progress-glow"></div>
                     </div>
                 </div>
                 <div class="score-evaluation" id="totalEvaluation">
@@ -67,149 +228,205 @@
             </div>
         </div>
 
-        <!-- 9个模块星球展示 -->
+        <!-- 模块星球展示 -->
         <div class="modules-section">
-            <div class="modules-container">
-                <!-- 个人介绍 -->
-                <div class="module-planet" data-module="self_introduction">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='地球.svg') }}" alt="个人介绍">
-                        </div>
-                        <div class="planet-content">
-                            <h3>个人介绍</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="self_introduction_score">0</span>
-                                <span class="score-max">/10</span>
+            <div class="section-title">
+                <h2>详细分析</h2>
+                <div class="title-decoration"></div>
+            </div>
+            
+            <!-- 滑动控制器 -->
+            <div class="carousel-controls">
+                <button class="control-btn prev-btn" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="carousel-indicators" id="carouselIndicators">
+                    <span class="indicator active" data-index="0"></span>
+                    <span class="indicator" data-index="1"></span>
+                    <span class="indicator" data-index="2"></span>
+                    <span class="indicator" data-index="3"></span>
+                    <span class="indicator" data-index="4"></span>
+                    <span class="indicator" data-index="5"></span>
+                    <span class="indicator" data-index="6"></span>
+                    <span class="indicator" data-index="7"></span>
+                    <span class="indicator" data-index="8"></span>
+                </div>
+                <button class="control-btn next-btn" id="nextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- 旋转式模块容器 -->
+            <div class="carousel-container">
+                <div class="carousel-track" id="carouselTrack">
+                    <!-- 个人介绍 -->
+                    <div class="module-planet" data-module="self_introduction" data-index="0">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='地球.svg') }}" alt="个人介绍">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>个人介绍</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="self_introduction_score">0</span>
+                                    <span class="score-max">/10</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 简历深挖 -->
-                <div class="module-planet" data-module="resume_digging">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='星球1.svg') }}" alt="简历深挖">
-                        </div>
-                        <div class="planet-content">
-                            <h3>简历深挖</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="resume_digging_score">0</span>
-                                <span class="score-max">/15</span>
+                    <!-- 简历深挖 -->
+                    <div class="module-planet" data-module="resume_digging" data-index="1">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='星球1.svg') }}" alt="简历深挖">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>简历深挖</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="resume_digging_score">0</span>
+                                    <span class="score-max">/15</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 能力评估 -->
-                <div class="module-planet" data-module="ability_assessment">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='星球2.svg') }}" alt="能力评估">
-                        </div>
-                        <div class="planet-content">
-                            <h3>能力评估</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="ability_assessment_score">0</span>
-                                <span class="score-max">/15</span>
+                    <!-- 能力评估 -->
+                    <div class="module-planet" data-module="ability_assessment" data-index="2">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='星球2.svg') }}" alt="能力评估">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>能力评估</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="ability_assessment_score">0</span>
+                                    <span class="score-max">/15</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 岗位匹配 -->
-                <div class="module-planet" data-module="position_matching">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='星球3.svg') }}" alt="岗位匹配">
-                        </div>
-                        <div class="planet-content">
-                            <h3>岗位匹配</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="position_matching_score">0</span>
-                                <span class="score-max">/10</span>
+                    <!-- 岗位匹配 -->
+                    <div class="module-planet" data-module="position_matching" data-index="3">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='星球3.svg') }}" alt="岗位匹配">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>岗位匹配</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="position_matching_score">0</span>
+                                    <span class="score-max">/10</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 专业能力 -->
-                <div class="module-planet" data-module="professional_skills">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='星球4.svg') }}" alt="专业能力">
-                        </div>
-                        <div class="planet-content">
-                            <h3>专业能力</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="professional_skills_score">0</span>
-                                <span class="score-max">/20</span>
+                    <!-- 专业能力 -->
+                    <div class="module-planet" data-module="professional_skills" data-index="4">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='星球4.svg') }}" alt="专业能力">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>专业能力</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="professional_skills_score">0</span>
+                                    <span class="score-max">/20</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 反问环节 -->
-                <div class="module-planet" data-module="reverse_question">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='星球5.svg') }}" alt="反问环节">
-                        </div>
-                        <div class="planet-content">
-                            <h3>反问环节</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="reverse_question_score">0</span>
-                                <span class="score-max">/5</span>
+                    <!-- 反问环节 -->
+                    <div class="module-planet" data-module="reverse_question" data-index="5">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='星球5.svg') }}" alt="反问环节">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>反问环节</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="reverse_question_score">0</span>
+                                    <span class="score-max">/5</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 语音语调 -->
-                <div class="module-planet" data-module="voice_tone">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='月球.svg') }}" alt="语音语调">
-                        </div>
-                        <div class="planet-content">
-                            <h3>语音语调</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="voice_tone_score">0</span>
-                                <span class="score-max">/5</span>
+                    <!-- 语音语调 -->
+                    <div class="module-planet" data-module="voice_tone" data-index="6">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='月球.svg') }}" alt="语音语调">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>语音语调</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="voice_tone_score">0</span>
+                                    <span class="score-max">/5</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 神态分析 -->
-                <div class="module-planet" data-module="facial_analysis">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='星球6.svg') }}" alt="神态分析">
-                        </div>
-                        <div class="planet-content">
-                            <h3>神态分析</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="facial_analysis_score">0</span>
-                                <span class="score-max">/10</span>
+                    <!-- 神态分析 -->
+                    <div class="module-planet" data-module="facial_analysis" data-index="7">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='星球6.svg') }}" alt="神态分析">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>神态分析</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="facial_analysis_score">0</span>
+                                    <span class="score-max">/10</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 肢体语言 -->
-                <div class="module-planet" data-module="body_language">
-                    <div class="planet-inner">
-                        <div class="planet-svg">
-                            <img src="{{ url_for('static', filename='星球7.svg') }}" alt="肢体语言">
-                        </div>
-                        <div class="planet-content">
-                            <h3>肢体语言</h3>
-                            <div class="planet-score">
-                                <span class="score-number" id="body_language_score">0</span>
-                                <span class="score-max">/10</span>
+                    <!-- 肢体语言 -->
+                    <div class="module-planet" data-module="body_language" data-index="8">
+                        <div class="planet-inner">
+                            <div class="planet-glow"></div>
+                            <div class="planet-svg">
+                                <img src="{{ url_for('static', filename='星球7.svg') }}" alt="肢体语言">
+                                <div class="svg-glow"></div>
                             </div>
+                            <div class="planet-content">
+                                <h3>肢体语言</h3>
+                                <div class="planet-score">
+                                    <span class="score-number" id="body_language_score">0</span>
+                                    <span class="score-max">/10</span>
+                                </div>
+                            </div>
+                            <div class="planet-particles"></div>
                         </div>
                     </div>
                 </div>
@@ -220,6 +437,7 @@
     <!-- 模块详情模态框 -->
     <div class="modal-overlay" id="moduleModal">
         <div class="modal-content">
+            <div class="modal-glow"></div>
             <div class="modal-header">
                 <h3 id="modalTitle">模块详情</h3>
                 <button class="modal-close" onclick="closeModal()">
@@ -234,11 +452,11 @@
                     </div>
                 </div>
                 <div class="analysis-section">
-                    <h4>评价</h4>
+                    <h4><i class="fas fa-chart-bar"></i> 评价</h4>
                     <p id="modalEvaluation">暂无评价</p>
                 </div>
                 <div class="analysis-section">
-                    <h4>建议</h4>
+                    <h4><i class="fas fa-lightbulb"></i> 建议</h4>
                     <p id="modalSuggestions">暂无建议</p>
                 </div>
             </div>
