@@ -1207,186 +1207,46 @@ def get_voice_analysis_status():
         print(f"获取语调分析状态失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取状态失败: {str(e)}'})
 
-<<<<<<< HEAD
-@app.route('/api/interview/analyze-photo', methods=['POST'])
-@login_required
-def analyze_photo():
-    """分析浏览器发送的照片"""
-=======
 @app.route('/interview-result')
 @login_required
 def interview_result_page():
     """面试结果分析页面"""
     return render_template('interview_result.html')
 
+@app.route('/uploads/<username>/<filename>')
+def get_user_file(username, filename):
+    """获取用户文件夹中的文件"""
+    try:
+        # 安全检查：只允许访问JSON文件
+        if not filename.endswith('.json'):
+            return jsonify({'error': '只能访问JSON文件'}), 403
+        
+        # 构建文件路径
+        file_path = os.path.join('uploads', username, filename)
+        
+        # 检查文件是否存在
+        if not os.path.exists(file_path):
+            return jsonify({'error': '文件不存在'}), 404
+        
+        # 读取并返回JSON文件
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return jsonify(data)
+        
+    except Exception as e:
+        print(f"获取用户文件失败: {str(e)}")
+        return jsonify({'error': f'获取文件失败: {str(e)}'}), 500
+
 @app.route('/api/interview-result/data')
 @login_required
 def get_interview_result_data():
     """获取面试结果数据"""
->>>>>>> bfb423d75f5e17bf45c837f2959b173d00a4dcf7
     try:
         # 获取当前登录用户
         current_user = session.get('user', {})
         username = current_user.get('username', 'unknown_user')
         
-<<<<<<< HEAD
-        if 'image' not in request.files:
-            return jsonify({'success': False, 'message': '没有上传图片'})
-        
-        image_file = request.files['image']
-        if image_file.filename == '':
-            return jsonify({'success': False, 'message': '没有选择文件'})
-        
-        # 保存临时文件
-        import tempfile
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
-            image_file.save(temp_file.name)
-            temp_filepath = temp_file.name
-        
-        try:
-            # 导入面试模块
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            facial_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview')
-            
-            if facial_analysis_path not in sys.path:
-                sys.path.insert(0, facial_analysis_path)
-            
-            from modules.Mock_interview.facial_analysis import FacialAnalysis
-            
-            # 创建分析实例
-            analyzer = FacialAnalysis()
-            
-            # 分析图像
-            result = analyzer.analyze_image(temp_filepath)
-            
-            if result:
-                # 保存到用户的分析结果中
-                if not hasattr(app, 'facial_analyzers'):
-                    app.facial_analyzers = {}
-                
-                if username not in app.facial_analyzers:
-                    app.facial_analyzers[username] = FacialAnalysis()
-                
-                # 添加时间戳
-                result['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                result['photo_path'] = f"browser_capture_{len(app.facial_analyzers[username].analysis_results)}.jpg"
-                
-                app.facial_analyzers[username].analysis_results.append(result)
-                
-                return jsonify({
-                    'success': True,
-                    'analysis': result,
-                    'count': len(app.facial_analyzers[username].analysis_results)
-                })
-            else:
-                return jsonify({'success': False, 'message': '图像分析失败'})
-                
-        finally:
-            # 清理临时文件
-            try:
-                os.unlink(temp_filepath)
-            except:
-                pass
-        
-    except Exception as e:
-        print(f"照片分析失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'照片分析失败: {str(e)}'})
-
-@app.route('/api/interview/analyze-audio', methods=['POST'])
-@login_required
-def analyze_audio():
-    """分析浏览器发送的音频"""
-    try:
-        # 获取当前登录用户
-        current_user = session.get('user', {})
-        username = current_user.get('username', 'unknown_user')
-        
-        if 'audio' not in request.files:
-            return jsonify({'success': False, 'message': '没有上传音频'})
-        
-        audio_file = request.files['audio']
-        if audio_file.filename == '':
-            return jsonify({'success': False, 'message': '没有选择文件'})
-        
-        # 保存临时文件
-        import tempfile
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as temp_file:
-            audio_file.save(temp_file.name)
-            temp_filepath = temp_file.name
-        
-        try:
-            # 这里需要转换webm到wav格式，用于分析
-            # 导入语调分析模块
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            voice_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview', '语调识别', 'Speech-Analysis')
-            
-            if voice_analysis_path not in sys.path:
-                sys.path.insert(0, voice_analysis_path)
-            
-            # 直接导入模块
-            import real_time_analyzer
-            RealTimeVoiceAnalyzer = real_time_analyzer.RealTimeVoiceAnalyzer
-            
-            # 创建分析实例
-            analyzer = RealTimeVoiceAnalyzer()
-            
-            # 这里需要实现webm到wav的转换，暂时返回成功
-            # TODO: 添加音频格式转换和分析逻辑
-            
-            return jsonify({
-                'success': True,
-                'analysis': {
-                    'message': '音频已接收，正在处理中...',
-                    'format': 'webm',
-                    'size': len(audio_file.read())
-                }
-            })
-                
-        finally:
-            # 清理临时文件
-            try:
-                os.unlink(temp_filepath)
-            except:
-                pass
-        
-    except Exception as e:
-        print(f"音频分析失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'音频分析失败: {str(e)}'})
-
-@app.route('/api/interview/save-voice-analysis', methods=['POST'])
-@login_required
-def save_voice_analysis():
-    """保存语调分析结果"""
-    try:
-        # 获取当前登录用户
-        current_user = session.get('user', {})
-        username = current_user.get('username', 'unknown_user')
-        
-        data = request.get_json()
-        analysis = data.get('analysis', {})
-        
-        if analysis:
-            # 保存到用户文件夹
-            user_folder = os.path.join('uploads', username)
-            os.makedirs(user_folder, exist_ok=True)
-            
-            report_path = os.path.join(user_folder, 'voice_analysis_result.json')
-            
-            with open(report_path, 'w', encoding='utf-8') as f:
-                json.dump(analysis, f, ensure_ascii=False, indent=2)
-            
-            return jsonify({
-                'success': True,
-                'message': '语调分析结果已保存',
-                'path': report_path
-            })
-        else:
-            return jsonify({'success': False, 'message': '没有分析数据'})
-        
-    except Exception as e:
-        print(f"保存语调分析结果失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'保存失败: {str(e)}'})
-=======
         # 检查用户文件夹中的分析文件
         user_folder = os.path.join('uploads', username)
         
@@ -1413,7 +1273,6 @@ def save_voice_analysis():
     except Exception as e:
         print(f"获取面试结果数据失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取数据失败: {str(e)}'})
->>>>>>> bfb423d75f5e17bf45c837f2959b173d00a4dcf7
 
 if __name__ == '__main__':
     app.run(debug=True)
