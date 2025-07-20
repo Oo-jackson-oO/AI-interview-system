@@ -1297,5 +1297,47 @@ def get_voice_analysis_status():
         print(f"获取语调分析状态失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取状态失败: {str(e)}'})
 
+@app.route('/interview-result')
+@login_required
+def interview_result_page():
+    """面试结果分析页面"""
+    return render_template('interview_result.html')
+
+@app.route('/api/interview-result/data')
+@login_required
+def get_interview_result_data():
+    """获取面试结果数据"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        # 检查用户文件夹中的分析文件
+        user_folder = os.path.join('uploads', username)
+        
+        # 检查三个JSON文件是否存在
+        files_to_check = [
+            'interview_summary_report.json',
+            'facial_analysis_report.json', 
+            'analysis_result.json'
+        ]
+        
+        available_files = []
+        for filename in files_to_check:
+            file_path = os.path.join(user_folder, filename)
+            if os.path.exists(file_path):
+                available_files.append(filename)
+        
+        return jsonify({
+            'success': True,
+            'username': username,
+            'available_files': available_files,
+            'user_folder': user_folder
+        })
+        
+    except Exception as e:
+        print(f"获取面试结果数据失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'获取数据失败: {str(e)}'})
+
 if __name__ == '__main__':
     app.run(debug=True)

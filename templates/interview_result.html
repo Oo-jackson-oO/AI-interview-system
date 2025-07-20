@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面试结果分析 - AI智能面试系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_result.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars-container">
+        <div class="star small" style="top: 10%; left: 20%;"></div>
+        <div class="star medium" style="top: 15%; left: 80%;"></div>
+        <div class="star large" style="top: 25%; left: 50%;"></div>
+        <div class="star small" style="top: 35%; left: 10%;"></div>
+        <div class="star medium" style="top: 45%; left: 90%;"></div>
+        <div class="star large" style="top: 55%; left: 30%;"></div>
+        <div class="star small" style="top: 65%; left: 70%;"></div>
+        <div class="star medium" style="top: 75%; left: 15%;"></div>
+        <div class="star large" style="top: 85%; left: 60%;"></div>
+        <div class="star small" style="top: 95%; left: 40%;"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="logo-text">
+                        <div class="title">面试结果分析</div>
+                        <div class="subtitle">深度解析您的面试表现</div>
+                    </div>
+                </div>
+                <div class="header-nav">
+                    <a href="/" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>返回主页</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 总评分区域 -->
+        <div class="total-score-section">
+            <div class="score-card">
+                <div class="score-header">
+                    <h2>总体评分</h2>
+                </div>
+                <div class="total-score">
+                    <span id="totalScore">0</span>
+                    <span class="score-max">/ 100</span>
+                </div>
+                <div class="score-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="totalProgress"></div>
+                    </div>
+                </div>
+                <div class="score-evaluation" id="totalEvaluation">
+                    正在分析您的面试表现...
+                </div>
+            </div>
+        </div>
+
+        <!-- 9个模块星球展示 -->
+        <div class="modules-section">
+            <div class="modules-container">
+                <!-- 个人介绍 -->
+                <div class="module-planet" data-module="self_introduction">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='地球.svg') }}" alt="个人介绍">
+                        </div>
+                        <div class="planet-content">
+                            <h3>个人介绍</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="self_introduction_score">0</span>
+                                <span class="score-max">/10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 简历深挖 -->
+                <div class="module-planet" data-module="resume_digging">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='星球1.svg') }}" alt="简历深挖">
+                        </div>
+                        <div class="planet-content">
+                            <h3>简历深挖</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="resume_digging_score">0</span>
+                                <span class="score-max">/15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 能力评估 -->
+                <div class="module-planet" data-module="ability_assessment">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='星球2.svg') }}" alt="能力评估">
+                        </div>
+                        <div class="planet-content">
+                            <h3>能力评估</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="ability_assessment_score">0</span>
+                                <span class="score-max">/15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 岗位匹配 -->
+                <div class="module-planet" data-module="position_matching">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='星球3.svg') }}" alt="岗位匹配">
+                        </div>
+                        <div class="planet-content">
+                            <h3>岗位匹配</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="position_matching_score">0</span>
+                                <span class="score-max">/10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 专业能力 -->
+                <div class="module-planet" data-module="professional_skills">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='星球4.svg') }}" alt="专业能力">
+                        </div>
+                        <div class="planet-content">
+                            <h3>专业能力</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="professional_skills_score">0</span>
+                                <span class="score-max">/20</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 反问环节 -->
+                <div class="module-planet" data-module="reverse_question">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='星球5.svg') }}" alt="反问环节">
+                        </div>
+                        <div class="planet-content">
+                            <h3>反问环节</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="reverse_question_score">0</span>
+                                <span class="score-max">/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 语音语调 -->
+                <div class="module-planet" data-module="voice_tone">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='月球.svg') }}" alt="语音语调">
+                        </div>
+                        <div class="planet-content">
+                            <h3>语音语调</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="voice_tone_score">0</span>
+                                <span class="score-max">/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 神态分析 -->
+                <div class="module-planet" data-module="facial_analysis">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='星球6.svg') }}" alt="神态分析">
+                        </div>
+                        <div class="planet-content">
+                            <h3>神态分析</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="facial_analysis_score">0</span>
+                                <span class="score-max">/10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 肢体语言 -->
+                <div class="module-planet" data-module="body_language">
+                    <div class="planet-inner">
+                        <div class="planet-svg">
+                            <img src="{{ url_for('static', filename='星球7.svg') }}" alt="肢体语言">
+                        </div>
+                        <div class="planet-content">
+                            <h3>肢体语言</h3>
+                            <div class="planet-score">
+                                <span class="score-number" id="body_language_score">0</span>
+                                <span class="score-max">/10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块详情模态框 -->
+    <div class="modal-overlay" id="moduleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">模块详情</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="score-detail">
+                    <div class="detail-score">
+                        <span id="modalScore">0</span>
+                        <span id="modalMax">/10</span>
+                    </div>
+                </div>
+                <div class="analysis-section">
+                    <h4>评价</h4>
+                    <p id="modalEvaluation">暂无评价</p>
+                </div>
+                <div class="analysis-section">
+                    <h4>建议</h4>
+                    <p id="modalSuggestions">暂无建议</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/interview_result.js') }}"></script>
+</body>
+</html> 
