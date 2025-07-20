@@ -1,42 +1,5 @@
 {
-  "analysis_info": {
-    "audio_file": "recording_20250720_144833.wav",
-    "analysis_time": "2025-07-20 14:48:35",
-    "analysis_timestamp": "2025-07-20T14:48:35.162878",
-    "overall_score": 0.83
-  },
-  "speech_rate_analysis": {
-    "level": "快",
-    "score": 0.8,
-    "syllable_rate": 2.841,
-    "speech_activity_ratio": 0.021,
-    "total_duration": 27.17
-  },
-  "emotion_tone_analysis": {
-    "emotion_type": "兴奋/激动",
-    "emotion_score": 0.8,
-    "average_pitch": 694.5,
-    "pitch_variation": 404.5,
-    "pitch_range": 3109.39990234375,
-    "energy_variation": 0.0
-  },
-  "fluency_analysis": {
-    "fluency_level": "流利",
-    "fluency_score": 0.9,
-    "pause_count": 1,
-    "pause_ratio": 0.027,
-    "speech_continuity": 0.973,
-    "rhythm_stability": 0.996999979019165
-  },
-  "recommendations": {
-    "speech_rate_advice": "建议调整语速到适中范围",
-    "emotion_advice": "建议增强情感表达，使语调更加生动有感染力",
-    "fluency_advice": "语言流利度很好，表达自然流畅"
-  },
-  "metadata": {
-    "analysis_version": "1.0",
-    "analyzer": "RealTimeVoiceAnalyzer",
-    "sample_rate": 22050,
-    "channels": 1
-  }
+  "format": "webm",
+  "message": "音频已接收，正在处理中...",
+  "size": 0
 }

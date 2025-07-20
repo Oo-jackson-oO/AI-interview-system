@@ -963,11 +963,15 @@ def live2d_interview():
 @app.route('/api/interview/start-facial-analysis', methods=['POST'])
 @login_required
 def start_facial_analysis():
-    """开始微表情肢体分析"""
+    """开始微表情肢体分析（浏览器端）"""
     try:
         # 获取当前登录用户
         current_user = session.get('user', {})
         username = current_user.get('username', 'unknown_user')
+        
+        # 初始化用户分析器
+        if not hasattr(app, 'facial_analyzers'):
+            app.facial_analyzers = {}
         
         # 导入面试模块
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -978,47 +982,57 @@ def start_facial_analysis():
         
         from modules.Mock_interview.facial_analysis import FacialAnalysis
         
-        # 创建用户专属的分析实例
-        if not hasattr(app, 'facial_analyzers'):
-            app.facial_analyzers = {}
-        
-        # 如果用户已有分析实例在运行，先停止
-        if username in app.facial_analyzers:
-            try:
-                app.facial_analyzers[username].stop_analysis()
-            except:
-                pass
-        
-        # 创建新的分析实例
-        analyzer = FacialAnalysis()
-        app.facial_analyzers[username] = analyzer
-        
-        # 设置用户特定的保存路径
-        user_folder = os.path.join('uploads', username)
-        os.makedirs(user_folder, exist_ok=True)
-        
-        # 在后台线程中开始分析
-        import threading
-        def run_analysis():
-            try:
-                analyzer.start_analysis(duration_seconds=3600)  # 1小时最大时长
-                # 分析完成后保存报告到用户文件夹
-                report_path = os.path.join(user_folder, "facial_analysis_report.json")
-                analyzer.save_analysis_report(report_path)
-            except Exception as e:
-                print(f"面试分析线程错误: {e}")
-        
-        analysis_thread = threading.Thread(target=run_analysis, daemon=True)
-        analysis_thread.start()
+        # 为用户创建分析实例
+        app.facial_analyzers[username] = FacialAnalysis()
+        app.facial_analyzers[username].is_analyzing = True
         
         return jsonify({
             'success': True,
-            'message': '微表情肢体分析已开始',
+            'message': '微表情分析已启动（浏览器端）',
             'username': username
         })
         
     except Exception as e:
         print(f"开始面试分析失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'开始分析失败: {str(e)}'})
+
+@app.route('/api/interview/start-voice-analysis', methods=['POST'])
+@login_required
+def start_voice_analysis():
+    """开始语调分析（浏览器端）"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        # 初始化用户分析器
+        if not hasattr(app, 'voice_analyzers'):
+            app.voice_analyzers = {}
+        
+        # 导入语调分析模块
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        voice_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview', '语调识别', 'Speech-Analysis')
+        
+        if voice_analysis_path not in sys.path:
+            sys.path.insert(0, voice_analysis_path)
+        
+        # 直接导入模块
+        import real_time_analyzer
+        RealTimeVoiceAnalyzer = real_time_analyzer.RealTimeVoiceAnalyzer
+        
+        # 为用户创建分析实例
+        analyzer = RealTimeVoiceAnalyzer()
+        analyzer.is_recording = True  # 标记为录音状态
+        app.voice_analyzers[username] = analyzer
+        
+        return jsonify({
+            'success': True,
+            'message': '语调分析已启动（浏览器端）',
+            'username': username
+        })
+        
+    except Exception as e:
+        print(f"开始语调分析失败: {str(e)}")
         return jsonify({'success': False, 'message': f'开始分析失败: {str(e)}'})
 
 @app.route('/api/interview/stop-facial-analysis', methods=['POST'])
@@ -1089,110 +1103,6 @@ def get_facial_analysis_status():
     except Exception as e:
         print(f"获取分析状态失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取状态失败: {str(e)}'})
-
-@app.route('/api/interview/start-voice-analysis', methods=['POST'])
-@login_required
-def start_voice_analysis():
-    """开始语调分析"""
-    try:
-        # 获取当前登录用户
-        current_user = session.get('user', {})
-        username = current_user.get('username', 'unknown_user')
-        
-        # 导入语调分析模块
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        voice_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview', '语调识别', 'Speech-Analysis')
-        
-        if voice_analysis_path not in sys.path:
-            sys.path.insert(0, voice_analysis_path)
-        
-        # 直接导入模块
-        import real_time_analyzer
-        RealTimeVoiceAnalyzer = real_time_analyzer.RealTimeVoiceAnalyzer
-        
-        # 创建用户专属的语调分析实例
-        if not hasattr(app, 'voice_analyzers'):
-            app.voice_analyzers = {}
-        
-        # 如果用户已有分析实例在运行，先停止
-        if username in app.voice_analyzers:
-            try:
-                app.voice_analyzers[username].stop_flask_recording()
-                # 等待一秒确保完全停止
-                import time
-                time.sleep(1)
-            except Exception as e:
-                print(f"停止旧分析实例时出错: {e}")
-        
-        # 创建新的分析实例
-        analyzer = RealTimeVoiceAnalyzer()
-        app.voice_analyzers[username] = analyzer
-        
-        # 设置用户特定的保存路径
-        user_folder = os.path.join('uploads', username)
-        os.makedirs(user_folder, exist_ok=True)
-        
-        # 在后台线程中开始分析
-        import threading
-        def run_voice_analysis():
-            try:
-                # 启动录音 - 使用Flask专用方法
-                if analyzer.start_flask_recording():
-                    print(f"🎤 用户 {username} 的语调分析已启动")
-                    # 持续录音直到被停止
-                    while analyzer.is_recording:
-                        import time
-                        time.sleep(1)  # 每秒检查一次状态
-                    
-                    # 分析录音
-                    result = analyzer.analyze_recording()
-                    
-                    if result:
-                        # 保存结果到用户文件夹，重命名为voice_analysis_result.json
-                        report_filename = "voice_analysis_result.json"
-                        
-                        # 直接保存到用户文件夹
-                        analyzer.save_analysis_result_json(result, report_filename)
-                        
-                        # 确保保存到正确的用户目录
-                        default_results_dir = os.path.join(voice_analysis_path, "results")
-                        source_path = os.path.join(default_results_dir, report_filename)
-                        target_path = os.path.join(user_folder, report_filename)
-                        
-                        # 如果文件在默认目录，移动到用户目录
-                        if os.path.exists(source_path):
-                            import shutil
-                            try:
-                                shutil.move(source_path, target_path)
-                                print(f"✅ 用户 {username} 的语调分析报告已保存到 {target_path}")
-                            except Exception as e:
-                                print(f"移动文件失败: {e}")
-                        else:
-                            # 直接在用户目录创建文件
-                            try:
-                                formatted_result = analyzer.format_result_for_json(result)
-                                with open(target_path, 'w', encoding='utf-8') as f:
-                                    import json
-                                    json.dump(formatted_result, f, ensure_ascii=False, indent=2)
-                                print(f"✅ 用户 {username} 的语调分析报告已保存到 {target_path}")
-                            except Exception as e:
-                                print(f"直接保存文件失败: {e}")
-        
-            except Exception as e:
-                print(f"语调分析线程错误: {e}")
-        
-        analysis_thread = threading.Thread(target=run_voice_analysis, daemon=True)
-        analysis_thread.start()
-        
-        return jsonify({
-            'success': True,
-            'message': '语调分析已开始',
-            'username': username
-        })
-        
-    except Exception as e:
-        print(f"开始语调分析失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'开始分析失败: {str(e)}'})
 
 @app.route('/api/interview/stop-voice-analysis', methods=['POST'])
 @login_required
@@ -1296,6 +1206,172 @@ def get_voice_analysis_status():
     except Exception as e:
         print(f"获取语调分析状态失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取状态失败: {str(e)}'})
+
+@app.route('/api/interview/analyze-photo', methods=['POST'])
+@login_required
+def analyze_photo():
+    """分析浏览器发送的照片"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        if 'image' not in request.files:
+            return jsonify({'success': False, 'message': '没有上传图片'})
+        
+        image_file = request.files['image']
+        if image_file.filename == '':
+            return jsonify({'success': False, 'message': '没有选择文件'})
+        
+        # 保存临时文件
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+            image_file.save(temp_file.name)
+            temp_filepath = temp_file.name
+        
+        try:
+            # 导入面试模块
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            facial_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview')
+            
+            if facial_analysis_path not in sys.path:
+                sys.path.insert(0, facial_analysis_path)
+            
+            from modules.Mock_interview.facial_analysis import FacialAnalysis
+            
+            # 创建分析实例
+            analyzer = FacialAnalysis()
+            
+            # 分析图像
+            result = analyzer.analyze_image(temp_filepath)
+            
+            if result:
+                # 保存到用户的分析结果中
+                if not hasattr(app, 'facial_analyzers'):
+                    app.facial_analyzers = {}
+                
+                if username not in app.facial_analyzers:
+                    app.facial_analyzers[username] = FacialAnalysis()
+                
+                # 添加时间戳
+                result['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                result['photo_path'] = f"browser_capture_{len(app.facial_analyzers[username].analysis_results)}.jpg"
+                
+                app.facial_analyzers[username].analysis_results.append(result)
+                
+                return jsonify({
+                    'success': True,
+                    'analysis': result,
+                    'count': len(app.facial_analyzers[username].analysis_results)
+                })
+            else:
+                return jsonify({'success': False, 'message': '图像分析失败'})
+                
+        finally:
+            # 清理临时文件
+            try:
+                os.unlink(temp_filepath)
+            except:
+                pass
+        
+    except Exception as e:
+        print(f"照片分析失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'照片分析失败: {str(e)}'})
+
+@app.route('/api/interview/analyze-audio', methods=['POST'])
+@login_required
+def analyze_audio():
+    """分析浏览器发送的音频"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        if 'audio' not in request.files:
+            return jsonify({'success': False, 'message': '没有上传音频'})
+        
+        audio_file = request.files['audio']
+        if audio_file.filename == '':
+            return jsonify({'success': False, 'message': '没有选择文件'})
+        
+        # 保存临时文件
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as temp_file:
+            audio_file.save(temp_file.name)
+            temp_filepath = temp_file.name
+        
+        try:
+            # 这里需要转换webm到wav格式，用于分析
+            # 导入语调分析模块
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            voice_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview', '语调识别', 'Speech-Analysis')
+            
+            if voice_analysis_path not in sys.path:
+                sys.path.insert(0, voice_analysis_path)
+            
+            # 直接导入模块
+            import real_time_analyzer
+            RealTimeVoiceAnalyzer = real_time_analyzer.RealTimeVoiceAnalyzer
+            
+            # 创建分析实例
+            analyzer = RealTimeVoiceAnalyzer()
+            
+            # 这里需要实现webm到wav的转换，暂时返回成功
+            # TODO: 添加音频格式转换和分析逻辑
+            
+            return jsonify({
+                'success': True,
+                'analysis': {
+                    'message': '音频已接收，正在处理中...',
+                    'format': 'webm',
+                    'size': len(audio_file.read())
+                }
+            })
+                
+        finally:
+            # 清理临时文件
+            try:
+                os.unlink(temp_filepath)
+            except:
+                pass
+        
+    except Exception as e:
+        print(f"音频分析失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'音频分析失败: {str(e)}'})
+
+@app.route('/api/interview/save-voice-analysis', methods=['POST'])
+@login_required
+def save_voice_analysis():
+    """保存语调分析结果"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        data = request.get_json()
+        analysis = data.get('analysis', {})
+        
+        if analysis:
+            # 保存到用户文件夹
+            user_folder = os.path.join('uploads', username)
+            os.makedirs(user_folder, exist_ok=True)
+            
+            report_path = os.path.join(user_folder, 'voice_analysis_result.json')
+            
+            with open(report_path, 'w', encoding='utf-8') as f:
+                json.dump(analysis, f, ensure_ascii=False, indent=2)
+            
+            return jsonify({
+                'success': True,
+                'message': '语调分析结果已保存',
+                'path': report_path
+            })
+        else:
+            return jsonify({'success': False, 'message': '没有分析数据'})
+        
+    except Exception as e:
+        print(f"保存语调分析结果失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'保存失败: {str(e)}'})
 
 if __name__ == '__main__':
     app.run(debug=True)

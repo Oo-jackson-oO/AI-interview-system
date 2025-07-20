@@ -1010,6 +1010,12 @@
     let voiceStatusInterval = null;
     let isRecording = false;
     
+    // 媒体流相关变量
+    let videoStream = null;
+    let audioStream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    
     window.toggleSettings = function() {
       const panel = document.getElementById('settingsPanel');
       settingsVisible = !settingsVisible;
@@ -1063,6 +1069,9 @@
           facialAnalysisRunning = true;
           console.log('✅ 微表情分析已启动:', data.message);
           
+          // 开始定期拍照分析
+          startPeriodicPhotoCapture();
+          
           // 开始定期检查状态
           startAnalysisStatusMonitoring();
           updateDebugInfo();
@@ -1078,6 +1087,58 @@
         console.error('微表情分析启动错误:', error);
         showNotification('摄像头访问失败，请检查权限设置', 'error');
       }
+    }
+    
+    function startPeriodicPhotoCapture() {
+      if (!videoStream || !facialAnalysisRunning) return;
+      
+      // 每10秒拍照一次
+      const captureInterval = setInterval(async () => {
+        if (!facialAnalysisRunning) {
+          clearInterval(captureInterval);
+          return;
+        }
+        
+        try {
+          // 创建canvas来捕获视频帧
+          const canvas = document.createElement('canvas');
+          const video = document.createElement('video');
+          video.srcObject = videoStream;
+          video.play();
+          
+          video.onloadedmetadata = () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            // 转换为blob并发送到后端
+            canvas.toBlob(async (blob) => {
+              const formData = new FormData();
+              formData.append('image', blob, 'capture.jpg');
+              
+              try {
+                const response = await fetch('/api/interview/analyze-photo', {
+                  method: 'POST',
+                  body: formData
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                  currentAnalysisCount++;
+                  console.log(`📊 第${currentAnalysisCount}次分析完成:`, result.analysis);
+                  updateDebugInfo();
+                }
+              } catch (error) {
+                console.error('照片分析失败:', error);
+              }
+            }, 'image/jpeg', 0.8);
+          };
+        } catch (error) {
+          console.error('拍照失败:', error);
+        }
+      }, 10000); // 10秒间隔
     }
     
     async function stopFacialAnalysis() {
@@ -1101,6 +1162,12 @@
         if (data.success) {
           facialAnalysisRunning = false;
           stopAnalysisStatusMonitoring();
+          
+          // 停止摄像头流
+          if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+          }
           
           console.log('✅ 微表情分析已停止:', data.message);
           console.log('📊 分析总结:', data.summary);
@@ -1127,10 +1194,12 @@
     
     async function requestCameraPermission() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        // 获取权限后立即停止流
-        stream.getTracks().forEach(track => track.stop());
-        console.log('✅ 摄像头权限已获取');
+        videoStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: 640, height: 480 },
+          audio: false 
+        });
+        
+        console.log('✅ 摄像头权限已获取，视频流已启动');
         return true;
       } catch (error) {
         console.error('❌ 摄像头权限获取失败:', error);
@@ -1197,6 +1266,9 @@
           voiceAnalysisRunning = true;
           console.log('✅ 语调分析已启动:', data.message);
           
+          // 开始浏览器端录音
+          startBrowserRecording();
+          
           // 开始定期检查状态
           startVoiceStatusMonitoring();
           updateDebugInfo();
@@ -1211,6 +1283,76 @@
       } catch (error) {
         console.error('语调分析启动错误:', error);
         showNotification('麦克风访问失败，请检查权限设置', 'error');
+      }
+    }
+    
+    function startBrowserRecording() {
+      if (!audioStream || !voiceAnalysisRunning) return;
+      
+      try {
+        recordedChunks = [];
+        
+        // 使用MediaRecorder录音
+        mediaRecorder = new MediaRecorder(audioStream, {
+          mimeType: 'audio/webm;codecs=opus'
+        });
+        
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+        
+        mediaRecorder.onstop = async () => {
+          // 录音结束，发送到后端分析
+          if (recordedChunks.length > 0) {
+            const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+            await sendAudioForAnalysis(audioBlob);
+          }
+        };
+        
+        // 开始录音
+        mediaRecorder.start(1000); // 每秒保存一次数据
+        isRecording = true;
+        console.log('🎤 浏览器录音已开始');
+        
+      } catch (error) {
+        console.error('录音启动失败:', error);
+        showNotification('录音启动失败', 'error');
+      }
+    }
+    
+    async function sendAudioForAnalysis(audioBlob) {
+      try {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        
+        const response = await fetch('/api/interview/analyze-audio', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          console.log('🎵 语调分析完成:', result.analysis);
+          
+          // 保存分析结果
+          if (result.analysis) {
+            const saveResponse = await fetch('/api/interview/save-voice-analysis', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ analysis: result.analysis })
+            });
+            
+            if (saveResponse.ok) {
+              console.log('✅ 语调分析结果已保存');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('音频分析失败:', error);
       }
     }
     
@@ -1237,6 +1379,17 @@
           isRecording = false;
           stopVoiceStatusMonitoring();
           
+          // 停止录音
+          if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+          }
+          
+          // 停止麦克风流
+          if (audioStream) {
+            audioStream.getTracks().forEach(track => track.stop());
+            audioStream = null;
+          }
+          
           console.log('✅ 语调分析已停止:', data.message);
           console.log('📊 分析结果:', data.result);
           
@@ -1262,10 +1415,16 @@
     
     async function requestMicrophonePermission() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // 获取权限后立即停止流
-        stream.getTracks().forEach(track => track.stop());
-        console.log('✅ 麦克风权限已获取');
+        audioStream = await navigator.mediaDevices.getUserMedia({ 
+          audio: { 
+            sampleRate: 44100,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true 
+          }
+        });
+        
+        console.log('✅ 麦克风权限已获取，音频流已启动');
         return true;
       } catch (error) {
         console.error('❌ 麦克风权限获取失败:', error);
