@@ -11,6 +11,7 @@ import numpy as np
 import threading
 import time
 import os
+import json
 from datetime import datetime
 from voice_analyzer import VoiceAnalyzer
 import signal
@@ -231,6 +232,242 @@ class RealTimeVoiceAnalyzer:
         print(f"   语音连续性: {fluency['语音连续性']}")
         print(f"   节奏稳定性: {fluency['节奏稳定性']}")
         
+    def _convert_numpy_types(self, obj):
+        """递归转换numpy类型为Python原生类型"""
+        if hasattr(obj, 'item'):  # numpy scalar
+            return obj.item()
+        elif hasattr(obj, 'tolist'):  # numpy array
+            return obj.tolist()
+        elif isinstance(obj, dict):
+            return {key: self._convert_numpy_types(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_numpy_types(item) for item in obj]
+        elif isinstance(obj, tuple):
+            return tuple(self._convert_numpy_types(item) for item in obj)
+        elif isinstance(obj, (int, float, str, bool, type(None))):
+            return obj
+        else:
+            # 对于其他类型，尝试转换为字符串
+            return str(obj)
+    
+    def format_result_for_json(self, result):
+        """将分析结果格式化为结构化的JSON数据"""
+        if not result:
+            return None
+        
+        # 先转换所有numpy类型
+        result = self._convert_numpy_types(result)
+        
+        # 创建结构化的数据
+        formatted_result = {
+            "analysis_info": {
+                "audio_file": result.get('音频文件', ''),
+                "analysis_time": result.get('分析时间', ''),
+                "analysis_timestamp": datetime.now().isoformat(),
+                "overall_score": float(result.get('综合得分', 0))
+            },
+            "speech_rate_analysis": {
+                "level": result.get('语速分析', {}).get('语速等级', ''),
+                "score": float(result.get('语速分析', {}).get('语速得分', 0)),
+                "syllable_rate": float(result.get('语速分析', {}).get('音节率', 0)),
+                "speech_activity_ratio": float(result.get('语速分析', {}).get('语音活动比例', 0)),
+                "total_duration": float(result.get('语速分析', {}).get('总时长', 0))
+            },
+            "emotion_tone_analysis": {
+                "emotion_type": result.get('情感语调', {}).get('情感类型', ''),
+                "emotion_score": float(result.get('情感语调', {}).get('情感得分', 0)),
+                "average_pitch": float(result.get('情感语调', {}).get('平均音调', 0)),
+                "pitch_variation": float(result.get('情感语调', {}).get('音调变化', 0)),
+                "pitch_range": float(result.get('情感语调', {}).get('音调范围', 0)),
+                "energy_variation": float(result.get('情感语调', {}).get('能量变化', 0))
+            },
+            "fluency_analysis": {
+                "fluency_level": result.get('流利度', {}).get('流利度等级', ''),
+                "fluency_score": float(result.get('流利度', {}).get('流利度得分', 0)),
+                "pause_count": int(result.get('流利度', {}).get('停顿次数', 0)),
+                "pause_ratio": float(result.get('流利度', {}).get('停顿比例', 0)),
+                "speech_continuity": float(result.get('流利度', {}).get('语音连续性', 0)),
+                "rhythm_stability": float(result.get('流利度', {}).get('节奏稳定性', 0))
+            },
+            "recommendations": {
+                "speech_rate_advice": self._get_speech_rate_advice(result.get('语速分析', {})),
+                "emotion_advice": self._get_emotion_advice(result.get('情感语调', {})),
+                "fluency_advice": self._get_fluency_advice(result.get('流利度', {}))
+            },
+            "metadata": {
+                "analysis_version": "1.0",
+                "analyzer": "RealTimeVoiceAnalyzer",
+                "sample_rate": self.sample_rate,
+                "channels": self.channels
+            }
+        }
+        
+        return formatted_result
+    
+    def _get_speech_rate_advice(self, speech_rate_data):
+        """根据语速分析给出建议"""
+        level = speech_rate_data.get('语速等级', '')
+        if level == '过快':
+            return "语速较快，建议适当放慢以增强理解度"
+        elif level == '过慢':
+            return "语速较慢，可适当加快以保持听众注意力"
+        elif level == '适中':
+            return "语速适中，保持当前节奏"
+        else:
+            return "建议调整语速到适中范围"
+    
+    def _get_emotion_advice(self, emotion_data):
+        """根据情感语调给出建议"""
+        emotion_type = emotion_data.get('情感类型', '')
+        score = emotion_data.get('情感得分', 0)
+        
+        if score >= 80:
+            return f"情感表达{emotion_type}，语调自然，继续保持"
+        elif score >= 60:
+            return f"情感表达{emotion_type}，可增强语调变化以提升表现力"
+        else:
+            return f"建议增强情感表达，使语调更加生动有感染力"
+    
+    def _get_fluency_advice(self, fluency_data):
+        """根据流利度给出建议"""
+        level = fluency_data.get('流利度等级', '')
+        pause_count = fluency_data.get('停顿次数', 0)
+        
+        if level == '流利':
+            return "语言流利度很好，表达自然流畅"
+        elif level == '一般':
+            return f"流利度一般，检测到{pause_count}次停顿，可通过练习减少不必要停顿"
+        else:
+            return f"流利度需要改善，建议多加练习以减少停顿和提高连贯性"
+    
+    def save_analysis_result_json(self, result, filename=None):
+        """保存分析结果为JSON文件"""
+        if not result:
+            print("没有分析结果可保存")
+            return
+            
+        if filename is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"analysis_result_{timestamp}.json"
+            
+        # 确保目录存在
+        results_dir = os.path.join(os.path.dirname(__file__), "results")
+        os.makedirs(results_dir, exist_ok=True)
+        filepath = os.path.join(results_dir, filename)
+        
+        try:
+            # 格式化结果数据
+            formatted_result = self.format_result_for_json(result)
+            
+            # 保存JSON文件
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(formatted_result, f, ensure_ascii=False, indent=2)
+            
+            print(f"💾 JSON格式分析结果已保存到: {filepath}")
+            print(f"📊 综合得分: {formatted_result['analysis_info']['overall_score']}")
+            print(f"🎵 语速等级: {formatted_result['speech_rate_analysis']['level']}")
+            print(f"😊 情感类型: {formatted_result['emotion_tone_analysis']['emotion_type']}")
+            print(f"🗣️  流利度等级: {formatted_result['fluency_analysis']['fluency_level']}")
+            
+            return filepath
+        except Exception as e:
+            print(f"保存JSON分析结果失败: {e}")
+            return None
+            
+    def load_analysis_result_json(self, filepath):
+        """从JSON文件加载分析结果"""
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                result = json.load(f)
+            print(f"✅ 成功加载分析结果: {filepath}")
+            return result
+        except Exception as e:
+            print(f"❌ 加载JSON分析结果失败: {e}")
+            return None
+    
+    def list_saved_results(self):
+        """列出已保存的JSON分析结果"""
+        results_dir = os.path.join(os.path.dirname(__file__), "results")
+        if not os.path.exists(results_dir):
+            print("📁 没有找到结果目录")
+            return []
+        
+        json_files = [f for f in os.listdir(results_dir) if f.endswith('.json')]
+        
+        if not json_files:
+            print("📄 没有找到JSON格式的分析结果")
+            return []
+        
+        print(f"\n📋 找到 {len(json_files)} 个JSON格式的分析结果:")
+        for i, filename in enumerate(json_files, 1):
+            filepath = os.path.join(results_dir, filename)
+            try:
+                # 尝试读取文件以获取基本信息
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                analysis_time = data.get('analysis_info', {}).get('analysis_time', '未知')
+                overall_score = data.get('analysis_info', {}).get('overall_score', 0)
+                
+                print(f"  {i}. {filename}")
+                print(f"     分析时间: {analysis_time}")
+                print(f"     综合得分: {overall_score}")
+                
+            except Exception as e:
+                print(f"  {i}. {filename} (文件损坏: {e})")
+        
+        return json_files
+    
+    def compare_results(self, result_files):
+        """比较多个分析结果"""
+        if len(result_files) < 2:
+            print("❌ 需要至少2个结果文件进行比较")
+            return
+        
+        results_dir = os.path.join(os.path.dirname(__file__), "results")
+        comparison_data = []
+        
+        print(f"\n📊 比较 {len(result_files)} 个分析结果:")
+        print("="*80)
+        
+        for filename in result_files:
+            filepath = os.path.join(results_dir, filename)
+            result = self.load_analysis_result_json(filepath)
+            
+            if result:
+                comparison_data.append({
+                    'filename': filename,
+                    'overall_score': result.get('analysis_info', {}).get('overall_score', 0),
+                    'speech_rate_score': result.get('speech_rate_analysis', {}).get('score', 0),
+                    'emotion_score': result.get('emotion_tone_analysis', {}).get('emotion_score', 0),
+                    'fluency_score': result.get('fluency_analysis', {}).get('fluency_score', 0),
+                    'analysis_time': result.get('analysis_info', {}).get('analysis_time', ''),
+                })
+        
+        if len(comparison_data) < 2:
+            print("❌ 无法加载足够的结果进行比较")
+            return
+        
+        # 显示比较表格
+        print(f"{'文件名':<30} {'综合得分':<10} {'语速得分':<10} {'情感得分':<10} {'流利度得分':<10}")
+        print("-" * 80)
+        
+        for data in comparison_data:
+            print(f"{data['filename']:<30} {data['overall_score']:<10.1f} {data['speech_rate_score']:<10.1f} {data['emotion_score']:<10.1f} {data['fluency_score']:<10.1f}")
+        
+        # 计算统计信息
+        overall_scores = [d['overall_score'] for d in comparison_data]
+        best_idx = overall_scores.index(max(overall_scores))
+        worst_idx = overall_scores.index(min(overall_scores))
+        
+        print("\n📈 比较总结:")
+        print(f"最佳表现: {comparison_data[best_idx]['filename']} (综合得分: {overall_scores[best_idx]:.1f})")
+        print(f"最差表现: {comparison_data[worst_idx]['filename']} (综合得分: {overall_scores[worst_idx]:.1f})")
+        print(f"平均得分: {sum(overall_scores)/len(overall_scores):.1f}")
+        print(f"得分范围: {min(overall_scores):.1f} - {max(overall_scores):.1f}")
+        
+        return comparison_data
+            
     def run_interactive_session(self):
         """运行交互式录音分析会话"""
         print("🎵 实时语音分析系统")
@@ -238,16 +475,24 @@ class RealTimeVoiceAnalyzer:
         print("功能说明:")
         print("- 按回车键开始录音")
         print("- 录音过程中按 Ctrl+C 停止录音并分析")
+        print("- 输入 'list' 查看历史分析结果")
+        print("- 输入 'compare' 比较多个分析结果")
         print("- 输入 'quit' 或 'exit' 退出程序")
         print("="*60)
         
         while True:
             try:
-                user_input = input("\n请按回车键开始录音 (或输入 'quit' 退出): ").strip().lower()
+                user_input = input("\n请按回车键开始录音 (或输入命令): ").strip().lower()
                 
                 if user_input in ['quit', 'exit', 'q']:
                     print("👋 感谢使用！")
                     break
+                elif user_input == 'list':
+                    self.list_saved_results()
+                    continue
+                elif user_input == 'compare':
+                    self._handle_compare_command()
+                    continue
                     
                 # 开始录音
                 if self.start_recording():
@@ -266,7 +511,10 @@ class RealTimeVoiceAnalyzer:
                         if result:
                             save_choice = input("\n💾 是否保存分析结果? (y/n): ").strip().lower()
                             if save_choice in ['y', 'yes', '是']:
-                                self.analyzer.save_analysis_result(result)
+                                # 直接保存为JSON格式
+                                saved_file = self.save_analysis_result_json(result)
+                                if saved_file:
+                                    print(f"✅ 分析结果已保存为JSON格式")
                                 
                     except KeyboardInterrupt:
                         # 这里会被signal handler处理
@@ -280,7 +528,35 @@ class RealTimeVoiceAnalyzer:
                 break
             except Exception as e:
                 print(f"❌ 程序异常: {e}")
+    
+    def _handle_compare_command(self):
+        """处理比较命令"""
+        json_files = self.list_saved_results()
+        
+        if len(json_files) < 2:
+            print("❌ 需要至少2个分析结果才能进行比较")
+            return
+        
+        try:
+            print(f"\n请选择要比较的结果文件 (输入数字，用逗号分隔，如: 1,2,3):")
+            choice = input("选择: ").strip()
+            
+            if not choice:
+                return
+            
+            indices = [int(x.strip()) - 1 for x in choice.split(',')]
+            selected_files = [json_files[i] for i in indices if 0 <= i < len(json_files)]
+            
+            if len(selected_files) >= 2:
+                self.compare_results(selected_files)
+            else:
+                print("❌ 请选择至少2个有效的文件")
                 
+        except (ValueError, IndexError):
+            print("❌ 输入格式错误，请输入有效的数字")
+        except Exception as e:
+            print(f"❌ 比较过程出错: {e}")
+            
 def main():
     """主函数"""
     try:

@@ -1,0 +1,18 @@
+{
+  "analysis_info": {
+    "audio_file": "recording_20250720_111311.wav",
+    "analysis_time": "2025-07-20 11:13:13",
+    "analysis_timestamp": "2025-07-20T11:13:19.750395",
+    "overall_score": 0.68
+  },
+  "speech_rate_analysis": {
+    "level": "快",
+    "score": 0.8,
+    "syllable_rate": 1.317,
+    "speech_activity_ratio": 0.253,
+    "total_duration": 21.5
+  },
+  "emotion_tone_analysis": {
+    "emotion_type": "兴奋/激动",
+    "emotion_score": 0.8,
+    "average_pitch": 
