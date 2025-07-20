@@ -14,7 +14,6 @@ import os
 import json
 from datetime import datetime
 from voice_analyzer import VoiceAnalyzer
-import signal
 import sys
 
 class RealTimeVoiceAnalyzer:
@@ -44,12 +43,9 @@ class RealTimeVoiceAnalyzer:
         # 语音分析器
         self.analyzer = VoiceAnalyzer()
         
-        # 信号处理
-        signal.signal(signal.SIGINT, self._signal_handler)
-        
-    def _signal_handler(self, signum, frame):
-        """处理中断信号"""
-        print("\n\n收到终止信号，正在停止录音...")
+    def stop_recording_gracefully(self):
+        """优雅地停止录音"""
+        print("\n\n收到停止信号，正在停止录音...")
         self.stop_recording()
         
     def _audio_callback(self):
@@ -384,6 +380,76 @@ class RealTimeVoiceAnalyzer:
         except Exception as e:
             print(f"❌ 加载JSON分析结果失败: {e}")
             return None
+    
+    def start_flask_recording(self):
+        """专门为Flask后台线程设计的录音方法"""
+        if self.is_recording:
+            print("录音已在进行中...")
+            return False
+            
+        try:
+            # 初始化PyAudio
+            self.audio = pyaudio.PyAudio()
+            
+            # 重置数据
+            self.audio_data = []
+            self.is_recording = True
+            
+            # 启动录音线程
+            self.audio_thread = threading.Thread(target=self._flask_audio_callback)
+            self.audio_thread.daemon = True
+            self.audio_thread.start()
+            
+            return True
+            
+        except Exception as e:
+            print(f"启动录音失败: {e}")
+            return False
+    
+    def _flask_audio_callback(self):
+        """Flask专用的音频录制回调函数"""
+        try:
+            self.stream = self.audio.open(
+                format=self.format,
+                channels=self.channels,
+                rate=self.sample_rate,
+                input=True,
+                frames_per_buffer=self.chunk_size
+            )
+            
+            print("🎙️  Flask录音已开始...")
+            
+            while self.is_recording:
+                try:
+                    data = self.stream.read(self.chunk_size, exception_on_overflow=False)
+                    self.audio_data.append(data)
+                except Exception as e:
+                    print(f"录音数据读取错误: {e}")
+                    break
+                    
+        except Exception as e:
+            print(f"Flask录音初始化错误: {e}")
+        finally:
+            if self.stream:
+                self.stream.stop_stream()
+                self.stream.close()
+    
+    def stop_flask_recording(self):
+        """停止Flask录音"""
+        if not self.is_recording:
+            return
+            
+        self.is_recording = False
+        
+        # 等待录音线程结束
+        if self.audio_thread and self.audio_thread.is_alive():
+            self.audio_thread.join(timeout=2)
+            
+        # 清理音频资源
+        if self.audio:
+            self.audio.terminate()
+            
+        print("🛑 Flask录音已停止")
     
     def list_saved_results(self):
         """列出已保存的JSON分析结果"""

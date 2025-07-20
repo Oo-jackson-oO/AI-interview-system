@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI面试官 - 智能面试系统</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #f0f0f0;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    canvas#live2d {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+    }
+    
+    /* 面试控制面板 */
+    .interview-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 20;
+      min-width: 250px;
+    }
+    
+    .control-title {
+      color: white;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .control-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .control-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .control-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status-text {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12px;
+      text-align: center;
+      margin: 10px 0;
+      min-height: 20px;
+    }
+    
+    /* 聊天区域 */
+    .chat-area {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 20;
+      max-height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      max-height: 120px;
+    }
+    
+    .message {
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      max-width: 80%;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+    
+    .message.interviewer {
+      background: rgba(102, 126, 234, 0.3);
+      color: white;
+      border: 1px solid rgba(102, 126, 234, 0.5);
+      margin-right: auto;
+    }
+    
+    .message.candidate {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin-left: auto;
+    }
+    
+    .chat-input {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-input input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 14px;
+    }
+    
+    .chat-input input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .chat-input input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .send-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* 返回按钮 */
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    /* 波动效果样式 */
+    .rocket-wave {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: waveExpand 2s ease-out forwards;
+    }
+    
+    @keyframes waveExpand {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+      100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+      }
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .interview-controls {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+      }
+      
+      .chat-area {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+      }
+    }
+    
+    /* 通知动画 */
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    /* AI思考动画 */
+    .ai-thinking {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 15px 25px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      min-width: 280px;
+    }
+    
+    .thinking-progress {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      position: relative;
+    }
+    
+    .thinking-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 16px;
+      transition: all 0.5s ease;
+      position: relative;
+      z-index: 2;
+      flex-shrink: 0;
+    }
+    
+    .thinking-icon.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+      transform: scale(1.1);
+    }
+    
+    .progress-line1 {
+      flex: 1;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+	.progress-line2 {
+      flex: 1;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-fill1 {
+	  height: 100%;
+	  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	  width: 0%;
+	  border-radius: 2px;
+	  transition: none; /* 默认无动画 */
+	}
+    
+	.progress-fill2 {
+	  height: 100%;
+	  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	  width: 0%;
+	  border-radius: 2px;
+	  transition: none; /* 默认无动画 */
+	}
+
+    .progress-fill1.animate {
+      transition: width 1s ease;
+    }
+    
+    .progress-fill2.animate {
+      transition: width 1s ease;
+    }
+    
+    /* 系统设置面板 */
+    .system-settings {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 200;
+    }
+    
+    .settings-toggle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .settings-toggle:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+    
+    .settings-panel {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      min-width: 280px;
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .settings-panel.show {
+      display: flex;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .panel-title {
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 10px;
+    }
+    
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+    
+    .setting-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .setting-toggle {
+      width: 50px;
+      height: 25px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .setting-toggle.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .toggle-slider {
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s ease;
+    }
+    
+    .setting-toggle.active .toggle-slider {
+      transform: translateX(25px);
+    }
+    
+    .setting-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .setting-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .debug-info {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      font-family: 'Courier New', monospace;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- 火箭鼠标样式 -->
+  <div class="rocket-cursor" id="rocketCursor">
+    <div class="rocket-nose"></div>
+    <div class="rocket-body"></div>
+    <div class="rocket-fins"></div>
+    <div class="rocket-engine"></div>
+  </div>
+  
+  <!-- 高级粒子效果容器 -->
+  <div class="particles-container">
+    <canvas id="particles-canvas"></canvas>
+  </div>
+  
+  <!-- 背景流星效果 -->
+  <div class="meteor-container"></div>
+  
+  <!-- 星光特效 -->
+  <div class="stars-container"></div>
+  
+  <!-- 星空装饰元素 -->
+  <!-- 行星悬浮 -->
+  <div class="planet saturn"></div>
+  <div class="planet jupiter"></div>
+  
+  <!-- 望远镜 -->
+  <div class="telescope"></div>
+  
+  <!-- 观星小人 -->
+  <div class="stargazer"></div>
+  
+  <!-- 星座图案 -->
+  <div class="constellation big-dipper"></div>
+  <div class="constellation orion"></div>
+  
+  <!-- 流星痕迹 -->
+  <div class="meteor-trail left"></div>
+  <div class="meteor-trail right"></div>
+  <div class="meteor-trail center"></div>
+  
+  <!-- 空间站 -->
+  <div class="space-station right"></div>
+  
+  <!-- 返回按钮 -->
+  <button class="back-btn" onclick="goBack()">
+    <i class="fas fa-arrow-left"></i> 返回主页
+  </button>
+  
+  <!-- AI思考动画 -->
+  <div class="ai-thinking" id="aiThinking">
+    <div class="thinking-progress">
+      <div class="thinking-icon" id="thinkingIcon1">
+        <i class="fas fa-broadcast-tower"></i>
+      </div>
+      <div class="progress-line1">
+        <div class="progress-fill1" id="progressFill1"></div>
+      </div>
+      <div class="thinking-icon" id="thinkingIcon2">
+        <i class="fas fa-satellite"></i>
+      </div>
+      <div class="progress-line2">
+        <div class="progress-fill2" id="progressFill2"></div>
+      </div>
+      <div class="thinking-icon" id="thinkingIcon3">
+        <i class="fa-solid fa-podcast"></i>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 系统设置面板 -->
+  <div class="system-settings">
+    <div class="settings-toggle" onclick="toggleSettings()">
+      <i class="fas fa-cog"></i>
+    </div>
+    <div class="settings-panel" id="settingsPanel">
+      <div class="panel-title">
+        <i class="fas fa-tools"></i> 系统设置
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <i class="fas fa-volume-up"></i>
+          <span>语音播放</span>
+        </div>
+        <div class="setting-toggle" onclick="toggleSetting(this, 'voice')" data-setting="voice">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <i class="fas fa-microphone"></i>
+          <span>语调分析</span>
+        </div>
+        <div class="setting-toggle active" onclick="toggleSetting(this, 'voiceAnalysis')" data-setting="voiceAnalysis">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <i class="fas fa-microphone"></i>
+          <span>自动录音</span>
+        </div>
+        <div class="setting-toggle" onclick="toggleSetting(this, 'autoRecord')" data-setting="autoRecord">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <i class="fas fa-camera"></i>
+          <span>微表情识别</span>
+        </div>
+        <div class="setting-toggle active" onclick="toggleSetting(this, 'facialAnalysis')" data-setting="facialAnalysis">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <i class="fas fa-eye"></i>
+          <span>鼠标跟随</span>
+        </div>
+        <div class="setting-toggle active" onclick="toggleSetting(this, 'mouseFollow')" data-setting="mouseFollow">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <i class="fas fa-rocket"></i>
+          <span>粒子特效</span>
+        </div>
+        <div class="setting-toggle active" onclick="toggleSetting(this, 'particles')" data-setting="particles">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <button class="setting-button" onclick="testThinking()">
+          <i class="fas fa-play"></i> 测试思考动画
+        </button>
+        <button class="setting-button" onclick="resetAnimation()">
+          <i class="fas fa-stop"></i> 重置动画
+        </button>
+      </div>
+      
+      <div class="setting-item">
+        <button class="setting-button" onclick="toggleFacialAnalysis()">
+          <i class="fas fa-camera"></i> <span id="facialBtn">停止分析</span>
+        </button>
+        <button class="setting-button" onclick="toggleVoiceAnalysis()">
+          <i class="fas fa-microphone"></i> <span id="voiceBtn">停止录音</span>
+        </button>
+      </div>
+      
+      <div class="setting-item">
+        <button class="setting-button" onclick="resetLive2D()">
+          <i class="fas fa-redo"></i> 重置模型
+        </button>
+        <button class="setting-button" onclick="toggleDebugInfo()">
+          <i class="fas fa-bug"></i> 调试信息
+        </button>
+      </div>
+      
+      <div class="setting-item">
+        <button class="setting-button" onclick="exportSettings()">
+          <i class="fas fa-download"></i> 导出设置
+        </button>
+      </div>
+      
+      <div class="debug-info" id="debugInfo" style="display: none;">
+        Live2D状态: 正常
+        动画状态: 空闲
+        音频状态: 未初始化
+        性能: 60 FPS
+      </div>
+    </div>
+  </div>
+  
+  <!-- 黑洞转场效果 -->
+  <div class="blackhole-transition" id="blackholeTransition">
+    <div class="blackhole-circle"></div>
+    <div class="blackhole-vortex"></div>
+    <div class="blackhole-streams">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+  </div>
+  
+  <!-- Live2D 数字人 -->
+  <canvas id="live2d"></canvas>
+  
+  <!-- importmap -->
+  <script type="importmap">
+  {
+    "imports": {
+      "pixi.js": "https://cdn.jsdelivr.net/npm/pixi.js/dist/pixi.min.mjs",
+      "@pixi/sound": "https://cdn.jsdelivr.net/npm/@pixi/sound@6.0.1/dist/pixi-sound.mjs",
+      "easy-live2d": "https://cdn.jsdelivr.net/npm/easy-live2d/dist/index.js"
+    }
+  }
+  </script>
+  
+  <!-- Live2D Core -->
+  <script src="/live2d/Core/live2dcubismcore.js"></script>
+  
+  <!-- 背景特效脚本 -->
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+  
+  <!-- Live2D 和面试逻辑 -->
+  <script type="module">
+    import { Application, Ticker } from 'pixi.js';
+    import { Live2DSprite, Config } from 'easy-live2d'
+
+    Config.MotionGroupIdle = 'Idle'; 
+    Config.MouseFollow = false;
+    const live2dSprite = new Live2DSprite();
+    
+    let app;
+    let interviewActive = false;
+    let currentQuestion = 0;
+    const questions = [
+      "请先自我介绍一下",
+      "说说你最大的优势是什么？",
+      "你为什么选择这个职位？",
+      "描述一下你的职业规划",
+      "你如何处理工作中的压力？"
+    ];
+    
+    // 初始化Live2D
+    async function initLive2D() {
+      try {
+        await live2dSprite.init({
+          modelPath: '/live2d/assets/haru/haru_greeter_t05.model3.json',
+          ticker: Ticker.shared
+        });
+
+        function resizeModel() {
+          const canvas = document.getElementById('live2d');
+          
+          console.log(window.devicePixelRatio);
+          
+          const screenWidth = window.innerWidth * window.devicePixelRatio / 1.5;
+          const screenHeight = window.innerHeight * window.devicePixelRatio / 1.5;
+          
+          canvas.width = screenWidth;
+          canvas.height = screenHeight;
+          
+          live2dSprite.width = 3 * screenWidth;
+          live2dSprite.height = 3 * screenHeight;
+          live2dSprite.x = -0.75 * screenWidth;
+          live2dSprite.y = -1.5 * screenHeight;
+        }
+
+        const canvas = document.getElementById('live2d');
+        app = new Application();
+        await app.init({
+          view: document.getElementById('live2d'),
+          backgroundAlpha: 0, 
+        });
+        
+        window.addEventListener('resize', resizeModel);
+        resizeModel();
+        app.stage.addChild(live2dSprite);
+        
+        console.log('Live2D模型加载成功');
+        updateStatus('Live2D面试官已就绪');
+        
+        // 3秒后自动播放太空信息传输动画演示
+        setTimeout(() => {
+          showThinking();
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Live2D模型加载失败:', error);
+        updateStatus('模型加载失败，请刷新页面重试');
+      }
+    }
+    
+    function updateStatus(text) {
+      console.log('状态更新:', text);
+    }
+    
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化背景特效
+      new RocketCursorSystem();
+      new ParticleSystem();
+      new StarSystem();
+      new MeteorSystem();
+      
+      // 初始化Live2D
+      initLive2D();
+      
+      // 添加鼠标特效
+      addMouseEffects();
+      
+      // 初始化设置
+      updateDebugInfo();
+      
+      // 自动启动微表情分析（如果设置为开启）
+      setTimeout(() => {
+        if (systemSettings.facialAnalysis) {
+          console.log('🎬 自动启动微表情肢体分析...');
+          startFacialAnalysis();
+        }
+      }, 2000); // 延迟2秒启动，确保Live2D加载完成
+      
+      // 自动启动语调分析（如果设置为开启）
+      setTimeout(() => {
+        if (systemSettings.voiceAnalysis) {
+          console.log('🎤 自动启动语调分析...');
+          startVoiceAnalysis();
+        }
+      }, 3000); // 延迟3秒启动，确保微表情分析先启动
+    });
+    
+    // 页面离开时自动停止分析
+    window.addEventListener('beforeunload', function() {
+      if (facialAnalysisRunning) {
+        console.log('🛑 页面离开，自动停止微表情分析');
+        // 发送同步请求停止分析
+        navigator.sendBeacon('/api/interview/stop-facial-analysis', JSON.stringify({}));
+        stopAnalysisStatusMonitoring();
+      }
+      
+      if (voiceAnalysisRunning) {
+        console.log('🛑 页面离开，自动停止语调分析');
+        // 发送同步请求停止分析
+        navigator.sendBeacon('/api/interview/stop-voice-analysis', JSON.stringify({}));
+        stopVoiceStatusMonitoring();
+      }
+    });
+    
+    // 页面隐藏时暂停分析
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        console.log('⏸️ 页面隐藏，暂停状态监控');
+        stopAnalysisStatusMonitoring();
+        stopVoiceStatusMonitoring();
+      } else {
+        console.log('▶️ 页面显示，恢复状态监控');
+        if (facialAnalysisRunning) {
+          startAnalysisStatusMonitoring();
+        }
+        if (voiceAnalysisRunning) {
+          startVoiceStatusMonitoring();
+        }
+      }
+    });
+    
+    // 添加鼠标特效
+    function addMouseEffects() {
+      const interactiveElements = document.querySelectorAll('.setting-button, .settings-toggle, .back-btn');
+      
+      interactiveElements.forEach(element => {
+        element.addEventListener('mouseenter', function(event) {
+          const wave = document.createElement('div');
+          wave.className = 'rocket-wave';
+          wave.style.left = event.clientX + 'px';
+          wave.style.top = event.clientY + 'px';
+          document.body.appendChild(wave);
+          
+          setTimeout(() => {
+            if (document.body.contains(wave)) {
+              document.body.removeChild(wave);
+            }
+          }, 2000);
+        });
+      });
+    }
+    
+    // 返回主页
+    window.goBack = function() {
+      const blackhole = document.getElementById('blackholeTransition');
+      blackhole.style.display = 'flex';
+      blackhole.classList.add('active');
+      
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    }
+    
+    // AI思考动画相关功能
+    let thinkingAnimationTimeout;
+    
+    function showThinking() {
+      const thinkingDiv = document.getElementById('aiThinking');
+      thinkingDiv.style.display = 'flex';
+      
+      // 重置所有状态
+      resetThinkingAnimation();
+      
+      // 阶段1: 激活第一个图标，然后填充第一个进度条
+      setTimeout(() => {
+        activateThinkingIcon(1);
+        setTimeout(() => {
+          fillProgressBar(1);
+        }, 100);
+      }, 200);
+      
+      // 阶段2: 激活第二个图标，然后填充第二个进度条
+      setTimeout(() => {
+        activateThinkingIcon(2);
+        setTimeout(() => {
+          fillProgressBar(2);
+        }, 100);
+      }, 1200);
+      
+      // 阶段3: 激活第三个图标
+      setTimeout(() => {
+        activateThinkingIcon(3);
+      }, 2200);
+      
+      // 3秒后隐藏
+      thinkingAnimationTimeout = setTimeout(() => {
+        hideThinking();
+      }, 3000);
+    }
+    
+    function hideThinking() {
+      const thinkingDiv = document.getElementById('aiThinking');
+      thinkingDiv.style.display = 'none';
+      resetThinkingAnimation();
+    }
+    
+    // 重置动画
+    function resetThinkingAnimation() {
+      const progressFills = document.querySelectorAll('.progress-fill1, .progress-fill2');
+      progressFills.forEach(fill => {
+        fill.style.width = '0%';
+        fill.classList.remove('animate');
+      });
+      
+      const icons = document.querySelectorAll('.thinking-icon');
+      icons.forEach(icon => {
+        icon.classList.remove('active');
+      });
+    }
+    
+    // 激活图标
+    function activateThinkingIcon(iconNumber) {
+      const icon = document.getElementById(`thinkingIcon${iconNumber}`);
+      if (icon) {
+        icon.classList.add('active');
+        console.log(`激活图标 ${iconNumber}: ${getIconName(iconNumber)}`);
+      }
+    }
+    
+    // 填充进度条
+    function fillProgressBar(progressNumber) {
+      const progressFill = document.getElementById(`progressFill${progressNumber}`);
+      if (progressFill) {
+        console.log(`开始填充进度条 ${progressNumber}`);
+        
+        // 确保只增加宽度，为每个进度条分别添加动画
+        if (progressNumber === 1) {
+          progressFill.classList.add('animate');  // 开启动画
+          progressFill.style.width = '100%';
+        } 
+		else if (progressNumber === 2) {
+          progressFill.classList.add('animate');  // 开启动画
+          progressFill.style.width = '100%';
+        }
+        
+        console.log(`进度条 ${progressNumber} 开始动画到 100%`);
+      }
+    }
+    
+    function getIconName(step) {
+      const names = ['信号发射', '卫星传输', '语音接收'];
+      return names[step - 1] || '未知';
+    }
+    
+    // 系统设置面板功能
+    let settingsVisible = false;
+    let systemSettings = {
+      voice: false,
+      voiceAnalysis: true, // 语调分析默认开启
+      autoRecord: false,
+      facialAnalysis: true, // 新增微表情识别
+      mouseFollow: true,
+      particles: true
+    };
+    
+    // 微表情分析相关变量
+    let facialAnalysisRunning = false;
+    let analysisStatusInterval = null;
+    let currentAnalysisCount = 0;
+    
+    // 语调分析相关变量
+    let voiceAnalysisRunning = false;
+    let voiceStatusInterval = null;
+    let isRecording = false;
+    
+    window.toggleSettings = function() {
+      const panel = document.getElementById('settingsPanel');
+      settingsVisible = !settingsVisible;
+      
+      if (settingsVisible) {
+        panel.classList.add('show');
+      } else {
+        panel.classList.remove('show');
+      }
+    }
+    
+    window.toggleSetting = function(element, settingName) {
+      const isActive = element.classList.contains('active');
+      
+      if (isActive) {
+        element.classList.remove('active');
+        systemSettings[settingName] = false;
+      } else {
+        element.classList.add('active');
+        systemSettings[settingName] = true;
+      }
+      
+      // 应用设置
+      applySystemSetting(settingName, systemSettings[settingName]);
+      updateDebugInfo();
+    }
+    
+    // 微表情分析功能
+    async function startFacialAnalysis() {
+      if (facialAnalysisRunning) {
+        console.log('微表情分析已在运行中');
+        return;
+      }
+      
+      try {
+        console.log('🎬 启动微表情肢体分析...');
+        
+        // 请求摄像头权限
+        await requestCameraPermission();
+        
+        const response = await fetch('/api/interview/start-facial-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          facialAnalysisRunning = true;
+          console.log('✅ 微表情分析已启动:', data.message);
+          
+          // 开始定期检查状态
+          startAnalysisStatusMonitoring();
+          updateDebugInfo();
+          updateFacialAnalysisButton();
+          
+          // 显示启动通知
+          showNotification('📹 微表情肢体分析已启动', 'success');
+        } else {
+          console.error('❌ 启动失败:', data.message);
+          showNotification('启动微表情分析失败: ' + data.message, 'error');
+        }
+      } catch (error) {
+        console.error('微表情分析启动错误:', error);
+        showNotification('摄像头访问失败，请检查权限设置', 'error');
+      }
+    }
+    
+    async function stopFacialAnalysis() {
+      if (!facialAnalysisRunning) {
+        console.log('微表情分析未在运行');
+        return;
+      }
+      
+      try {
+        console.log('🛑 停止微表情肢体分析...');
+        
+        const response = await fetch('/api/interview/stop-facial-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          facialAnalysisRunning = false;
+          stopAnalysisStatusMonitoring();
+          
+          console.log('✅ 微表情分析已停止:', data.message);
+          console.log('📊 分析总结:', data.summary);
+          
+          updateDebugInfo();
+          updateFacialAnalysisButton();
+          
+          // 显示停止通知和结果摘要
+          if (data.summary) {
+            const avgScore = data.summary.overall_score || 0;
+            showNotification(`📹 分析完成！综合得分: ${avgScore}/10`, 'success');
+          } else {
+            showNotification('📹 微表情分析已停止', 'success');
+          }
+        } else {
+          console.error('❌ 停止失败:', data.message);
+          showNotification('停止分析失败: ' + data.message, 'error');
+        }
+      } catch (error) {
+        console.error('停止微表情分析错误:', error);
+        showNotification('停止分析时发生错误', 'error');
+      }
+    }
+    
+    async function requestCameraPermission() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        // 获取权限后立即停止流
+        stream.getTracks().forEach(track => track.stop());
+        console.log('✅ 摄像头权限已获取');
+        return true;
+      } catch (error) {
+        console.error('❌ 摄像头权限获取失败:', error);
+        throw new Error('无法访问摄像头，请检查浏览器权限设置');
+      }
+    }
+    
+    function startAnalysisStatusMonitoring() {
+      // 每5秒检查一次分析状态
+      analysisStatusInterval = setInterval(async () => {
+        try {
+          const response = await fetch('/api/interview/facial-analysis-status');
+          const data = await response.json();
+          
+          if (data.success) {
+            facialAnalysisRunning = data.is_running;
+            currentAnalysisCount = data.analysis_count;
+            
+            // 如果分析意外停止，更新状态
+            if (!data.is_running && facialAnalysisRunning) {
+              facialAnalysisRunning = false;
+              stopAnalysisStatusMonitoring();
+              showNotification('微表情分析已自动停止', 'info');
+            }
+            
+            updateDebugInfo();
+          }
+        } catch (error) {
+          console.error('状态监控错误:', error);
+        }
+      }, 5000);
+    }
+    
+    function stopAnalysisStatusMonitoring() {
+      if (analysisStatusInterval) {
+        clearInterval(analysisStatusInterval);
+        analysisStatusInterval = null;
+      }
+    }
+    
+    // 语调分析功能
+    async function startVoiceAnalysis() {
+      if (voiceAnalysisRunning) {
+        console.log('语调分析已在运行中');
+        return;
+      }
+      
+      try {
+        console.log('🎤 启动语调分析...');
+        
+        // 请求麦克风权限
+        await requestMicrophonePermission();
+        
+        const response = await fetch('/api/interview/start-voice-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          voiceAnalysisRunning = true;
+          console.log('✅ 语调分析已启动:', data.message);
+          
+          // 开始定期检查状态
+          startVoiceStatusMonitoring();
+          updateDebugInfo();
+          updateVoiceAnalysisButton();
+          
+          // 显示启动通知
+          showNotification('🎤 语调分析已启动', 'success');
+        } else {
+          console.error('❌ 启动失败:', data.message);
+          showNotification('启动语调分析失败: ' + data.message, 'error');
+        }
+      } catch (error) {
+        console.error('语调分析启动错误:', error);
+        showNotification('麦克风访问失败，请检查权限设置', 'error');
+      }
+    }
+    
+    async function stopVoiceAnalysis() {
+      if (!voiceAnalysisRunning) {
+        console.log('语调分析未在运行');
+        return;
+      }
+      
+      try {
+        console.log('🛑 停止语调分析...');
+        
+        const response = await fetch('/api/interview/stop-voice-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          voiceAnalysisRunning = false;
+          isRecording = false;
+          stopVoiceStatusMonitoring();
+          
+          console.log('✅ 语调分析已停止:', data.message);
+          console.log('📊 分析结果:', data.result);
+          
+          updateDebugInfo();
+          updateVoiceAnalysisButton();
+          
+          // 显示停止通知和结果摘要
+          if (data.result && data.result.analysis_info) {
+            const overallScore = data.result.analysis_info.overall_score || 0;
+            showNotification(`🎤 语调分析完成！综合得分: ${overallScore.toFixed(2)}/1`, 'success');
+          } else {
+            showNotification('🎤 语调分析已停止', 'success');
+          }
+        } else {
+          console.error('❌ 停止失败:', data.message);
+          showNotification('停止语调分析失败: ' + data.message, 'error');
+        }
+      } catch (error) {
+        console.error('停止语调分析错误:', error);
+        showNotification('停止分析时发生错误', 'error');
+      }
+    }
+    
+    async function requestMicrophonePermission() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // 获取权限后立即停止流
+        stream.getTracks().forEach(track => track.stop());
+        console.log('✅ 麦克风权限已获取');
+        return true;
+      } catch (error) {
+        console.error('❌ 麦克风权限获取失败:', error);
+        throw new Error('无法访问麦克风，请检查浏览器权限设置');
+      }
+    }
+    
+    function startVoiceStatusMonitoring() {
+      // 每5秒检查一次分析状态
+      voiceStatusInterval = setInterval(async () => {
+        try {
+          const response = await fetch('/api/interview/voice-analysis-status');
+          const data = await response.json();
+          
+          if (data.success) {
+            voiceAnalysisRunning = data.is_running;
+            isRecording = data.is_recording;
+            
+            // 如果分析意外停止，更新状态
+            if (!data.is_running && voiceAnalysisRunning) {
+              voiceAnalysisRunning = false;
+              isRecording = false;
+              stopVoiceStatusMonitoring();
+              showNotification('语调分析已自动停止', 'info');
+            }
+            
+            updateDebugInfo();
+          }
+        } catch (error) {
+          console.error('语调状态监控错误:', error);
+        }
+      }, 5000);
+    }
+    
+    function stopVoiceStatusMonitoring() {
+      if (voiceStatusInterval) {
+        clearInterval(voiceStatusInterval);
+        voiceStatusInterval = null;
+      }
+    }
+    
+    function showNotification(message, type = 'info') {
+      // 创建通知元素
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: ${type === 'success' ? 'rgba(76, 175, 80, 0.9)' : 
+                     type === 'error' ? 'rgba(244, 67, 54, 0.9)' : 
+                     'rgba(33, 150, 243, 0.9)'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 1001;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+        word-wrap: break-word;
+      `;
+      notification.textContent = message;
+      
+      // 添加到页面
+      document.body.appendChild(notification);
+      
+      // 3秒后自动移除
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => {
+            if (document.body.contains(notification)) {
+              document.body.removeChild(notification);
+            }
+          }, 300);
+        }
+      }, 3000);
+    }
+    
+    function applySystemSetting(settingName, value) {
+      switch (settingName) {
+        case 'mouseFollow':
+          if (window.Config && live2dSprite) {
+            window.Config.MouseFollow = value;
+          }
+          break;
+        case 'particles':
+          const particlesCanvas = document.getElementById('particles-canvas');
+          if (particlesCanvas) {
+            particlesCanvas.style.display = value ? 'block' : 'none';
+          }
+          break;
+        case 'voice':
+          console.log('语音播放:', value ? '开启' : '关闭');
+          break;
+        case 'voiceAnalysis':
+          console.log('语调分析:', value ? '开启' : '关闭');
+          if (value && !voiceAnalysisRunning) {
+            // 如果开启且未运行，则启动
+            startVoiceAnalysis();
+          } else if (!value && voiceAnalysisRunning) {
+            // 如果关闭且正在运行，则停止
+            stopVoiceAnalysis();
+          }
+          break;
+        case 'autoRecord':
+          console.log('自动录音:', value ? '开启' : '关闭');
+          break;
+        case 'facialAnalysis':
+          console.log('微表情识别:', value ? '开启' : '关闭');
+          if (value && !facialAnalysisRunning) {
+            // 如果开启且未运行，则启动
+            startFacialAnalysis();
+          } else if (!value && facialAnalysisRunning) {
+            // 如果关闭且正在运行，则停止
+            stopFacialAnalysis();
+          }
+          break;
+      }
+    }
+    
+    window.testThinking = function() {
+      showThinking();
+    }
+    
+    window.resetAnimation = function() {
+      // 清除现有的超时
+      if (thinkingAnimationTimeout) {
+        clearTimeout(thinkingAnimationTimeout);
+      }
+      
+      // 隐藏动画并重置
+      hideThinking();
+      console.log('太空信息传输动画已重置');
+    }
+    
+    window.toggleFacialAnalysis = function() {
+      const facialBtn = document.getElementById('facialBtn');
+      
+      if (facialAnalysisRunning) {
+        stopFacialAnalysis();
+        facialBtn.textContent = '开始分析';
+      } else {
+        startFacialAnalysis();
+        facialBtn.textContent = '停止分析';
+      }
+    }
+    
+    window.toggleVoiceAnalysis = function() {
+      const voiceBtn = document.getElementById('voiceBtn');
+      
+      if (voiceAnalysisRunning) {
+        stopVoiceAnalysis();
+        voiceBtn.textContent = '开始录音';
+      } else {
+        startVoiceAnalysis();
+        voiceBtn.textContent = '停止录音';
+      }
+    }
+    
+    // 更新按钮文本的函数
+    function updateFacialAnalysisButton() {
+      const facialBtn = document.getElementById('facialBtn');
+      if (facialBtn) {
+        facialBtn.textContent = facialAnalysisRunning ? '停止分析' : '开始分析';
+      }
+    }
+    
+    function updateVoiceAnalysisButton() {
+      const voiceBtn = document.getElementById('voiceBtn');
+      if (voiceBtn) {
+        voiceBtn.textContent = voiceAnalysisRunning ? '停止录音' : '开始录音';
+      }
+    }
+    
+    window.resetLive2D = function() {
+      if (live2dSprite && app) {
+        // 重置Live2D模型位置
+        const canvas = document.getElementById('live2d');
+        const screenWidth = window.innerWidth * window.devicePixelRatio / 1.5;
+        const screenHeight = window.innerHeight * window.devicePixelRatio / 1.5;
+        
+        live2dSprite.width = 3 * screenWidth;
+        live2dSprite.height = 3 * screenHeight;
+        live2dSprite.x = -0.75 * screenWidth;
+        live2dSprite.y = -1.5 * screenHeight;
+        
+        updateDebugInfo();
+        console.log('Live2D模型已重置');
+      }
+    }
+    
+    window.toggleDebugInfo = function() {
+      const debugInfo = document.getElementById('debugInfo');
+      const isVisible = debugInfo.style.display !== 'none';
+      
+      if (isVisible) {
+        debugInfo.style.display = 'none';
+      } else {
+        debugInfo.style.display = 'block';
+        updateDebugInfo();
+      }
+    }
+    
+    function updateDebugInfo() {
+      const debugInfo = document.getElementById('debugInfo');
+      const timestamp = new Date().toLocaleTimeString();
+      
+      let info = `更新时间: ${timestamp}\n`;
+      info += `Live2D状态: ${live2dSprite ? '正常' : '未加载'}\n`;
+      info += `动画状态: 太空信息传输\n`;
+      info += `音频状态: ${systemSettings.voice ? '已启用' : '未启用'}\n`;
+      info += `鼠标跟随: ${systemSettings.mouseFollow ? '开启' : '关闭'}\n`;
+      info += `粒子特效: ${systemSettings.particles ? '开启' : '关闭'}\n`;
+      info += `微表情识别: ${systemSettings.facialAnalysis ? '开启' : '关闭'}\n`;
+      info += `分析状态: ${facialAnalysisRunning ? '运行中' : '已停止'}\n`;
+      info += `分析次数: ${currentAnalysisCount}\n`;
+      info += `语调分析: ${systemSettings.voiceAnalysis ? '开启' : '关闭'}\n`;
+      info += `录音状态: ${voiceAnalysisRunning ? (isRecording ? '录音中' : '准备中') : '已停止'}\n`;
+      info += `屏幕尺寸: ${window.innerWidth}x${window.innerHeight}\n`;
+      info += `设备像素比: ${window.devicePixelRatio}\n`;
+      info += `传输动画: 信号→卫星→语音`;
+      
+      debugInfo.textContent = info;
+    }
+    
+    window.exportSettings = function() {
+      const settings = {
+        systemSettings: systemSettings,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        screenSize: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          devicePixelRatio: window.devicePixelRatio
+        }
+      };
+      
+      const dataStr = JSON.stringify(settings, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'live2d_settings.json';
+      link.click();
+      
+      URL.revokeObjectURL(url);
+      console.log('设置已导出');
+    }
+    
+    // 点击外部关闭设置面板
+    document.addEventListener('click', function(event) {
+      const settingsPanel = document.getElementById('settingsPanel');
+      const settingsToggle = document.querySelector('.settings-toggle');
+      
+      if (settingsVisible && 
+          !settingsPanel.contains(event.target) && 
+          !settingsToggle.contains(event.target)) {
+        toggleSettings();
+      }
+    });
+  </script>
+</body>
+</html>

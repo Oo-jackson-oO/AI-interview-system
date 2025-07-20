@@ -685,13 +685,9 @@
 
             <!-- 面试控制按钮 -->
             <div class="interview-controls">
-
-
-
-                                
-                <button class="control-btn" onclick="runCompleteInterview()">
-                    <i class="fas fa-play"></i>
-                    开始完整面试
+                <button class="control-btn" onclick="startLive2DInterview()">
+                    <i class="fas fa-robot"></i>
+                    启动 AI 数字面试官
                 </button>
             </div>
 
@@ -1346,6 +1342,18 @@
             
             setTimeout(() => {
                 window.location.href = '/interview-config';
+            }, 1000);
+        }
+
+        // 开始完整面试 (跳转到 live2d.html)
+        function startLive2DInterview() {
+            // 触发黑洞转场效果
+            const blackhole = document.getElementById('blackholeTransition');
+            blackhole.style.display = 'flex';
+            blackhole.classList.add('active');
+            
+            setTimeout(() => {
+                window.location.href = '/live2d';
             }, 1000);
         }
     </script>
