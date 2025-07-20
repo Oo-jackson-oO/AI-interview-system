@@ -1,0 +1,42 @@
+{
+  "analysis_info": {
+    "audio_file": "recording_20250720_111515.wav",
+    "analysis_time": "2025-07-20 11:15:16",
+    "analysis_timestamp": "2025-07-20T11:15:19.729288",
+    "overall_score": 0.68
+  },
+  "speech_rate_analysis": {
+    "level": "快",
+    "score": 0.8,
+    "syllable_rate": 1.325,
+    "speech_activity_ratio": 0.298,
+    "total_duration": 13.79
+  },
+  "emotion_tone_analysis": {
+    "emotion_type": "兴奋/激动",
+    "emotion_score": 0.8,
+    "average_pitch": 384.1000061035156,
+    "pitch_variation": 393.5,
+    "pitch_range": 3394.699951171875,
+    "energy_variation": 0.0
+  },
+  "fluency_analysis": {
+    "fluency_level": "不流利",
+    "fluency_score": 0.4,
+    "pause_count": 5,
+    "pause_ratio": 0.604,
+    "speech_continuity": 0.396,
+    "rhythm_stability": 0.9850000143051147
+  },
+  "recommendations": {
+    "speech_rate_advice": "建议调整语速到适中范围",
+    "emotion_advice": "建议增强情感表达，使语调更加生动有感染力",
+    "fluency_advice": "流利度需要改善，建议多加练习以减少停顿和提高连贯性"
+  },
+  "metadata": {
+    "analysis_version": "1.0",
+    "analyzer": "RealTimeVoiceAnalyzer",
+    "sample_rate": 22050,
+    "channels": 1
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "generated_at": "2025-01-20T10:30:00.000000",
+  "candidate_name": "alivin",
+  "total_score": 78,
+  "total_evaluation": "面试表现良好，整体沟通能力较强，专业技能扎实，但在某些细节方面还有提升空间。",
+  "total_suggestions": "建议继续提升专业技能深度，加强项目经验的详细描述，注意面试时的肢体语言和表情管理。",
+  "self_introduction": {
+    "score": 8,
+    "evaluation": "自我介绍清晰流畅，能够突出个人优势，时间控制得当。",
+    "suggestions": "可以增加一些具体的项目案例来支撑自我介绍。"
+  },
+  "resume_digging": {
+    "score": 12,
+    "evaluation": "对简历内容熟悉，能够详细回答相关问题，展现了良好的项目经验。",
+    "suggestions": "建议在描述项目时更加注重技术细节和解决方案。"
+  },
+  "ability_assessment": {
+    "score": 13,
+    "evaluation": "技术能力较强，能够回答大部分技术问题，逻辑思维清晰。",
+    "suggestions": "可以多准备一些实际案例来展示解决问题的能力。"
+  },
+  "position_matching": {
+    "score": 8,
+    "evaluation": "对岗位要求理解准确，个人能力与岗位匹配度较高。",
+    "suggestions": "可以更详细地说明为什么选择这个岗位和公司。"
+  },
+  "professional_skills": {
+    "score": 16,
+    "evaluation": "专业技能扎实，能够展示相关的技术栈和项目经验。",
+    "suggestions": "建议深入学习一些前沿技术，提升技术广度。"
+  },
+  "reverse_question": {
+    "score": 4,
+    "evaluation": "能够提出有见地的问题，体现了对公司和岗位的关注。",
+    "suggestions": "可以准备更多关于公司发展、团队文化等方面的问题。"
+  }
+} 

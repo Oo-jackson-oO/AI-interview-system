@@ -1207,15 +1207,29 @@ def get_voice_analysis_status():
         print(f"获取语调分析状态失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取状态失败: {str(e)}'})
 
+<<<<<<< HEAD
 @app.route('/api/interview/analyze-photo', methods=['POST'])
 @login_required
 def analyze_photo():
     """分析浏览器发送的照片"""
+=======
+@app.route('/interview-result')
+@login_required
+def interview_result_page():
+    """面试结果分析页面"""
+    return render_template('interview_result.html')
+
+@app.route('/api/interview-result/data')
+@login_required
+def get_interview_result_data():
+    """获取面试结果数据"""
+>>>>>>> bfb423d75f5e17bf45c837f2959b173d00a4dcf7
     try:
         # 获取当前登录用户
         current_user = session.get('user', {})
         username = current_user.get('username', 'unknown_user')
         
+<<<<<<< HEAD
         if 'image' not in request.files:
             return jsonify({'success': False, 'message': '没有上传图片'})
         
@@ -1372,6 +1386,34 @@ def save_voice_analysis():
     except Exception as e:
         print(f"保存语调分析结果失败: {str(e)}")
         return jsonify({'success': False, 'message': f'保存失败: {str(e)}'})
+=======
+        # 检查用户文件夹中的分析文件
+        user_folder = os.path.join('uploads', username)
+        
+        # 检查三个JSON文件是否存在
+        files_to_check = [
+            'interview_summary_report.json',
+            'facial_analysis_report.json', 
+            'analysis_result.json'
+        ]
+        
+        available_files = []
+        for filename in files_to_check:
+            file_path = os.path.join(user_folder, filename)
+            if os.path.exists(file_path):
+                available_files.append(filename)
+        
+        return jsonify({
+            'success': True,
+            'username': username,
+            'available_files': available_files,
+            'user_folder': user_folder
+        })
+        
+    except Exception as e:
+        print(f"获取面试结果数据失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'获取数据失败: {str(e)}'})
+>>>>>>> bfb423d75f5e17bf45c837f2959b173d00a4dcf7
 
 if __name__ == '__main__':
     app.run(debug=True)
