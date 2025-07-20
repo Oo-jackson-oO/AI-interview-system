@@ -605,4 +605,41 @@ body::before {
     .score-number {
         font-size: 16px;
     }
+}
+
+/* 非活跃状态 - 零分或无效数据 */
+.module-planet.inactive {
+    opacity: 0.3;
+    filter: grayscale(100%);
+    pointer-events: none;
+    transform: scale(0.8);
+}
+
+.module-planet.inactive .planet-inner {
+    background: rgba(128, 128, 128, 0.1);
+    border-color: rgba(128, 128, 128, 0.2);
+    box-shadow: 
+        0 0 20px rgba(128, 128, 128, 0.3),
+        inset 0 0 10px rgba(128, 128, 128, 0.1);
+}
+
+.module-planet.inactive:hover {
+    transform: scale(0.8);
+}
+
+.module-planet.inactive:hover .planet-inner {
+    background: rgba(128, 128, 128, 0.1);
+    border-color: rgba(128, 128, 128, 0.2);
+    box-shadow: 
+        0 0 20px rgba(128, 128, 128, 0.3),
+        inset 0 0 10px rgba(128, 128, 128, 0.1);
+}
+
+.module-planet.inactive .planet-content h3 {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.module-planet.inactive .score-number {
+    color: rgba(102, 126, 234, 0.3);
+    text-shadow: none;
 } 
