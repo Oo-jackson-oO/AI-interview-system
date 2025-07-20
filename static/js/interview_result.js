@@ -233,6 +233,19 @@ async function loadInterviewData() {
         
         console.log(`加载用户 ${username} 的面试数据...`);
         
+        // 首先检查用户是否有可用的数据文件
+        const dataCheckResponse = await fetch('/api/interview-result/data');
+        if (!dataCheckResponse.ok) {
+            throw new Error(`检查数据文件失败: ${dataCheckResponse.status}`);
+        }
+        
+        const dataCheck = await dataCheckResponse.json();
+        console.log('数据文件检查结果:', dataCheck);
+        
+        if (!dataCheck.success) {
+            throw new Error(dataCheck.message || '检查数据文件失败');
+        }
+        
         // 加载三个JSON文件
         const [summaryData, facialData, voiceData] = await Promise.all([
             loadJSONFile(`/uploads/${username}/interview_summary_report.json`),
@@ -240,7 +253,10 @@ async function loadInterviewData() {
             loadJSONFile(`/uploads/${username}/analysis_result.json`)
         ]);
         
-        console.log('JSON文件加载完成:', { summaryData, facialData, voiceData });
+        console.log('JSON文件加载完成:');
+        console.log('summaryData:', summaryData);
+        console.log('facialData:', facialData);
+        console.log('voiceData:', voiceData);
         
         // 合并数据
         moduleData = mergeModuleData(summaryData, facialData, voiceData);
@@ -255,24 +271,51 @@ async function loadInterviewData() {
     } catch (error) {
         console.error('加载面试数据时出错:', error);
         // 显示错误信息
-        document.getElementById('totalEvaluation').textContent = '数据加载失败，请检查网络连接';
+        const evaluationElement = document.getElementById('totalEvaluation');
+        if (evaluationElement) {
+            evaluationElement.textContent = '数据加载失败，请检查网络连接或登录状态';
+        }
     }
 }
 
 // 获取当前用户名
 function getCurrentUsername() {
-    // 这里需要根据实际的用户认证系统获取用户名
-    // 暂时返回一个测试用户名
+    // 尝试从URL参数获取用户名
+    const urlParams = new URLSearchParams(window.location.search);
+    const userFromUrl = urlParams.get('user');
+    
+    if (userFromUrl) {
+        console.log(`从URL参数获取用户名: ${userFromUrl}`);
+        return userFromUrl;
+    }
+    
+    // 尝试从session或localStorage获取
+    try {
+        const sessionUser = sessionStorage.getItem('currentUser');
+        if (sessionUser) {
+            console.log(`从sessionStorage获取用户名: ${sessionUser}`);
+            return sessionUser;
+        }
+    } catch (e) {
+        console.warn('无法从sessionStorage获取用户信息:', e);
+    }
+    
+    // 默认返回测试用户名
+    console.log('使用默认测试用户名: alivin');
     return 'alivin';
 }
 
 // 加载JSON文件
 async function loadJSONFile(url) {
     try {
+        console.log(`尝试加载文件: ${url}`);
         const response = await fetch(url);
+        console.log(`响应状态: ${response.status}`);
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
         console.log(`成功加载 ${url}:`, data);
         return data;
@@ -402,12 +445,14 @@ function mergeModuleData(summaryData, facialData, voiceData) {
         // 语音语调
         if (voiceData.analysis_info) {
             const data = voiceData.analysis_info;
+            // 将0-1的分数转换为0-5分
+            const voiceScore = (data.overall_score || 0) * 5;
             mergedData.voice_tone = {
-                score: normalizeScore(data.overall_score || 0, 5),
+                score: normalizeScore(voiceScore, 5),
                 maxScore: 5,
                 evaluation: voiceData.fluency_analysis?.fluency_level || '暂无评价',
-                suggestions: voiceData.recommendations?.speech_rate_advice + ' ' + 
-                           voiceData.recommendations?.fluency_advice || '建议改善语音语调'
+                suggestions: (voiceData.recommendations?.speech_rate_advice || '') + ' ' + 
+                           (voiceData.recommendations?.fluency_advice || '') || '建议改善语音语调'
             };
         }
     }
@@ -459,6 +504,8 @@ function updateModuleScores() {
         const scoreElement = document.getElementById(`${moduleName}_score`);
         const planetElement = document.querySelector(`[data-module="${moduleName}"]`);
         
+        console.log(`更新模块 ${moduleName}:`, data);
+        
         if (scoreElement && data) {
             // 动画更新分数
             animateScore(scoreElement, 0, data.score);
@@ -468,11 +515,15 @@ function updateModuleScores() {
                 if (data.score > 0) {
                     planetElement.classList.add('active');
                     planetElement.classList.remove('inactive');
+                    console.log(`${moduleName} 设置为活跃状态，分数: ${data.score}`);
                 } else {
                     planetElement.classList.add('inactive');
                     planetElement.classList.remove('active');
+                    console.log(`${moduleName} 设置为黯淡状态，分数: ${data.score}`);
                 }
             }
+        } else {
+            console.warn(`未找到模块 ${moduleName} 的分数元素或数据`);
         }
     });
 }
@@ -507,6 +558,8 @@ function updateTotalScore() {
     console.log('更新总分...');
     
     const activeModules = Object.values(moduleData).filter(module => module.score > 0);
+    
+    console.log('活跃模块:', activeModules);
     
     if (activeModules.length === 0) {
         console.log('没有活跃模块，总分设为0');
