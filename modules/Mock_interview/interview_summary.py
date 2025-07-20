@@ -48,12 +48,16 @@ class InterviewSummary:
     
     def parse_qa_md(self, qa_file="QA.md"):
         """解析QA.md文件，提取各板块内容"""
-        if not os.path.exists(qa_file):
-            print(f"❌ QA文件 {qa_file} 不存在")
+        # 获取当前脚本所在目录
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        qa_file_path = os.path.join(current_dir, qa_file)
+        
+        if not os.path.exists(qa_file_path):
+            print(f"❌ QA文件 {qa_file_path} 不存在")
             return {}
         
         try:
-            with open(qa_file, 'r', encoding='utf-8') as f:
+            with open(qa_file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
             sections = {}
@@ -419,103 +423,139 @@ class InterviewSummary:
         return final_score, total_used_weight
     
     def generate_summary_report(self, evaluations, final_score, total_weight):
-        """生成面试总结报告"""
+        """生成面试总结报告 - JSON格式"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # 等级评定
         if final_score >= 90:
             grade = "优秀"
             recommendation = "强烈推荐录用"
+            grade_level = "A+"
         elif final_score >= 80:
             grade = "良好"
             recommendation = "推荐录用"
+            grade_level = "A"
         elif final_score >= 70:
             grade = "一般"
             recommendation = "考虑录用，需要进一步培训"
+            grade_level = "B"
         elif final_score >= 60:
             grade = "较差"
             recommendation = "不推荐录用，建议提升后再次面试"
+            grade_level = "C"
         else:
             grade = "不合格"
             recommendation = "不推荐录用"
-        
-        # 构建报告
-        report = f"""# 面试总结报告
-
-**生成时间**: {timestamp}
-**最终得分**: {final_score:.2f} / 100
-**评级等级**: {grade}
-**录用建议**: {recommendation}
-
-## 📊 各板块详细评估
-
-"""
-        
-        # 各板块详情
-        for section_name, evaluation in evaluations.items():
-            weight = self.section_weights.get(section_name, 0)
-            report += f"""### {section_name} (权重: {weight*100:.0f}%)
-
-**得分**: {evaluation['score']:.1f} / 100
-
-**评价**: 
-{evaluation['evaluation']}
-
-**改进建议**: 
-{evaluation['suggestions']}
-
----
-
-"""
-        
-        # 总体建议
-        report += f"""## 📋 综合建议
-
-基于本次面试的整体表现，该候选人在{len(evaluations)}个评估维度中表现如下：
-
-"""
+            grade_level = "D"
         
         # 强项和弱项分析
         sorted_sections = sorted(evaluations.items(), key=lambda x: x[1]['score'], reverse=True)
+        best_section = sorted_sections[0] if sorted_sections else None
+        worst_section = sorted_sections[-1] if sorted_sections else None
         
-        if sorted_sections:
-            best_section = sorted_sections[0]
-            worst_section = sorted_sections[-1]
-            
-            report += f"""**表现最佳板块**: {best_section[0]} ({best_section[1]['score']:.1f}分)
-**需要改进板块**: {worst_section[0]} ({worst_section[1]['score']:.1f}分)
-
-"""
+        # 构建各板块详细评估
+        section_evaluations = {}
+        for section_name, evaluation in evaluations.items():
+            weight = self.section_weights.get(section_name, 0)
+            section_evaluations[section_name] = {
+                "score": round(evaluation['score'], 1),
+                "weight_percentage": round(weight * 100, 0),
+                "weighted_score": round(evaluation['score'] * weight, 2),
+                "evaluation": evaluation['evaluation'],
+                "suggestions": evaluation['suggestions']
+            }
         
-        report += f"""**整体建议**: 
-根据{final_score:.1f}分的综合得分，{recommendation}。
-
-**后续行动**: 
-"""
-        
+        # 后续行动建议
+        next_actions = []
         if final_score >= 80:
-            report += "- 可以进入下一轮面试或直接录用\n- 关注候选人的薪资期望和入职时间\n"
+            next_actions = [
+                "可以进入下一轮面试或直接录用",
+                "关注候选人的薪资期望和入职时间"
+            ]
         elif final_score >= 70:
-            report += "- 需要针对弱项进行进一步确认\n- 考虑提供相关培训支持\n"
+            next_actions = [
+                "需要针对弱项进行进一步确认",
+                "考虑提供相关培训支持"
+            ]
         else:
-            report += "- 建议候选人提升相关技能后重新申请\n- 可提供具体的学习建议和资源\n"
+            next_actions = [
+                "建议候选人提升相关技能后重新申请",
+                "可提供具体的学习建议和资源"
+            ]
         
-        report += f"\n**评估完成时间**: {timestamp}\n**评估覆盖权重**: {total_weight*100:.1f}%\n"
+        # 构建JSON报告
+        report_data = {
+            "report_info": {
+                "generated_at": timestamp,
+                "report_version": "1.0",
+                "evaluation_sections_count": len(evaluations)
+            },
+            "overall_assessment": {
+                "final_score": round(final_score, 2),
+                "grade": grade,
+                "grade_level": grade_level,
+                "recommendation": recommendation,
+                "weight_coverage_percentage": round(total_weight * 100, 1)
+            },
+            "section_evaluations": section_evaluations,
+            "performance_analysis": {
+                "best_performance": {
+                    "section": best_section[0] if best_section else None,
+                    "score": round(best_section[1]['score'], 1) if best_section else None
+                },
+                "worst_performance": {
+                    "section": worst_section[0] if worst_section else None,
+                    "score": round(worst_section[1]['score'], 1) if worst_section else None
+                },
+                "average_score": round(sum(eval['score'] for eval in evaluations.values()) / len(evaluations), 1) if evaluations else 0
+            },
+            "recommendations": {
+                "overall_suggestion": f"根据{final_score:.1f}分的综合得分，{recommendation}。",
+                "next_actions": next_actions,
+                "improvement_areas": [
+                    {
+                        "section": section_name,
+                        "score": round(evaluation['score'], 1),
+                        "suggestions": evaluation['suggestions']
+                    }
+                    for section_name, evaluation in sorted(evaluations.items(), key=lambda x: x[1]['score'])
+                    if evaluation['score'] < 80  # 80分以下的板块需要改进
+                ]
+            },
+            "metadata": {
+                "evaluation_timestamp": timestamp,
+                "sections_evaluated": list(evaluations.keys()),
+                "total_questions_answered": len(evaluations),
+                "evaluation_method": "AI并行评估",
+                "scoring_range": "0-100分"
+            }
+        }
         
-        return report
+        return report_data
     
-    def save_summary_report(self, report, filename="interview_summary_report.md"):
-        """保存总结报告到文件"""
+    def save_summary_report(self, report_data, filename="interview_summary_report.json", current_username=None):
+        """保存总结报告到JSON文件"""
         try:
-            with open(filename, 'w', encoding='utf-8') as f:
-                f.write(report)
-            print(f"✅ 面试总结报告已保存到 {filename}")
+            # 如果提供了用户名，则保存到用户文件夹
+            if current_username:
+                user_folder = os.path.join('uploads', current_username)
+                os.makedirs(user_folder, exist_ok=True)
+                filepath = os.path.join(user_folder, filename)
+            else:
+                filepath = filename
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(report_data, f, ensure_ascii=False, indent=2)
+            print(f"✅ 面试总结报告已保存到 {filepath}")
+            print(f"📊 报告包含 {len(report_data.get('section_evaluations', {}))} 个板块评估")
+            print(f"🎯 最终得分: {report_data.get('overall_assessment', {}).get('final_score', 0)} 分")
+            print(f"📈 评级: {report_data.get('overall_assessment', {}).get('grade', '未知')}")
             return True
         except Exception as e:
             print(f"❌ 保存报告失败: {e}")
             return False
     
-    async def run_complete_summary(self, qa_file="QA.md"):
+    async def run_complete_summary(self, qa_file="QA.md", current_username=None):
         """运行完整的面试总结流程"""
         print("="*80)
         print("📊 AI面试总结评估")
@@ -543,10 +583,10 @@ class InterviewSummary:
         
         # 4. 生成总结报告
         print(f"\n📝 步骤4: 生成面试总结报告...")
-        report = self.generate_summary_report(evaluations, final_score, total_weight)
+        report_data = self.generate_summary_report(evaluations, final_score, total_weight)
         
         # 5. 保存报告
-        success = self.save_summary_report(report)
+        success = self.save_summary_report(report_data, current_username=current_username)
         
         # 6. 显示简要总结
         print(f"\n" + "="*80)
@@ -555,7 +595,9 @@ class InterviewSummary:
         print(f"📊 最终得分: {final_score:.2f} / 100")
         print(f"📋 评估板块: {len(evaluations)} 个")
         print(f"⚖️ 权重覆盖: {total_weight*100:.1f}%")
-        print(f"📁 报告文件: interview_summary_report.md")
+        print(f"📁 报告文件: interview_summary_report.json")
+        if current_username:
+            print(f"📂 保存位置: uploads/{current_username}/")
         print("="*80)
         
         return True
@@ -565,7 +607,11 @@ async def main():
     summary = InterviewSummary()
     
     # 检查QA.md文件
-    if not os.path.exists("QA.md"):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    qa_file_path = os.path.join(current_dir, "QA.md")
+    print(f"📂 检查文件路径: {qa_file_path}")
+    
+    if not os.path.exists(qa_file_path):
         print("❌ QA.md文件不存在，请先完成面试")
         return
     
