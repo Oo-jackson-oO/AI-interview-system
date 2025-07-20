@@ -36,3 +36,6 @@ httpx==0.22.0
 opencv-python
 soundfile
 ffmpeg
+flask-socketio
+flask-cors
+python-socketio

@@ -533,7 +533,7 @@ class RealTimeVoiceAnalyzer:
         print(f"得分范围: {min(overall_scores):.1f} - {max(overall_scores):.1f}")
         
         return comparison_data
-            
+        
     def run_interactive_session(self):
         """运行交互式录音分析会话"""
         print("🎵 实时语音分析系统")
@@ -622,7 +622,7 @@ class RealTimeVoiceAnalyzer:
             print("❌ 输入格式错误，请输入有效的数字")
         except Exception as e:
             print(f"❌ 比较过程出错: {e}")
-            
+                
 def main():
     """主函数"""
     try:

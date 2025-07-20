@@ -149,11 +149,11 @@ custom_tts_config = {
     "api_secret": "your_api_secret", 
     "api_key": "your_api_key",
     "url": "your_websocket_url",
-    "vcn": "x5_lingfeiyi_flow"
+    "vcn": "x4_lingxiaoqi_oral"
 }
 
 chat = AIVoiceChat(tts_config=custom_tts_config)
-chat.set_tts_voice("x5_lingfeiyi_flow")
+chat.set_tts_voice("x4_lingxiaoqi_oral")
 ```
 
 #### 便捷函数
@@ -210,7 +210,7 @@ tts_config = {
     "api_secret": "your_api_secret", # 讯飞API密钥
     "api_key": "your_api_key",       # 讯飞API Key
     "url": "your_websocket_url",     # WebSocket连接地址
-    "vcn": "x5_lingfeiyi_flow"       # 发音人ID
+    "vcn": "x4_lingxiaoqi_oral"       # 发音人ID
 }
 ```
 

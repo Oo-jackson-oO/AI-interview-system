@@ -1,37 +1,37 @@
 {
   "analysis_info": {
-    "audio_file": "tmpyfp3ahvx.wav",
-    "analysis_time": "2025-07-20 18:01:49",
-    "analysis_timestamp": "2025-07-20T18:01:49.030490",
-    "overall_score": 0.77
+    "audio_file": "tmp8pe1i6m8.wav",
+    "analysis_time": "2025-07-21 00:20:28",
+    "analysis_timestamp": "2025-07-21T00:20:28.899089",
+    "overall_score": 0.83
   },
   "speech_rate_analysis": {
     "level": "快",
     "score": 0.8,
-    "syllable_rate": 1.409,
-    "speech_activity_ratio": 0.062,
-    "total_duration": 36.12
+    "syllable_rate": 1.876,
+    "speech_activity_ratio": 0.039,
+    "total_duration": 141.9
   },
   "emotion_tone_analysis": {
     "emotion_type": "兴奋/激动",
     "emotion_score": 0.8,
-    "average_pitch": 428.29998779296875,
-    "pitch_variation": 511.0,
-    "pitch_range": 3821.39990234375,
+    "average_pitch": 677.2999877929688,
+    "pitch_variation": 628.0,
+    "pitch_range": 3727.10009765625,
     "energy_variation": 0.0
   },
   "fluency_analysis": {
-    "fluency_level": "一般",
-    "fluency_score": 0.7,
+    "fluency_level": "流利",
+    "fluency_score": 0.9,
     "pause_count": 2,
-    "pause_ratio": 0.13,
-    "speech_continuity": 0.87,
-    "rhythm_stability": 0.9860000014305115
+    "pause_ratio": 0.076,
+    "speech_continuity": 0.924,
+    "rhythm_stability": 0.9440000057220459
   },
   "recommendations": {
     "speech_rate_advice": "建议调整语速到适中范围",
     "emotion_advice": "建议增强情感表达，使语调更加生动有感染力",
-    "fluency_advice": "流利度一般，检测到2次停顿，可通过练习减少不必要停顿"
+    "fluency_advice": "语言流利度很好，表达自然流畅"
   },
   "metadata": {
     "analysis_version": "1.0",

@@ -603,7 +603,7 @@
           <div class="toggle-slider"></div>
         </div>
       </div>
-      
+    
       <div class="setting-item">
         <div class="setting-label">
           <i class="fas fa-eye"></i>
@@ -641,7 +641,6 @@
           <i class="fas fa-microphone"></i> <span id="voiceBtn">停止录音</span>
         </button>
       </div>
-      
       <div class="setting-item">
         <button class="setting-button" onclick="resetLive2D()">
           <i class="fas fa-redo"></i> 重置模型
@@ -705,18 +704,18 @@
   </div>
   
   <!-- Live2D 数字人 -->
-  <canvas id="live2d"></canvas>
+  	<canvas id="live2d"></canvas>
   
   <!-- importmap -->
-  <script type="importmap">
-  {
-    "imports": {
-      "pixi.js": "https://cdn.jsdelivr.net/npm/pixi.js/dist/pixi.min.mjs",
-      "@pixi/sound": "https://cdn.jsdelivr.net/npm/@pixi/sound@6.0.1/dist/pixi-sound.mjs",
-      "easy-live2d": "https://cdn.jsdelivr.net/npm/easy-live2d/dist/index.js"
-    }
-  }
-  </script>
+  	<script type="importmap">
+	{
+  		"imports": {
+    			"pixi.js": "https://cdn.jsdelivr.net/npm/pixi.js/dist/pixi.min.mjs",
+    			"@pixi/sound": "https://cdn.jsdelivr.net/npm/@pixi/sound@6.0.1/dist/pixi-sound.mjs",
+    			"easy-live2d": "https://cdn.jsdelivr.net/npm/easy-live2d/dist/index.js"
+  		}
+	}
+	</script>
   
   <!-- Live2D Core -->
   <script src="/live2d/Core/live2dcubismcore.js"></script>
@@ -725,13 +724,13 @@
   <script src="{{ url_for('static', filename='js/index.js') }}"></script>
   
   <!-- Live2D 和面试逻辑 -->
-  <script type="module">
-    import { Application, Ticker } from 'pixi.js';
-    import { Live2DSprite, Config } from 'easy-live2d'
+	<script type="module">
+   		import { Application, Ticker } from 'pixi.js';
+    		import { Live2DSprite, Config } from 'easy-live2d'
 
-    Config.MotionGroupIdle = 'Idle'; 
-    Config.MouseFollow = false;
-    const live2dSprite = new Live2DSprite();
+    		Config.MotionGroupIdle = 'Idle'; 
+    		Config.MouseFollow = false;
+    		const live2dSprite = new Live2DSprite();
     
     let app;
     let interviewActive = false;
@@ -749,36 +748,36 @@
       try {
         await live2dSprite.init({
           modelPath: '/live2d/assets/haru/haru_greeter_t05.model3.json',
-          ticker: Ticker.shared
-        });
+      			ticker: Ticker.shared
+    		});
 
-        function resizeModel() {
-          const canvas = document.getElementById('live2d');
-          
+			function resizeModel() {
+            	const canvas = document.getElementById('live2d');
+
           console.log(window.devicePixelRatio);
           
           const screenWidth = window.innerWidth * window.devicePixelRatio / 1.5;
           const screenHeight = window.innerHeight * window.devicePixelRatio / 1.5;
-          
-          canvas.width = screenWidth;
-          canvas.height = screenHeight;
-          
-          live2dSprite.width = 3 * screenWidth;
-          live2dSprite.height = 3 * screenHeight;
-          live2dSprite.x = -0.75 * screenWidth;
+				
+            	canvas.width = screenWidth;
+            	canvas.height = screenHeight;
+            
+            	live2dSprite.width = 3 * screenWidth;
+				live2dSprite.height = 3 * screenHeight;
+				live2dSprite.x = -0.75 * screenWidth;
           live2dSprite.y = -1.5 * screenHeight;
-        }
+			}
 
-        const canvas = document.getElementById('live2d');
+			const canvas = document.getElementById('live2d');
         app = new Application();
-        await app.init({
-          view: document.getElementById('live2d'),
-          backgroundAlpha: 0, 
-        });
+      				await app.init({
+        				view: document.getElementById('live2d'),
+        				backgroundAlpha: 0, 
+      				});
         
-        window.addEventListener('resize', resizeModel);
-        resizeModel();
-        app.stage.addChild(live2dSprite);
+			window.addEventListener('resize', resizeModel);
+			resizeModel();
+      		app.stage.addChild(live2dSprite);
         
         console.log('Live2D模型加载成功');
         updateStatus('Live2D面试官已就绪');
@@ -1693,6 +1692,6 @@
         toggleSettings();
       }
     });
-  </script>
+  	</script>
 </body>
 </html>

@@ -47,7 +47,7 @@ def example_custom_voice():
     chat = AIVoiceChat()
     
     # 设置不同的发音人（可选）
-    # chat.set_tts_voice("x5_lingfeiyi_flow")  # 默认发音人
+    # chat.set_tts_voice("x4_lingxiaoqi_oral")  # 默认发音人
     
     # 转换文本
     text = "这是使用自定义发音人的测试。"
