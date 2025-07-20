@@ -1,5 +1,346 @@
 // 面试结果页面JavaScript
 
+// 高级粒子系统
+class ParticleSystem {
+    constructor() {
+        this.canvas = document.getElementById('particles-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.mouse = { x: 0, y: 0 };
+        this.init();
+    }
+
+    init() {
+        this.resize();
+        this.createParticles();
+        this.animate();
+        this.addEventListeners();
+    }
+
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    createParticles() {
+        const particleCount = 100;
+        for (let i = 0; i < particleCount; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.5 + 0.2
+            });
+        }
+    }
+
+    animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.particles.forEach(particle => {
+            // 更新位置
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            
+            // 边界检查
+            if (particle.x < 0 || particle.x > this.canvas.width) particle.vx *= -1;
+            if (particle.y < 0 || particle.y > this.canvas.height) particle.vy *= -1;
+            
+            // 绘制粒子
+            this.ctx.beginPath();
+            this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
+            this.ctx.fill();
+            
+            // 鼠标交互
+            const dx = particle.x - this.mouse.x;
+            const dy = particle.y - this.mouse.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 100) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(particle.x, particle.y);
+                this.ctx.lineTo(this.mouse.x, this.mouse.y);
+                this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1 - distance / 100)})`;
+                this.ctx.stroke();
+            }
+        });
+        
+        requestAnimationFrame(() => this.animate());
+    }
+
+    addEventListeners() {
+        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('mousemove', (e) => {
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
+        });
+    }
+}
+
+// 星光系统
+class StarSystem {
+    constructor() {
+        this.container = document.querySelector('.stars-container');
+        this.stars = [];
+        this.init();
+    }
+
+    init() {
+        // 初始创建星星
+        for (let i = 0; i < 50; i++) {
+            this.createStar();
+        }
+        
+        // 定期创建新星星
+        setInterval(() => {
+            this.createStar();
+        }, 2000);
+    }
+
+    createStar() {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // 随机位置
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        
+        star.style.left = x + 'px';
+        star.style.top = y + 'px';
+        
+        // 随机大小和类型
+        const sizes = ['small', 'medium', 'large'];
+        const size = sizes[Math.floor(Math.random() * sizes.length)];
+        star.classList.add(size);
+        
+        // 随机添加彩色效果
+        if (Math.random() > 0.7) {
+            star.classList.add('colorful');
+        }
+        
+        // 随机延迟
+        star.style.animationDelay = Math.random() * 3 + 's';
+        
+        this.container.appendChild(star);
+        this.stars.push(star);
+        
+        // 定期移除星星以控制数量
+        setTimeout(() => {
+            star.remove();
+            this.stars = this.stars.filter(s => s !== star);
+        }, 10000 + Math.random() * 5000);
+    }
+}
+
+// 流星系统
+class MeteorSystem {
+    constructor() {
+        this.container = document.querySelector('.meteor-container');
+        this.meteors = [];
+        this.init();
+    }
+
+    init() {
+        // 初始创建流星
+        for (let i = 0; i < 8; i++) {
+            this.createMeteor();
+        }
+        
+        // 定期创建新流星
+        setInterval(() => {
+            this.createMeteor();
+        }, 800);
+    }
+
+    createMeteor() {
+        const meteor = document.createElement('div');
+        meteor.className = 'meteor';
+        
+        // 随机选择起始位置，让流星分布更自然
+        const startPositions = [
+            { x: -100, y: -100 },           // 左上角
+            { x: -100, y: -50 },            // 左上偏中
+            { x: -100, y: 0 },              // 左上
+            { x: -50, y: -100 },            // 左上偏右
+            { x: 0, y: -100 },              // 正上方
+            { x: window.innerWidth * 0.2, y: -100 },  // 上方偏左
+            { x: window.innerWidth * 0.4, y: -100 },  // 上方中左
+            { x: window.innerWidth * 0.6, y: -100 },  // 上方中右
+            { x: window.innerWidth * 0.8, y: -100 },  // 上方偏右
+        ];
+        
+        const startPos = startPositions[Math.floor(Math.random() * startPositions.length)];
+        const startX = startPos.x;
+        const startY = startPos.y;
+        
+        // 计算结束位置，保持45度角移动
+        const distance = Math.max(window.innerWidth, window.innerHeight) + 200;
+        const endX = startX + distance;
+        const endY = startY + distance;
+        
+        meteor.style.left = startX + 'px';
+        meteor.style.top = startY + 'px';
+        
+        // 随机大小和速度
+        const size = Math.random() * 2 + 3;
+        const duration = Math.random() * 1 + 3; // 增加持续时间，降低频率
+        
+        meteor.style.width = size + 'px';
+        meteor.style.height = size + 'px';
+        
+        // 创建自定义动画
+        const animationName = 'meteor-' + Math.floor(Math.random() * 10000);
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes ${animationName} {
+                0% {
+                    transform: translate(0, 0) rotate(45deg);
+                    opacity: 1;
+                }
+                70% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(${endX - startX}px, ${endY - startY}px) rotate(45deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        meteor.style.animation = `${animationName} ${duration}s linear forwards`;
+        
+        this.container.appendChild(meteor);
+        this.meteors.push(meteor);
+        
+        // 动画结束后移除流星
+        setTimeout(() => {
+            meteor.remove();
+            this.meteors = this.meteors.filter(m => m !== meteor);
+            style.remove();
+        }, duration * 1000);
+    }
+
+    start() {
+        // 降低流星生成频率：从每1-3秒改为每3-8秒
+        this.interval = setInterval(() => {
+            if (this.meteors.length < 3) { // 限制同时存在的流星数量
+                this.createMeteor();
+            }
+        }, Math.random() * 5000 + 3000); // 3-8秒随机间隔
+    }
+}
+
+// 火箭鼠标系统
+class RocketCursorSystem {
+    constructor() {
+        this.cursor = document.getElementById('rocketCursor');
+        this.isVisible = false;
+        this.waveTimer = null;
+        this.init();
+    }
+
+    init() {
+        this.addEventListeners();
+        this.startWaveTimer();
+    }
+
+    addEventListeners() {
+        document.addEventListener('mousemove', (e) => {
+            if (this.cursor) {
+                this.cursor.style.left = e.clientX + 'px';
+                this.cursor.style.top = e.clientY + 'px';
+                
+                if (!this.isVisible) {
+                    this.cursor.style.opacity = '1';
+                    this.isVisible = true;
+                }
+            }
+        });
+
+        document.addEventListener('mouseenter', () => {
+            if (this.cursor) {
+                this.cursor.style.opacity = '1';
+                this.isVisible = true;
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            if (this.cursor) {
+                this.cursor.style.opacity = '0';
+                this.isVisible = false;
+            }
+        });
+
+        // 点击时创建波动效果
+        document.addEventListener('click', (e) => {
+            this.createWave(e.clientX, e.clientY);
+        });
+    }
+
+    startWaveTimer() {
+        // 每3秒自动创建一个波动效果
+        this.waveTimer = setInterval(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            this.createWave(x, y);
+        }, 3000);
+    }
+
+    createWave(x, y) {
+        const wave = document.createElement('div');
+        wave.className = 'rocket-wave';
+        wave.style.left = x + 'px';
+        wave.style.top = y + 'px';
+        document.body.appendChild(wave);
+        
+        setTimeout(() => {
+            wave.remove();
+        }, 2000);
+    }
+}
+
+// 黑洞转场系统
+class BlackholeTransitionSystem {
+    constructor() {
+        this.transition = document.getElementById('blackholeTransition');
+        this.init();
+    }
+
+    init() {
+        // 检查是否从其他页面返回
+        this.checkReturnFromOtherPage();
+    }
+
+    checkReturnFromOtherPage() {
+        // 检查URL参数或sessionStorage中的标记
+        const fromOtherPage = sessionStorage.getItem('fromOtherPage');
+        if (fromOtherPage) {
+            sessionStorage.removeItem('fromOtherPage');
+            this.playReturnAnimation();
+        }
+    }
+
+    playReturnAnimation() {
+        if (this.transition) {
+            this.transition.classList.add('active');
+            this.transition.classList.add('enter');
+            
+            setTimeout(() => {
+                this.transition.classList.remove('active');
+                this.transition.classList.remove('enter');
+            }, 500);
+        }
+    }
+
+    static triggerReturnTransition() {
+        sessionStorage.setItem('fromOtherPage', 'true');
+    }
+}
+
 // 模块配置
 const MODULE_CONFIG = {
     self_introduction: { name: '个人介绍', maxScore: 10 },
@@ -22,6 +363,13 @@ let isAnimating = false;
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     console.log('面试结果页面初始化开始...');
+    
+    // 初始化背景系统
+    new ParticleSystem();
+    new StarSystem();
+    new MeteorSystem();
+    new RocketCursorSystem();
+    new BlackholeTransitionSystem();
     
     // 初始化滑动控制器
     initCarousel();

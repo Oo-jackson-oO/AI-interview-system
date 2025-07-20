@@ -9,6 +9,122 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- 火箭鼠标样式 -->
+    <div class="rocket-cursor" id="rocketCursor">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body"></div>
+        <div class="rocket-fins"></div>
+        <div class="rocket-engine"></div>
+    </div>
+    
+    <!-- 黑洞转场效果 -->
+    <div class="blackhole-transition" id="blackholeTransition">
+        <div class="blackhole-circle"></div>
+        <div class="blackhole-vortex"></div>
+        <div class="blackhole-streams">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+
+    <!-- 高级粒子效果容器 -->
+    <div class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- 背景流星效果 -->
+    <div class="meteor-container"></div>
+    
+    <!-- 星光特效 -->
+    <div class="stars-container"></div>
+    
+    <!-- 星空装饰元素 -->
+    <!-- 行星悬浮 -->
+    <div class="planet saturn"></div>
+    <div class="planet jupiter"></div>
+    
+    <!-- 火箭 -->
+    <div class="telescope"></div>
+    
+    <!-- 观星小人 -->
+    <div class="stargazer"></div>
+    
+    <!-- 星座图案 -->
+    <div class="constellation orion">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 0%; left: 30%;"></div>   <!-- Bellatrix -->
+        <div class="star" style="top: 20%; left: 40%;"></div>  <!-- Alnilam -->
+        <div class="star" style="top: 40%; left: 35%;"></div>  <!-- Mintaka -->
+        <div class="star" style="top: 30%; left: 20%;"></div>  <!-- Alnitak -->
+        <div class="star" style="top: 60%; left: 10%;"></div>  <!-- Saiph -->
+        <div class="star" style="top: 70%; left: 50%;"></div>  <!-- Rigel -->
+        <div class="star" style="top: 20%; left: 10%;"></div>  <!-- Betelgeuse -->
+
+        <!-- 线段连接（用绝对定位和 transform 绘制虚线） -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="30" y1="0" x2="40" y2="20" />
+            <line x1="40" y1="20" x2="35" y2="40" />
+            <line x1="20" y1="30" x2="40" y2="20" />
+            <line x1="10" y1="20" x2="20" y2="30" />
+            <line x1="10" y1="20" x2="30" y2="0" />
+            <line x1="10" y1="60" x2="20" y2="30" />
+            <line x1="35" y1="40" x2="50" y2="70" />
+        </svg>
+    </div>
+    <div class="constellation big-dipper">
+        <!-- 星星节点 -->
+        <div class="star" style="top: 20%; left: 0%;"></div>    <!-- 星1 -->
+        <div class="star" style="top: 10%; left: 25%;"></div>   <!-- 星2 -->
+        <div class="star" style="top: 20%; left: 50%;"></div>   <!-- 星3 -->
+        <div class="star" style="top: 10%; left: 75%;"></div>   <!-- 星4 -->
+        <div class="star" style="top: 20%; left: 100%;"></div>  <!-- 星5 -->
+      
+        <!-- 连接线 -->
+        <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="0" y1="20" x2="25" y2="10" />
+            <line x1="25" y1="10" x2="50" y2="20" />
+            <line x1="50" y1="20" x2="75" y2="10" />
+            <line x1="75" y1="10" x2="100" y2="20" />
+        </svg>
+    </div>
+    
+    <!-- 流星痕迹 -->
+    <div class="meteor-trail left"></div>
+    <div class="meteor-trail right"></div>
+    <div class="meteor-trail center"></div>
+    
+    <!-- 空间站 -->
+    <div class="space-station right"></div>
+
     <!-- 星空背景 -->
     <div class="stars-container">
         <div class="star star-1"></div>
