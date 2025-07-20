@@ -546,6 +546,47 @@ def get_pdf_info(filename):
             return jsonify({'error': '文件不存在'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+@app.route('/interview-result')
+@login_required
+def interview_result_page():
+    """面试结果分析页面"""
+    return render_template('interview_result.html')
+
+@app.route('/api/interview-result/data')
+@login_required
+def get_interview_result_data():
+    """获取面试结果数据"""
+    try:
+        # 获取当前登录用户
+        current_user = session.get('user', {})
+        username = current_user.get('username', 'unknown_user')
+        
+        # 检查用户文件夹中的分析文件
+        user_folder = os.path.join('uploads', username)
+        
+        # 检查三个JSON文件是否存在
+        files_to_check = [
+            'interview_summary_report.json',
+            'facial_analysis_report.json', 
+            'analysis_result.json'
+        ]
+        
+        available_files = []
+        for filename in files_to_check:
+            file_path = os.path.join(user_folder, filename)
+            if os.path.exists(file_path):
+                available_files.append(filename)
+        
+        return jsonify({
+            'success': True,
+            'username': username,
+            'available_files': available_files,
+            'user_folder': user_folder
+        })
+        
+    except Exception as e:
+        print(f"获取面试结果数据失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'获取数据失败: {str(e)}'})
 
 @app.route('/book-reader')
 @login_required
@@ -1020,7 +1061,7 @@ def start_voice_analysis():
         import real_time_analyzer
         RealTimeVoiceAnalyzer = real_time_analyzer.RealTimeVoiceAnalyzer
         
-        # 为用户创建分析实例
+        # 创建分析实例
         analyzer = RealTimeVoiceAnalyzer()
         analyzer.is_recording = True  # 标记为录音状态
         app.voice_analyzers[username] = analyzer
@@ -1113,6 +1154,21 @@ def stop_voice_analysis():
         current_user = session.get('user', {})
         username = current_user.get('username', 'unknown_user')
         
+        data = request.get_json() or {}
+        browser_mode = data.get('browser_mode', False)
+        
+        if browser_mode:
+            # 浏览器模式：只需要清理状态
+            if hasattr(app, 'voice_analyzers') and username in app.voice_analyzers:
+                del app.voice_analyzers[username]
+            
+            return jsonify({
+                'success': True,
+                'message': '语调分析状态已清理',
+                'browser_mode': True
+            })
+        
+        # 原始服务器端模式（保留兼容性）
         if hasattr(app, 'voice_analyzers') and username in app.voice_analyzers:
             analyzer = app.voice_analyzers[username]
             analyzer.stop_flask_recording()
@@ -1207,29 +1263,15 @@ def get_voice_analysis_status():
         print(f"获取语调分析状态失败: {str(e)}")
         return jsonify({'success': False, 'message': f'获取状态失败: {str(e)}'})
 
-<<<<<<< HEAD
 @app.route('/api/interview/analyze-photo', methods=['POST'])
 @login_required
 def analyze_photo():
     """分析浏览器发送的照片"""
-=======
-@app.route('/interview-result')
-@login_required
-def interview_result_page():
-    """面试结果分析页面"""
-    return render_template('interview_result.html')
-
-@app.route('/api/interview-result/data')
-@login_required
-def get_interview_result_data():
-    """获取面试结果数据"""
->>>>>>> bfb423d75f5e17bf45c837f2959b173d00a4dcf7
     try:
         # 获取当前登录用户
         current_user = session.get('user', {})
         username = current_user.get('username', 'unknown_user')
         
-<<<<<<< HEAD
         if 'image' not in request.files:
             return jsonify({'success': False, 'message': '没有上传图片'})
         
@@ -1314,8 +1356,76 @@ def analyze_audio():
             audio_file.save(temp_file.name)
             temp_filepath = temp_file.name
         
+        print(f"音频文件已保存到临时路径: {temp_filepath}")
+        print(f"原始文件大小: {os.path.getsize(temp_filepath)} bytes")
+        
         try:
-            # 这里需要转换webm到wav格式，用于分析
+            # 转换webm到wav格式
+            import subprocess
+            import tempfile
+            
+            # 创建临时wav文件
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as wav_file:
+                wav_filepath = wav_file.name
+            
+            print(f"目标WAV文件路径: {wav_filepath}")
+            
+            # 使用ffmpeg转换（如果有的话）
+            conversion_success = False
+            try:
+                # 尝试使用ffmpeg转换
+                print("尝试使用FFmpeg转换...")
+                result = subprocess.run([
+                    'ffmpeg', '-i', temp_filepath, '-ar', '22050', '-ac', '1', 
+                    '-acodec', 'pcm_s16le', wav_filepath, '-y'
+                ], capture_output=True, text=True, timeout=30)
+                
+                if result.returncode == 0:
+                    print("FFmpeg转换成功")
+                    conversion_success = True
+                else:
+                    print(f"FFmpeg转换失败: {result.stderr}")
+                
+            except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+                print(f"FFmpeg不可用: {e}")
+            
+            # 如果FFmpeg失败，使用librosa
+            if not conversion_success:
+                print("使用librosa进行音频转换...")
+                try:
+                    import librosa
+                    import soundfile as sf
+                    print(f"开始加载音频文件: {temp_filepath}")
+                    
+                    # 检查原始文件是否可读
+                    if not os.path.exists(temp_filepath):
+                        raise FileNotFoundError(f"临时文件不存在: {temp_filepath}")
+                    
+                    audio_data, sr = librosa.load(temp_filepath, sr=22050)
+                    print(f"音频加载成功，采样率: {sr}, 数据长度: {len(audio_data)}, 时长: {len(audio_data)/sr:.2f}秒")
+                    
+                    if len(audio_data) == 0:
+                        raise ValueError("音频数据为空")
+                    
+                    sf.write(wav_filepath, audio_data, sr)
+                    print(f"音频已转换并保存为: {wav_filepath}")
+                    conversion_success = True
+                    
+                except Exception as librosa_error:
+                    print(f"Librosa处理失败: {librosa_error}")
+                    import traceback
+                    traceback.print_exc()
+                    return jsonify({
+                        'success': False, 
+                        'message': f'音频转换失败: {str(librosa_error)}'
+                    })
+            
+            if not conversion_success:
+                return jsonify({
+                    'success': False, 
+                    'message': '音频转换失败，请检查音频格式'
+                })
+            
             # 导入语调分析模块
             current_dir = os.path.dirname(os.path.abspath(__file__))
             voice_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview', '语调识别', 'Speech-Analysis')
@@ -1330,22 +1440,56 @@ def analyze_audio():
             # 创建分析实例
             analyzer = RealTimeVoiceAnalyzer()
             
-            # 这里需要实现webm到wav的转换，暂时返回成功
-            # TODO: 添加音频格式转换和分析逻辑
+            # 检查wav文件是否存在和有效
+            if not os.path.exists(wav_filepath):
+                raise FileNotFoundError(f"转换后的WAV文件不存在: {wav_filepath}")
             
-            return jsonify({
-                'success': True,
-                'analysis': {
-                    'message': '音频已接收，正在处理中...',
-                    'format': 'webm',
-                    'size': len(audio_file.read())
-                }
-            })
+            file_size = os.path.getsize(wav_filepath)
+            if file_size < 1000:  # 小于1KB可能是空文件
+                raise ValueError(f"WAV文件太小，可能转换失败: {file_size} bytes")
+            
+            print(f"开始分析WAV文件: {wav_filepath} (大小: {file_size} bytes)")
+            
+            # 使用语音分析器分析转换后的wav文件
+            result = analyzer.analyzer.analyze_voice(wav_filepath)
+            print(f"分析结果类型: {type(result)}")
+            
+            if result and "错误" not in str(result):
+                print("音频分析成功，开始格式化结果...")
+                # 格式化结果
+                formatted_result = analyzer.format_result_for_json(result)
+                
+                # 保存分析结果到用户文件夹
+                user_folder = os.path.join('uploads', username)
+                os.makedirs(user_folder, exist_ok=True)
+                
+                report_path = os.path.join(user_folder, 'voice_analysis_result.json')
+                
+                with open(report_path, 'w', encoding='utf-8') as f:
+                    json.dump(formatted_result, f, ensure_ascii=False, indent=2)
+                
+                print(f"✅ 语调分析完成，结果已保存到: {report_path}")
+                
+                return jsonify({
+                    'success': True,
+                    'analysis': formatted_result,
+                    'message': '语调分析完成',
+                    'saved_path': 'voice_analysis_result.json'
+                })
+            else:
+                error_msg = result.get('错误', '分析失败') if isinstance(result, dict) else '音频处理失败'
+                print(f"分析失败: {error_msg}")
+                return jsonify({
+                    'success': False, 
+                    'message': f'语调分析失败: {error_msg}'
+                })
                 
         finally:
             # 清理临时文件
             try:
                 os.unlink(temp_filepath)
+                if 'wav_filepath' in locals():
+                    os.unlink(wav_filepath)
             except:
                 pass
         
@@ -1386,34 +1530,6 @@ def save_voice_analysis():
     except Exception as e:
         print(f"保存语调分析结果失败: {str(e)}")
         return jsonify({'success': False, 'message': f'保存失败: {str(e)}'})
-=======
-        # 检查用户文件夹中的分析文件
-        user_folder = os.path.join('uploads', username)
-        
-        # 检查三个JSON文件是否存在
-        files_to_check = [
-            'interview_summary_report.json',
-            'facial_analysis_report.json', 
-            'analysis_result.json'
-        ]
-        
-        available_files = []
-        for filename in files_to_check:
-            file_path = os.path.join(user_folder, filename)
-            if os.path.exists(file_path):
-                available_files.append(filename)
-        
-        return jsonify({
-            'success': True,
-            'username': username,
-            'available_files': available_files,
-            'user_folder': user_folder
-        })
-        
-    except Exception as e:
-        print(f"获取面试结果数据失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'获取数据失败: {str(e)}'})
->>>>>>> bfb423d75f5e17bf45c837f2959b173d00a4dcf7
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1327,6 +1327,8 @@
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.webm');
         
+        console.log('📤 发送音频数据进行分析...');
+        
         const response = await fetch('/api/interview/analyze-audio', {
           method: 'POST',
           body: formData
@@ -1336,23 +1338,24 @@
         if (result.success) {
           console.log('🎵 语调分析完成:', result.analysis);
           
-          // 保存分析结果
-          if (result.analysis) {
-            const saveResponse = await fetch('/api/interview/save-voice-analysis', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ analysis: result.analysis })
-            });
-            
-            if (saveResponse.ok) {
-              console.log('✅ 语调分析结果已保存');
-            }
+          // 显示分析结果通知
+          if (result.analysis && result.analysis.analysis_info) {
+            const overallScore = result.analysis.analysis_info.overall_score || 0;
+            showNotification(`🎤 语调分析完成！综合得分: ${overallScore.toFixed(2)}/1.0`, 'success');
+          } else {
+            showNotification('🎤 语调分析完成，结果已保存', 'success');
           }
+          
+          // 更新调试信息
+          updateDebugInfo();
+          
+        } else {
+          console.error('❌ 分析失败:', result.message);
+          showNotification('语调分析失败: ' + result.message, 'error');
         }
       } catch (error) {
         console.error('音频分析失败:', error);
+        showNotification('音频分析时发生错误', 'error');
       }
     }
     
@@ -1365,48 +1368,50 @@
       try {
         console.log('🛑 停止语调分析...');
         
+        // 停止录音
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          // 等待录音数据处理完成
+          await new Promise(resolve => {
+            mediaRecorder.onstop = async () => {
+              if (recordedChunks.length > 0) {
+                const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                console.log('🎵 开始分析录音数据...');
+                await sendAudioForAnalysis(audioBlob);
+              }
+              resolve();
+            };
+          });
+        }
+        
+        // 停止麦克风流
+        if (audioStream) {
+          audioStream.getTracks().forEach(track => track.stop());
+          audioStream = null;
+        }
+        
+        voiceAnalysisRunning = false;
+        isRecording = false;
+        stopVoiceStatusMonitoring();
+        
+        // 通知后端停止状态监控
         const response = await fetch('/api/interview/stop-voice-analysis', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          body: JSON.stringify({ browser_mode: true })
         });
         
         const data = await response.json();
         
-        if (data.success) {
-          voiceAnalysisRunning = false;
-          isRecording = false;
-          stopVoiceStatusMonitoring();
-          
-          // 停止录音
-          if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-          }
-          
-          // 停止麦克风流
-          if (audioStream) {
-            audioStream.getTracks().forEach(track => track.stop());
-            audioStream = null;
-          }
-          
-          console.log('✅ 语调分析已停止:', data.message);
-          console.log('📊 分析结果:', data.result);
-          
-          updateDebugInfo();
-          updateVoiceAnalysisButton();
-          
-          // 显示停止通知和结果摘要
-          if (data.result && data.result.analysis_info) {
-            const overallScore = data.result.analysis_info.overall_score || 0;
-            showNotification(`🎤 语调分析完成！综合得分: ${overallScore.toFixed(2)}/1`, 'success');
-          } else {
-            showNotification('🎤 语调分析已停止', 'success');
-          }
-        } else {
-          console.error('❌ 停止失败:', data.message);
-          showNotification('停止语调分析失败: ' + data.message, 'error');
-        }
+        console.log('✅ 语调分析已停止');
+        updateDebugInfo();
+        updateVoiceAnalysisButton();
+        
+        // 显示停止通知
+        showNotification('🎤 语调分析已停止，正在处理数据...', 'success');
+        
       } catch (error) {
         console.error('停止语调分析错误:', error);
         showNotification('停止分析时发生错误', 'error');
