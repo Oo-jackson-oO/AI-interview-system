@@ -242,7 +242,7 @@ class InterviewAgent:
 3. 专业能力测试
 
 要求：
-1. 每个板块生成1-2道题目
+1. 每个板块生成1道题目
 2. 题目按重要性排序
 3. 严格模式下题目难度大幅提高
 4. 结合目标公司特点设计相关问题
@@ -251,16 +251,13 @@ class InterviewAgent:
 返回格式示例：
 {{
     "能力评估": [
-        {{"question": "请描述您解决过的最复杂的技术问题", "importance": 1, "difficulty": "medium"}},
-        {{"question": "您如何评估自己的学习能力？", "importance": 2, "difficulty": "easy"}}
+        {{"question": "请描述您解决过的最复杂的技术问题", "importance": 1, "difficulty": "medium"}}
     ],
     "岗位匹配度": [
-        {{"question": "您认为这个岗位最需要哪些技能？", "importance": 1, "difficulty": "medium"}},
-        {{"question": "您为什么选择这个岗位？", "importance": 2, "difficulty": "easy"}}
+        {{"question": "您认为这个岗位最需要哪些技能？", "importance": 1, "difficulty": "medium"}}
     ],
     "专业能力测试": [
-        {{"question": "请解释Python中的装饰器模式", "importance": 1, "difficulty": "hard"}},
-        {{"question": "Django和Flask的区别是什么？", "importance": 2, "difficulty": "medium"}}
+        {{"question": "请解释Python中的装饰器模式", "importance": 1, "difficulty": "hard"}}
     ]
 }}"""
         
@@ -331,7 +328,7 @@ class InterviewAgent:
 严格模式：{'是' if self.interview_config['strict_mode'] else '否'}
 
 要求：
-1. 生成2-3道简历深挖题目
+1. 生成1-2道简历深挖题目
 2. 题目按重要性排序
 3. 重点关注工作经验、技能匹配度、项目经历
 4. 严格模式下增加挑战性问题
@@ -343,8 +340,7 @@ class InterviewAgent:
     "candidate_name": "{candidate_name if candidate_name else ''}",
     "简历深挖": [
         {{"question": "您在贵泽实业有限公司担任行政主管期间，最大的挑战是什么？", "importance": 1, "difficulty": "medium", "focus_area": "工作经验"}},
-        {{"question": "您如何管理团队和协调各部门工作？", "importance": 2, "difficulty": "medium", "focus_area": "管理能力"}},
-        {{"question": "您的英语六级证书对当前岗位有什么帮助？", "importance": 3, "difficulty": "easy", "focus_area": "技能匹配"}}
+        {{"question": "您如何管理团队和协调各部门工作？", "importance": 2, "difficulty": "medium", "focus_area": "管理能力"}}
     ]
 }}"""
         

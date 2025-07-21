@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>easy-live2d 示例</title>
+  <style>
+    canvas {
+      width: 100vw;
+      height: 100vh;
+	  background-color:transparent;
+    }
+  </style>
+</head>
+<body>
+	<div class="container">
+        <div class="header">
+            <h1>🎤 语音合成系统</h1>
+            <p>基于讯飞语音合成API，合成完成后自动播放</p>
+        </div>
+        
+        <div class="voice-info">
+            <strong>🎭 配音员：聆小琪 (x4_lingxiaoqi_oral)</strong>
+        </div>
+        
+        <div class="auto-play-notification">
+            💡 音频将在合成完成后自动播放，请确保已允许浏览器自动播放音频
+        </div>
+        
+        <div class="input-group">
+            <label for="textInput">📝 请输入要合成的文本：</label>
+            <textarea 
+                id="textInput" 
+                class="text-input" 
+                placeholder="在这里输入您想要转换为语音的文字..."
+                maxlength="500"
+            ></textarea>
+        </div>
+        
+        <div class="button-group">
+            <button id="synthesizeBtn" class="btn btn-primary">
+                🚀 开始合成
+            </button>
+            <button id="stopBtn" class="btn btn-secondary" disabled>
+                ⏹️ 停止播放
+            </button>
+        </div>
+        
+        <div class="status-panel">
+            <div class="status-item">
+                <span>连接状态：</span>
+                <span id="connectionStatus">🔴 未连接</span>
+            </div>
+            <div class="status-item">
+                <span>合成状态：</span>
+                <span id="synthesisStatus">⏸️ 待机中</span>
+            </div>
+            <div class="status-item">
+                <span>音频块数：</span>
+                <span id="audioChunks">0</span>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        
+        <audio id="audioPlayer" class="audio-player" controls style="display: none;"></audio>
+
+    </div>
+
+  	<canvas id="live2d"></canvas>
+
+
+  	<script type="importmap">
+	{
+  		"imports": {
+    			"pixi.js": "https://cdn.jsdelivr.net/npm/pixi.js/dist/pixi.min.mjs",
+    			"@pixi/sound": "https://cdn.jsdelivr.net/npm/@pixi/sound@6.0.1/dist/pixi-sound.mjs",
+    			"easy-live2d": "https://cdn.jsdelivr.net/npm/easy-live2d/dist/index.js"
+  		}
+	}
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  	<script src="/Core/live2dcubismcore.js"></script>
+	<script type="module">
+   			import { Application, Ticker } from 'pixi.js';
+    		import { Live2DSprite, Config } from 'easy-live2d'
+
+    		Config.MotionGroupIdle = 'Idle'; 
+    		Config.MouseFollow = false;
+    		const live2dSprite = new Live2DSprite();
+
+    		live2dSprite.init({
+      			modelPath: '/assets/haru/haru_greeter_t05.model3.json',
+      			ticker: Ticker.shared
+    		});
+
+			function resizeModel() {
+            	const canvas = document.getElementById('live2d');
+
+				const screenWidth = window.innerWidth * window.devicePixelRatio / 1.5;
+				const screenHeight = window.innerHeight * window.devicePixelRatio / 1.5;
+				
+            	canvas.width = screenWidth;
+            	canvas.height = screenHeight;
+            
+            	live2dSprite.width = 3 * screenWidth;
+				live2dSprite.height = 3 * screenHeight;
+				live2dSprite.x = -0.75 * screenWidth;
+				live2dSprite.y = -1.5 *screenHeight;
+			}
+
+			const canvas = document.getElementById('live2d');
+      			const app = new Application();
+      				await app.init({
+        				view: document.getElementById('live2d'),
+        				backgroundAlpha: 0, 
+      				});
+			window.addEventListener('resize', resizeModel);
+			resizeModel();
+      		app.stage.addChild(live2dSprite);
+
+			document.addEventListener('DOMContentLoaded', () => {
+            	new TTSClient();
+        	});
+
+			window.addEventListener("keydown", function(event) {
+				if (event.keyCode === 13) { 
+					console.log("voice debug");
+					const music = new Audio('/assets/haru/test.wav');
+					music.play();
+				}
+			});
+	
+
+			function createWAVHeader(dataLength, sampleRate = 24000, channels = 1, bitsPerSample = 16) {
+    const buffer = new ArrayBuffer(44);
+    const view = new DataView(buffer);
+    
+    // RIFF chunk descriptor
+    view.setUint32(0, 0x52494646, false); // "RIFF"
+    view.setUint32(4, 36 + dataLength, true); // File size - 8
+    view.setUint32(8, 0x57415645, false); // "WAVE"
+    
+    // fmt sub-chunk
+    view.setUint32(12, 0x666d7420, false); // "fmt "
+    view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
+    view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
+    view.setUint16(22, channels, true); // NumChannels
+    view.setUint32(24, sampleRate, true); // SampleRate
+    view.setUint32(28, sampleRate * channels * bitsPerSample / 8, true); // ByteRate
+    view.setUint16(32, channels * bitsPerSample / 8, true); // BlockAlign
+    view.setUint16(34, bitsPerSample, true); // BitsPerSample
+    
+    // data sub-chunk
+    view.setUint32(36, 0x64617461, false); // "data"
+    view.setUint32(40, dataLength, true); // Subchunk2Size
+    
+    return new Uint8Array(buffer);
+}
+
+function createWAVFile(pcmData) {
+    const wavHeader = createWAVHeader(pcmData.length);
+    const wavFile = new Uint8Array(wavHeader.length + pcmData.length);
+    wavFile.set(wavHeader, 0);
+    wavFile.set(pcmData, wavHeader.length);
+    return wavFile;
+}
+
+		class TTSClient {
+            constructor() {
+                this.socket = null;
+                this.isConnected = false;
+                this.isSynthesizing = false;
+                this.audioChunks = [];
+                this.currentSessionId = null;
+                this.currentAudio = null;
+                this.wavFile = null;
+                
+                this.initializeElements();
+                this.connectWebSocket();
+                this.setupEventListeners();
+            }
+            
+            initializeElements() {
+                this.textInput = document.getElementById('textInput');
+                this.synthesizeBtn = document.getElementById('synthesizeBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.connectionStatus = document.getElementById('connectionStatus');
+                this.synthesisStatus = document.getElementById('synthesisStatus');
+                this.audioChunksCount = document.getElementById('audioChunks');
+                this.progressFill = document.getElementById('progressFill');
+                this.audioPlayer = document.getElementById('audioPlayer');
+            }
+            
+            connectWebSocket() {
+                this.socket = io();
+                
+                this.socket.on('connect', () => {
+                    this.isConnected = true;
+                    this.connectionStatus.textContent = '🟢 已连接';
+                    this.log('WebSocket连接成功', 'success');
+                });
+                
+                this.socket.on('disconnect', () => {
+                    this.isConnected = false;
+                    this.connectionStatus.textContent = '🔴 已断开';
+                    this.log('WebSocket连接断开', 'error');
+                });
+                
+                this.socket.on('audio_chunk', (data) => {
+                    this.handleAudioChunk(data);
+                });
+                
+                this.socket.on('synthesis_complete', (data) => {
+                    this.handleSynthesisComplete(data);
+                });
+                
+                this.socket.on('synthesis_error', (data) => {
+                    this.handleSynthesisError(data);
+                });
+            }
+            
+            setupEventListeners() {
+                this.synthesizeBtn.addEventListener('click', () => {
+                    this.startSynthesis();
+                });
+                
+                this.stopBtn.addEventListener('click', () => {
+                    this.stopPlayback();
+                });
+                
+                this.textInput.addEventListener('input', () => {
+                    const length = this.textInput.value.length;
+                    if (length > 450) {
+                        this.textInput.style.borderColor = '#ffc107';
+                    } else {
+                        this.textInput.style.borderColor = '#e1e5e9';
+                    }
+                });
+            }
+            
+            async startSynthesis() {
+                const text = this.textInput.value.trim();
+                
+                if (!text) {
+                    alert('请输入要合成的文本');
+                    return;
+                }
+                
+                if (!this.isConnected) {
+                    alert('WebSocket未连接，请刷新页面重试');
+                    return;
+                }
+                
+                if (this.isSynthesizing) {
+                    alert('正在合成中，请稍候');
+                    return;
+                }
+                
+                this.isSynthesizing = true;
+                this.audioChunks = [];
+                this.progressFill.style.width = '0%';
+                this.audioPlayer.style.display = 'none';
+                this.wavFile = null;
+                this.updateUI();
+                
+                try {
+                    const response = await fetch('/api/tts/synthesize', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: text,
+                            client_id: this.socket.id
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.currentSessionId = result.session_id;
+                        console.log(`开始合成WAV音频: ${text.substring(0, 50)}...`, 'info');
+                    } else {
+                        throw new Error(result.message);
+                    }
+                    
+                } catch (error) {
+                    console.log('合成请求失败: ' + error.message, 'error');
+                    this.isSynthesizing = false;
+                    this.updateUI();
+                }
+            }
+            
+            handleAudioChunk(data) {
+                if (data.session_id !== this.currentSessionId) {
+                    return;
+                }
+                
+                this.audioChunks.push(data);
+                this.audioChunksCount.textContent = data.chunk_number;
+                
+                // 更新进度条（基于接收到的音频块数量）
+                if (data.chunk_number > 0) {
+                    const progressPercent = Math.min(90, (data.chunk_number / 20) * 90); // 最多到90%，留10%给合成完成
+                    this.progressFill.style.width = progressPercent + '%';
+                }
+                
+                console.log(`收到WAV音频块 #${data.chunk_number}`, 'info');
+            }
+            
+            handleSynthesisComplete(data) {
+                if (data.session_id !== this.currentSessionId) {
+                    return;
+                }
+                
+                this.isSynthesizing = false;
+                this.progressFill.style.width = '100%';
+                
+                console.log(`WAV音频合成完成，共 ${data.total_chunks} 个音频块`, 'success');
+                
+                // 合成完成后立即生成并播放WAV文件
+                if (this.audioChunks.length > 0) {
+                    this.createAndPlayWAVFile();
+                }
+                
+                this.updateUI();
+            }
+            
+            createAndPlayWAVFile() {
+                try {
+                    console.log('正在生成WAV音频文件...', 'info');
+                    
+                    // 合并所有PCM音频块
+                    const allPCMData = this.audioChunks.map(chunk => {
+                        const binaryString = atob(chunk.audio_data);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        return bytes;
+                    });
+                    
+                    // 计算总长度并合并PCM数据
+                    const totalLength = allPCMData.reduce((sum, arr) => sum + arr.length, 0);
+                    const mergedPCM = new Uint8Array(totalLength);
+                    
+                    let offset = 0;
+                    for (const data of allPCMData) {
+                        mergedPCM.set(data, offset);
+                        offset += data.length;
+                    }
+                    
+                    // 创建WAV文件（添加WAV头部）
+                    this.wavFile = createWAVFile(mergedPCM);
+                    const wavBlob = new Blob([this.wavFile], { type: 'audio/wav' });
+                    const url = URL.createObjectURL(wavBlob);
+                    
+					if(this.audioPlayer.src) {
+						URL.revokeObjectURL(this.audioPlayer.src);
+					}
+
+                    // 设置音频播放器并自动播放
+                    this.audioPlayer.src = url;
+                    this.audioPlayer.style.display = 'block';
+                    
+                    live2dSprite.playVoice({
+        				voicePath: url,
+        				immediate: true
+      				})
+                    
+                    console.log(`WAV文件已生成 (${(this.wavFile.length / 1024).toFixed(1)} KB)`, 'success');
+                    
+                } catch (error) {
+                    console.log('生成WAV文件失败: ' + error.message, 'error');
+                }
+            }
+            
+            downloadWAVFile() {
+                if (!this.wavFile) {
+                    this.log('没有可下载的WAV文件', 'error');
+                    return;
+                }
+                
+                try {
+                    const blob = new Blob([this.wavFile], { type: 'audio/wav' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    
+                    // 生成文件名
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    const filename = `tts_audio_${timestamp}.wav`;
+                    
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    URL.revokeObjectURL(url);
+                    this.log(`WAV文件已下载: ${filename}`, 'success');
+                    
+                } catch (error) {
+                    this.log('下载失败: ' + error.message, 'error');
+                }
+            }
+            
+            handleSynthesisError(data) {
+                if (data.session_id !== this.currentSessionId) {
+                    return;
+                }
+                
+                this.isSynthesizing = false;
+                this.log('合成错误: ' + data.error, 'error');
+                this.updateUI();
+            }
+            
+            stopPlayback() {
+                // 停止当前播放
+                if (this.audioPlayer.src) {
+                    this.audioPlayer.pause();
+                    this.audioPlayer.currentTime = 0;
+                    this.stopBtn.disabled = true;
+                    this.log('播放已停止', 'info');
+                }
+            }
+            
+            updateUI() {
+                this.synthesizeBtn.disabled = this.isSynthesizing;
+                
+                if (this.isSynthesizing) {
+                    this.synthesisStatus.textContent = '🔄 合成中...';
+                    this.synthesizeBtn.classList.add('synthesizing');
+                    this.stopBtn.disabled = true;
+                } else {
+                    this.synthesisStatus.textContent = '⏸️ 待机中';
+                    this.synthesizeBtn.classList.remove('synthesizing');
+                }
+            }
+            
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = `[${timestamp}] ${message}`;
+            }
+        }
+        
+  	</script>
+</body>
+</html>

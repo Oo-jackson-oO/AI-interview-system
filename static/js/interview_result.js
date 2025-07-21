@@ -572,43 +572,55 @@ async function loadInterviewData() {
     console.log('开始加载面试数据...');
     
     try {
-        // 获取当前用户名（这里需要根据实际登录状态获取）
-        const username = getCurrentUsername();
-        if (!username) {
-            console.error('未找到用户名');
-            return;
+        // 获取面试结果数据（包含所有文件的内容）
+        const dataResponse = await fetch('/api/interview-result/data');
+        if (!dataResponse.ok) {
+            throw new Error(`获取数据失败: ${dataResponse.status}`);
         }
         
-        console.log(`加载用户 ${username} 的面试数据...`);
+        const resultData = await dataResponse.json();
+        console.log('面试结果数据:', resultData);
         
-        // 首先检查用户是否有可用的数据文件
-        const dataCheckResponse = await fetch('/api/interview-result/data');
-        if (!dataCheckResponse.ok) {
-            throw new Error(`检查数据文件失败: ${dataCheckResponse.status}`);
+        if (!resultData.success) {
+            throw new Error(resultData.message || '获取面试数据失败');
         }
         
-        const dataCheck = await dataCheckResponse.json();
-        console.log('数据文件检查结果:', dataCheck);
+        const fileData = resultData.file_data || {};
+        const summaryData = resultData.summary_data || {};
         
-        if (!dataCheck.success) {
-            throw new Error(dataCheck.message || '检查数据文件失败');
+        console.log('可用文件:', resultData.available_files);
+        console.log('面试总结数据:', summaryData);
+        
+        // 如果有面试总结报告，使用新的数据结构
+        if (summaryData && summaryData.section_evaluations) {
+            console.log('✅ 使用面试总结报告数据');
+            
+            // 从面试总结报告中提取模块数据
+            moduleData = extractModuleDataFromSummary(summaryData);
+            
+            // 补充其他分析数据
+            if (fileData['facial_analysis_report.json']) {
+                addFacialAnalysisData(moduleData, fileData['facial_analysis_report.json']);
+            }
+            
+            if (fileData['voice_analysis_result.json']) {
+                addVoiceAnalysisData(moduleData, fileData['voice_analysis_result.json']);
+            }
+            
+        } else {
+            console.log('⚠️ 使用传统数据结构');
+            
+            // 使用传统方式加载数据（向后兼容）
+            const [facialData, voiceData] = await Promise.all([
+                loadJSONFileFromData(fileData, 'facial_analysis_report.json'),
+                loadJSONFileFromData(fileData, 'voice_analysis_result.json')
+            ]);
+            
+            // 合并数据
+            moduleData = mergeTraditionalData(facialData, voiceData);
         }
         
-        // 加载三个JSON文件
-        const [summaryData, facialData, voiceData] = await Promise.all([
-            loadJSONFile(`/uploads/${username}/interview_summary_report.json`),
-            loadJSONFile(`/uploads/${username}/facial_analysis_report.json`),
-            loadJSONFile(`/uploads/${username}/analysis_result.json`)
-        ]);
-        
-        console.log('JSON文件加载完成:');
-        console.log('summaryData:', summaryData);
-        console.log('facialData:', facialData);
-        console.log('voiceData:', voiceData);
-        
-        // 合并数据
-        moduleData = mergeModuleData(summaryData, facialData, voiceData);
-        console.log('合并后的模块数据:', moduleData);
+        console.log('最终模块数据:', moduleData);
         
         // 更新UI
         updateModuleScores();
@@ -621,204 +633,188 @@ async function loadInterviewData() {
         // 显示错误信息
         const evaluationElement = document.getElementById('totalEvaluation');
         if (evaluationElement) {
-            evaluationElement.textContent = '数据加载失败，请检查网络连接或登录状态';
+            evaluationElement.textContent = '数据加载失败，请检查网络连接或稍后重试';
         }
     }
 }
 
-// 获取当前用户名
-function getCurrentUsername() {
-    // 尝试从URL参数获取用户名
-    const urlParams = new URLSearchParams(window.location.search);
-    const userFromUrl = urlParams.get('user');
+// 从面试总结报告中提取模块数据
+function extractModuleDataFromSummary(summaryData) {
+    const sectionEvaluations = summaryData.section_evaluations || {};
+    const overallAssessment = summaryData.overall_assessment || {};
     
-    if (userFromUrl) {
-        console.log(`从URL参数获取用户名: ${userFromUrl}`);
-        return userFromUrl;
-    }
-    
-    // 尝试从session或localStorage获取
-    try {
-        const sessionUser = sessionStorage.getItem('currentUser');
-        if (sessionUser) {
-            console.log(`从sessionStorage获取用户名: ${sessionUser}`);
-            return sessionUser;
-        }
-    } catch (e) {
-        console.warn('无法从sessionStorage获取用户信息:', e);
-    }
-    
-    // 默认返回测试用户名
-    console.log('使用默认测试用户名: alivin');
-    return 'alivin';
-}
-
-// 加载JSON文件
-async function loadJSONFile(url) {
-    try {
-        console.log(`尝试加载文件: ${url}`);
-        const response = await fetch(url);
-        console.log(`响应状态: ${response.status}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log(`成功加载 ${url}:`, data);
-        return data;
-    } catch (error) {
-        console.warn(`加载 ${url} 失败:`, error);
-        return null;
-    }
-}
-
-// 合并模块数据
-function mergeModuleData(summaryData, facialData, voiceData) {
-    const mergedData = {};
-    
-    // 定义模块配置
-    const moduleConfigs = {
-        self_introduction: { maxScore: 10, key: 'self_introduction' },
-        resume_digging: { maxScore: 15, key: 'resume_digging' },
-        ability_assessment: { maxScore: 15, key: 'ability_assessment' },
-        position_matching: { maxScore: 10, key: 'position_matching' },
-        professional_skills: { maxScore: 20, key: 'professional_skills' },
-        reverse_question: { maxScore: 5, key: 'reverse_question' },
-        voice_tone: { maxScore: 5, key: 'voice_tone' },
-        facial_analysis: { maxScore: 10, key: 'facial_analysis' },
-        body_language: { maxScore: 10, key: 'body_language' }
+    // 板块名称映射
+    const sectionMapping = {
+        '自我介绍': 'self_introduction',
+        '简历深挖': 'resume_digging', 
+        '能力评估': 'ability_assessment',
+        '岗位匹配度': 'position_matching',
+        '专业能力测试': 'professional_skills',
+        '反问环节': 'reverse_question'
     };
     
-    // 处理面试总结数据
-    if (summaryData) {
-        console.log('处理面试总结数据...');
-        
-        // 个人介绍
-        if (summaryData.section_evaluations && summaryData.section_evaluations['自我介绍']) {
-            const data = summaryData.section_evaluations['自我介绍'];
-            mergedData.self_introduction = {
-                score: normalizeScore(data.score || 0, 10),
-                maxScore: 10,
-                evaluation: data.evaluation || '暂无评价',
-                suggestions: data.suggestions || '暂无建议'
-            };
-        }
-        
-        // 简历深挖
-        if (summaryData.section_evaluations && summaryData.section_evaluations['简历深挖']) {
-            const data = summaryData.section_evaluations['简历深挖'];
-            mergedData.resume_digging = {
-                score: normalizeScore(data.score || 0, 15),
-                maxScore: 15,
-                evaluation: data.evaluation || '暂无评价',
-                suggestions: data.suggestions || '暂无建议'
-            };
-        }
-        
-        // 能力评估 - 基于自我介绍和简历深挖的综合评估
-        const selfIntroScore = mergedData.self_introduction?.score || 0;
-        const resumeScore = mergedData.resume_digging?.score || 0;
-        const abilityScore = Math.round((selfIntroScore + resumeScore) * 0.75);
-        mergedData.ability_assessment = {
-            score: abilityScore,
-            maxScore: 15,
-            evaluation: '基于自我介绍和简历深挖环节的综合评估',
-            suggestions: '建议加强技术能力的展示和项目经验的详细描述'
-        };
-        
-        // 岗位匹配
-        if (summaryData.section_evaluations && summaryData.section_evaluations['岗位匹配度']) {
-            const data = summaryData.section_evaluations['岗位匹配度'];
-            mergedData.position_matching = {
-                score: normalizeScore(data.score || 0, 10),
-                maxScore: 10,
-                evaluation: data.evaluation || '暂无评价',
-                suggestions: data.suggestions || '暂无建议'
-            };
-        }
-        
-        // 专业能力 - 基于简历深挖的专业技能评估
-        const professionalScore = Math.round((mergedData.resume_digging?.score || 0) * 1.33);
-        mergedData.professional_skills = {
-            score: professionalScore,
-            maxScore: 20,
-            evaluation: '基于简历深挖环节的专业技能评估',
-            suggestions: '建议深入学习相关技术栈，提升项目经验的展示质量'
-        };
-        
-        // 反问环节
-        if (summaryData.section_evaluations && summaryData.section_evaluations['反问环节']) {
-            const data = summaryData.section_evaluations['反问环节'];
-            mergedData.reverse_question = {
-                score: normalizeScore(data.score || 0, 5),
-                maxScore: 5,
-                evaluation: data.evaluation || '暂无评价',
-                suggestions: data.suggestions || '暂无建议'
-            };
-        }
-    }
+    const modules = {};
     
-    // 处理面部分析数据
-    if (facialData) {
-        console.log('处理面部分析数据...');
+    // 处理面试板块数据
+    Object.keys(sectionMapping).forEach(sectionName => {
+        const moduleKey = sectionMapping[sectionName];
+        const sectionData = sectionEvaluations[sectionName];
         
-        // 神态分析
-        if (facialData.performance_summary && facialData.performance_summary['微表情表现']) {
-            const data = facialData.performance_summary['微表情表现'];
-            mergedData.facial_analysis = {
-                score: normalizeScore(data.平均分 || 0, 10),
-                maxScore: 10,
-                evaluation: data.表现评级 || '暂无评价',
-                suggestions: facialData.改进建议汇总?.微表情建议?.join(' ') || '建议保持自然的面部表情'
+        if (sectionData) {
+            modules[moduleKey] = {
+                score: sectionData.score || 0,
+                maxScore: getMaxScoreForModule(moduleKey),
+                evaluation: sectionData.evaluation || '暂无评价',
+                suggestions: sectionData.suggestions || '暂无建议',
+                source: 'interview_summary'
             };
-        }
-        
-        // 肢体语言
-        if (facialData.performance_summary && facialData.performance_summary['肢体动作表现']) {
-            const data = facialData.performance_summary['肢体动作表现'];
-            mergedData.body_language = {
-                score: normalizeScore(data.平均分 || 0, 10),
-                maxScore: 10,
-                evaluation: data.表现评级 || '暂无评价',
-                suggestions: facialData.改进建议汇总?.肢体动作建议?.join(' ') || '建议改善坐姿和手势'
-            };
-        }
-    }
-    
-    // 处理语音语调数据
-    if (voiceData) {
-        console.log('处理语音语调数据...');
-        
-        // 语音语调
-        if (voiceData.analysis_info) {
-            const data = voiceData.analysis_info;
-            // 将0-1的分数转换为0-5分
-            const voiceScore = (data.overall_score || 0) * 5;
-            mergedData.voice_tone = {
-                score: normalizeScore(voiceScore, 5),
-                maxScore: 5,
-                evaluation: voiceData.fluency_analysis?.fluency_level || '暂无评价',
-                suggestions: (voiceData.recommendations?.speech_rate_advice || '') + ' ' + 
-                           (voiceData.recommendations?.fluency_advice || '') || '建议改善语音语调'
-            };
-        }
-    }
-    
-    // 为缺失的模块设置默认值
-    Object.keys(moduleConfigs).forEach(moduleName => {
-        if (!mergedData[moduleName]) {
-            mergedData[moduleName] = {
+        } else {
+            // 如果没有数据，设置默认值
+            modules[moduleKey] = {
                 score: 0,
-                maxScore: moduleConfigs[moduleName].maxScore,
-                evaluation: '暂无数据',
-                suggestions: '暂无建议'
+                maxScore: getMaxScoreForModule(moduleKey),
+                evaluation: '该板块未参与面试',
+                suggestions: '建议在下次面试中包含此板块',
+                source: 'default'
             };
         }
     });
     
-    console.log('数据合并完成:', mergedData);
-    return mergedData;
+    // 其他模块设置默认值
+    ['voice_tone', 'facial_analysis', 'body_language'].forEach(moduleKey => {
+        modules[moduleKey] = {
+            score: 0,
+            maxScore: getMaxScoreForModule(moduleKey),
+            evaluation: '该项分析数据未找到',
+            suggestions: '建议启用相关分析功能',
+            source: 'default'
+        };
+    });
+    
+    // 设置总分
+    modules.totalScore = overallAssessment.final_score || 0;
+    modules.totalMaxScore = 100;
+    modules.grade = overallAssessment.grade || '未知';
+    modules.recommendation = overallAssessment.recommendation || '暂无建议';
+    
+    return modules;
+}
+
+// 获取模块的最大分数
+function getMaxScoreForModule(moduleKey) {
+    const maxScores = {
+        'self_introduction': 10,
+        'resume_digging': 15,
+        'ability_assessment': 15,
+        'position_matching': 10,
+        'professional_skills': 20,
+        'reverse_question': 5,
+        'voice_tone': 5,
+        'facial_analysis': 10,
+        'body_language': 10
+    };
+    
+    return maxScores[moduleKey] || 10;
+}
+
+// 添加微表情分析数据
+function addFacialAnalysisData(moduleData, facialData) {
+    console.log('添加微表情分析数据:', facialData);
+    
+    if (facialData && facialData.overall_score) {
+        const score = parseFloat(facialData.overall_score) * 10; // 转换为10分制
+        moduleData.facial_analysis = {
+            score: Math.min(score, 10),
+            maxScore: 10,
+            evaluation: `综合得分 ${facialData.overall_score}/10，检测到 ${facialData.total_detections || 0} 次表情变化`,
+            suggestions: facialData.suggestions || '保持自然的面部表情，适当的微笑会增加亲和力',
+            source: 'facial_analysis'
+        };
+    }
+}
+
+// 添加语调分析数据
+function addVoiceAnalysisData(moduleData, voiceData) {
+    console.log('添加语调分析数据:', voiceData);
+    
+    if (voiceData && voiceData.analysis_info) {
+        const analysisInfo = voiceData.analysis_info;
+        const score = (analysisInfo.overall_score || 0) * 5; // 转换为5分制
+        
+        moduleData.voice_tone = {
+            score: Math.min(score, 5),
+            maxScore: 5,
+            evaluation: `语调综合得分 ${analysisInfo.overall_score || 0}/1.0，音调变化 ${analysisInfo.pitch_variation || 0}`,
+            suggestions: '保持语调自然变化，避免过于单调',
+            source: 'voice_analysis'
+        };
+    }
+}
+
+// 从数据中加载JSON文件
+function loadJSONFileFromData(fileData, filename) {
+    return new Promise((resolve) => {
+        const data = fileData[filename];
+        if (data) {
+            console.log(`✅ 从缓存数据加载 ${filename}`);
+            resolve(data);
+        } else {
+            console.log(`⚠️ 文件 ${filename} 不存在于缓存数据中`);
+            resolve(null);
+        }
+    });
+}
+
+// 合并传统数据（向后兼容）
+function mergeTraditionalData(facialData, voiceData) {
+    const modules = {};
+    
+    // 设置默认的面试模块
+    ['self_introduction', 'resume_digging', 'ability_assessment', 'position_matching', 'professional_skills', 'reverse_question'].forEach(moduleKey => {
+        modules[moduleKey] = {
+            score: 0,
+            maxScore: getMaxScoreForModule(moduleKey),
+            evaluation: '该板块数据未找到',
+            suggestions: '请完成完整的面试流程',
+            source: 'default'
+        };
+    });
+    
+    // 添加分析数据
+    if (facialData) {
+        addFacialAnalysisData(modules, facialData);
+    }
+    
+    if (voiceData) {
+        addVoiceAnalysisData(modules, voiceData);
+    }
+    
+    // 设置肢体语言默认值
+    modules.body_language = {
+        score: 0,
+        maxScore: 10,
+        evaluation: '肢体语言分析数据未找到',
+        suggestions: '保持良好的坐姿和手势',
+        source: 'default'
+    };
+    
+    // 计算总分（基于可用数据）
+    let totalScore = 0;
+    let availableModules = 0;
+    
+    Object.keys(modules).forEach(key => {
+        if (modules[key].source !== 'default') {
+            totalScore += (modules[key].score / modules[key].maxScore) * 100;
+            availableModules++;
+        }
+    });
+    
+    modules.totalScore = availableModules > 0 ? totalScore / availableModules : 0;
+    modules.totalMaxScore = 100;
+    modules.grade = modules.totalScore >= 80 ? '良好' : modules.totalScore >= 60 ? '一般' : '待提升';
+    modules.recommendation = modules.totalScore >= 80 ? '表现不错，继续保持' : '需要在某些方面加强练习';
+    
+    return modules;
 }
 
 // 标准化分数

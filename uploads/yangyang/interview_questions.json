@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-07-20T16:04:22.461768",
+  "generated_at": "2025-07-21T03:46:28.928129",
   "candidate_name": "杨洋",
   "interview_position": "python工程师",
   "tech_domain": "python",
@@ -7,59 +7,38 @@
   "questions": {
     "能力评估": [
       {
-        "question": "请描述您在处理高并发系统时遇到的一个技术挑战，并详细说明您是如何解决这个问题的。",
+        "question": "明您是如何分析和解决的。",
         "importance": 1,
         "difficulty": "hard"
-      },
-      {
-        "question": "您如何评估自己在团队中解决复杂问题的能力？请举例说明。",
-        "importance": 2,
-        "difficulty": "medium"
       }
     ],
     "岗位匹配度": [
       {
-        "question": "请结合美团的业务特点，分析Python工程师在该环境下需要具备的核心技能和素质。",
+        "question": "请结合业务场景说明。",
         "importance": 1,
         "difficulty": "hard"
-      },
-      {
-        "question": "您为什么选择应聘美团的Python工程师岗位？请结合您的职业规划和对公司的了解进行回答。",
-        "importance": 2,
-        "difficulty": "medium"
       }
     ],
     "专业能力测试": [
       {
-        "question": "请实现一个高效的分布式任务调度系统，要求支持动态扩展和故障恢复，并解释其设计原理。",
+        "question": "考虑高并发场景下的性能优化。",
         "importance": 1,
-        "difficulty": "hard"
-      },
-      {
-        "question": "请解释Python中的GIL（全局解释器锁）及其对多线程编程的影响，并讨论如何在美团这样的高并发环境中优化Python代码的性能。",
-        "importance": 2,
         "difficulty": "hard"
       }
     ],
     "candidate_name": "杨洋",
     "简历深挖": [
       {
-        "question": "您在贵泽实业有限公司担任行政主管期间，如何通过人力资源管理和招聘策略确保人才梯队发展？请举例说明具体实施过程及成果。",
+        "question": "请结合具体案例说明。",
         "importance": 1,
         "difficulty": "hard",
         "focus_area": "工作经验与技能匹配"
       },
       {
-        "question": "美团作为一家技术驱动型公司，对行政流程的数字化和自动化有较高要求。您在过往工作中如何利用计算机技能（如Excel、PowerPoint）优化行政流程？请结合具体案例说明。",
+        "question": "请举例说明。",
         "importance": 2,
         "difficulty": "medium",
-        "focus_area": "技能匹配与岗位适配"
-      },
-      {
-        "question": "您在团队管理中提到‘丰富的团队组建与扩充经验’，如果需要将一个传统行政团队转型为支持互联网业务的技术驱动型团队，您会如何规划和执行？",
-        "importance": 3,
-        "difficulty": "hard",
-        "focus_area": "管理能力与挑战性"
+        "focus_area": "技能匹配与目标公司背景"
       }
     ]
   }

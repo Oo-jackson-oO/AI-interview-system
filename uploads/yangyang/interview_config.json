@@ -1,21 +1,16 @@
 {
-  "generated_at": "2025-07-20T16:04:22.461768",
+  "generated_at": "2025-07-21T03:46:28.927128",
   "interview_config": {
     "candidate_name": "杨洋",
     "current_username": "yangyang",
     "position": "python工程师",
-    "target_company": "美团",
+    "target_company": "京东",
     "tech_domain": "python",
     "has_resume": true,
     "resume_path": "uploads\\yangyang\\yangyang_简历_8.txt",
     "interview_type": "单人",
     "strict_mode": true,
     "selected_sections": [
-      "自我介绍",
-      "简历深挖",
-      "能力评估",
-      "岗位匹配",
-      "专业能力",
       "反问环节"
     ]
   },

@@ -7,7 +7,15 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 import io
 from functools import wraps
-
+import time
+# TTS相关导入
+import ssl
+import queue
+from datetime import datetime
+from urllib.parse import urlparse, urlencode
+from wsgiref.handlers import format_date_time
+from time import mktime
+import _thread as thread
 # 添加模块路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
@@ -21,6 +29,523 @@ from modules.user_management import UserManager
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.secret_key = 'your-secret-key-here'  # 用于session加密
+
+# ==================== ASR语音识别功能集成 ====================
+# 在原有功能基础上添加ASR支持，不影响现有功能
+
+# ASR相关导入
+import eventlet
+import hashlib
+import hmac
+import threading
+import websocket
+from urllib.parse import quote
+from flask_socketio import SocketIO, emit
+
+# 初始化SocketIO（如果还没有初始化）
+try:
+    # 尝试检查是否已经有socketio实例
+    if 'socketio' not in globals():
+        socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+        print("✅ SocketIO已初始化用于ASR功能")
+    else:
+        print("✅ 使用现有的SocketIO实例")
+except Exception as e:
+    # 如果初始化失败，创建新的实例
+    socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+    print(f"✅ 新建SocketIO实例: {e}")
+
+# 科大讯飞ASR配置
+XUNFEI_ASR_CONFIG = {
+    'APPID': 'daa9d5d9',
+    'API_KEY': '57e1dcd91156c7b12c078b5ad372870b',
+    'BASE_URL': 'ws://rtasr.xfyun.cn/v1/ws'
+}
+
+# ASR连接存储
+asr_connections = {}
+
+def parse_xunfei_result(result_json):
+    """解析科大讯飞实时语音转写的JSON结果"""
+    try:
+        result = json.loads(result_json)
+        
+        if result.get("action") == "started":
+            return "连接成功，开始转写..."
+        
+        elif result.get("action") == "result":
+            # 直接处理result中的data字段
+            data = result.get("data", "")
+            if data:
+                # 尝试解析data字段
+                try:
+                    data_obj = json.loads(data)
+                    # 提取转写文本
+                    text = ""
+                    if "cn" in data_obj and "st" in data_obj["cn"]:
+                        st = data_obj["cn"]["st"]
+                        if "rt" in st:
+                            for rt_item in st["rt"]:
+                                if "ws" in rt_item:
+                                    for ws_item in rt_item["ws"]:
+                                        if "cw" in ws_item:
+                                            for cw_item in ws_item["cw"]:
+                                                text += cw_item.get("w", "")
+                    return text.strip()
+                except:
+                    # 如果data不是JSON格式，直接返回
+                    return data
+        
+        elif result.get("action") == "error":
+            return f"错误: {result_json}"
+        
+        else:
+            # 处理没有action字段的情况，可能是直接的转写结果
+            if "cn" in result and "st" in result["cn"]:
+                st = result["cn"]["st"]
+                if "rt" in st:
+                    text = ""
+                    for rt_item in st["rt"]:
+                        if "ws" in rt_item:
+                            for ws_item in rt_item["ws"]:
+                                if "cw" in ws_item:
+                                    for cw_item in ws_item["cw"]:
+                                        text += cw_item.get("w", "")
+                    return text.strip()
+            
+            return f"未知结果: {result_json}"
+            
+    except Exception as e:
+        return f"解析错误: {e}"
+
+class ASRAgent:
+    """ASR语音识别代理类"""
+    def __init__(self, client_id):
+        self.client_id = client_id
+        self.ws = None
+        self.app_id = XUNFEI_ASR_CONFIG['APPID']
+        self.api_key = XUNFEI_ASR_CONFIG['API_KEY']
+        
+        # 智能录音控制
+        self.is_recording = False
+        self.last_speech_time = time.time()
+        self.transcription_parts = []
+        self.all_sentences = []
+        self.all_transcriptions = []
+        self.accumulated_text = ""
+        self.start_time = None
+        self.monitor_thread = None
+        
+    def create_auth_url(self):
+        """创建科大讯飞WebSocket连接URL"""
+        base_url = XUNFEI_ASR_CONFIG['BASE_URL']
+        ts = str(int(time.time()))
+        tt = (self.app_id + ts).encode('utf-8')
+        md5 = hashlib.md5()
+        md5.update(tt)
+        baseString = md5.hexdigest()
+        baseString = bytes(baseString, encoding='utf-8')
+
+        apiKey = self.api_key.encode('utf-8')
+        signa = hmac.new(apiKey, baseString, hashlib.sha1).digest()
+        signa = base64.b64encode(signa)
+        signa = str(signa, 'utf-8')
+
+        url = base_url + "?appid=" + self.app_id + "&ts=" + ts + "&signa=" + quote(signa)
+        return url
+    
+    def monitor_silence(self):
+        """监控静音，实现智能停止"""
+        if not self.start_time:
+            return
+            
+        # 先等8秒
+        while self.is_recording and (time.time() - self.start_time < 8):
+            time.sleep(0.2)
+        
+        # 8秒后，开始检测3秒无新转写
+        last_check_time = self.last_speech_time
+        while self.is_recording:
+            # 检查是否有新的转写更新
+            if self.last_speech_time > last_check_time:
+                last_check_time = self.last_speech_time
+            
+            if time.time() - self.last_speech_time > 3.0:
+                print(f"\n🔇 3秒无新转写，自动停止录音")
+                self.auto_stop()
+                break
+            time.sleep(0.2)
+    
+    def auto_stop(self):
+        """自动停止录音并发送最终结果"""
+        self.is_recording = False
+        print("准备发送结束标记")
+        self.stop()
+        
+        # 处理转写内容并提取最终句子
+        final_sentences = self.extract_final_sentences()
+        
+        # 发送最终结果到前端
+        if final_sentences:
+            final_text = " ".join(final_sentences)
+            socketio.emit('asr_final_result', {
+                'sentences': final_sentences,
+                'full_text': final_text,
+                'count': len(final_sentences)
+            }, room=self.client_id)
+            print(f"📋 最终转写结果({len(final_sentences)}句): {final_text}")
+        
+        socketio.emit('asr_auto_stopped', room=self.client_id)
+
+    
+    def extract_final_sentences(self):
+        """提取最终句子"""
+        if not self.all_transcriptions:
+            return []
+        
+        print(f"🔍 分析 {len(self.all_transcriptions)} 个转写结果...")
+        
+        final_sentences = []
+        previous_text = ""
+        
+        for i, current_text in enumerate(self.all_transcriptions):
+            if previous_text:
+                # 如果当前转写比上一个短或长度相等但内容不同，说明进入下一句
+                if (len(current_text) < len(previous_text) or 
+                    (len(current_text) == len(previous_text) and current_text != previous_text)):
+                    # 保存上一个转写结果（完整的句子）
+                    if previous_text.strip():
+                        final_sentences.append(previous_text.strip())
+                        print(f"✅ 提取句子: '{previous_text.strip()}'")
+            
+            previous_text = current_text
+        
+        # 转写终止，保存最后一个转写结果
+        if previous_text and previous_text.strip():
+            final_sentences.append(previous_text.strip())
+            print(f"✅ 提取最后句子: '{previous_text.strip()}'")
+        
+        return final_sentences
+
+    def on_message(self, ws, message):
+        """处理科大讯飞返回的消息"""
+        try:
+            result_str = str(message)
+            result_dict = json.loads(result_str)
+            
+            if result_dict.get("action") == "started":
+                print("转写服务已启动")
+                socketio.emit('asr_connected', room=self.client_id)
+                
+            elif result_dict.get("action") == "result":
+                result = parse_xunfei_result(result_str)
+                if result and result != "连接成功，开始转写...":
+                    # 检查是否是新的转写内容
+                    if result != self.accumulated_text:
+                        self.accumulated_text = result
+                        self.last_speech_time = time.time()  # 重置静音计时器
+                        
+                        # 存储所有转写结果用于后续分析
+                        self.all_transcriptions.append(result)
+                        print(f"📝 转写: {result}")
+                        
+                        # 更新转写部分
+                        if self.transcription_parts:
+                            self.transcription_parts[-1] = result
+                        else:
+                            self.transcription_parts.append(result)
+                        
+                        # 发送实时转写结果到前端
+                        socketio.emit('asr_result', {'text': result}, room=self.client_id)
+                    
+            elif result_dict.get("action") == "error":
+                print(f"转写错误: {result_str}")
+                socketio.emit('asr_error', {'error': result_str}, room=self.client_id)
+                
+        except Exception as e:
+            print(f"处理消息错误: {e}")
+
+    def on_error(self, ws, error):
+        """处理错误"""
+        print(f"WebSocket错误: {error}")
+        socketio.emit('asr_error', {'error': str(error)}, room=self.client_id)
+
+    def on_close(self, ws, close_status_code, close_msg):
+        """连接关闭"""
+        print("WebSocket连接已关闭")
+        socketio.emit('asr_disconnected', room=self.client_id)
+
+    def on_open(self, ws):
+        """连接打开"""
+        print("WebSocket连接已建立")
+        socketio.emit('asr_connected', room=self.client_id)
+
+    def connect(self):
+        """连接到科大讯飞"""
+        url = self.create_auth_url()
+        print(f"连接URL: {url}")
+        self.ws = websocket.WebSocketApp(url,
+                                        on_message=self.on_message,
+                                        on_error=self.on_error,
+                                        on_close=self.on_close,
+                                        on_open=self.on_open)
+        
+        # 在新线程中运行
+        def run_ws():
+            self.ws.run_forever()
+        
+        thread = threading.Thread(target=run_ws)
+        thread.daemon = True
+        thread.start()
+
+    def start_smart_recording(self):
+        """开始智能录音"""
+        print(f"\n🎙️ 开始录音，请开始说话...")
+        print(f"⏰ 录音至少持续8秒，之后3秒无新转写自动停止")
+        
+        # 初始化录音状态
+        self.transcription_parts = []
+        self.all_transcriptions = []
+        self.all_sentences = []
+        self.accumulated_text = ""
+        self.is_recording = True
+        self.last_speech_time = time.time()
+        self.start_time = time.time()
+        
+        # 启动监控线程
+        self.monitor_thread = threading.Thread(target=self.monitor_silence)
+        self.monitor_thread.daemon = True
+        self.monitor_thread.start()
+        
+        print("=" * 60)
+        print("🎙️ 开始录音，请开始说话...")
+        print("⏰ 录音至少持续8秒，之后3秒无新转写自动停止")
+        print("=" * 60)
+
+        socketio.emit('asr_smart_started', {
+            'message': '智能录音已启动，将自动检测停止'
+        }, room=self.client_id)
+
+    def send_audio(self, audio_data):
+        """发送音频数据"""
+        if self.ws and self.ws.sock and self.ws.sock.connected and self.is_recording:
+            self.ws.send(audio_data)
+
+    def stop(self):
+        """停止识别"""
+        self.is_recording = False
+        if self.ws:
+            # 发送结束标记
+            end_tag = "{\"end\": true}"
+            try:
+                binary_data = json.dumps(end_tag).encode('utf-8')  # 将 JSON 转为字节流
+                self.ws.send(binary_data)  # 发送二进制数据
+                print("已发送结束标记二进制")
+            except Exception as e:
+                # 捕获异常并打印日志
+                print(f"发送结束标记失败: {e}")
+            self.ws.close()
+
+# ==================== ASR SocketIO事件处理 ====================
+
+@socketio.on('connect')
+def asr_handle_connect():
+    print(f'ASR客户端已连接: {request.sid}')
+
+@socketio.on('disconnect')
+def asr_handle_disconnect():
+    print(f'ASR客户端已断开: {request.sid}')
+    # 清理连接
+    if request.sid in asr_connections:
+        asr_connections[request.sid].stop()
+        del asr_connections[request.sid]
+
+@socketio.on('start_smart_asr')
+def handle_start_smart_asr():
+    """开始智能语音识别（自动停止）"""
+    client_id = request.sid
+    if client_id in asr_connections:
+        # 如果已有连接，先停止
+        asr_connections[client_id].stop()
+        del asr_connections[client_id]
+    
+    asr = ASRAgent(client_id)
+    asr_connections[client_id] = asr
+    asr.connect()
+    
+    # 等待连接建立后启动智能录音
+    def start_after_connection():
+        time.sleep(1)  # 等待连接建立
+        if client_id in asr_connections:
+            asr_connections[client_id].start_smart_recording()
+    
+    thread = threading.Thread(target=start_after_connection)
+    thread.daemon = True
+    thread.start()
+
+@socketio.on('stop_asr')
+def handle_stop_asr():
+    """停止语音识别"""
+    client_id = request.sid
+    if client_id in asr_connections:
+        # 手动停止时也进行最终结果处理
+        asr = asr_connections[client_id]
+        if asr.all_transcriptions:
+            final_sentences = asr.extract_final_sentences()
+            if final_sentences:
+                final_text = " ".join(final_sentences)
+                socketio.emit('asr_final_result', {
+                    'sentences': final_sentences,
+                    'full_text': final_text,
+                    'count': len(final_sentences)
+                }, room=client_id)
+                print(f"📋 手动停止 - 最终转写结果({len(final_sentences)}句): {final_text}")
+        
+        asr_connections[client_id].stop()
+        del asr_connections[client_id]
+
+
+@socketio.on('audio_data')
+def handle_audio_data(data):
+    """处理音频数据"""
+    client_id = request.sid
+    if client_id in asr_connections:
+        # 将base64编码的音频数据解码后发送
+        audio_bytes = base64.b64decode(data['audio'])
+        asr_connections[client_id].send_audio(audio_bytes)
+
+# ==================== ASR HTTP路由 ====================
+
+@app.route('/api/asr/status')
+def asr_status():
+    """ASR服务状态检查"""
+    return jsonify({
+        'success': True,
+        'message': 'ASR服务运行正常',
+        'active_connections': len(asr_connections),
+        'config': {
+            'app_id': XUNFEI_ASR_CONFIG['APPID'],
+            'service': '科大讯飞语音转写'
+        }
+    })
+
+@app.route('/api/asr/test')
+def asr_test():
+    """ASR测试页面"""
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>ASR语音识别测试</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+            .btn { padding: 10px 20px; margin: 10px; border: none; border-radius: 5px; cursor: pointer; }
+            .btn-primary { background: #007bff; color: white; }
+            .btn-danger { background: #dc3545; color: white; }
+            #results { border: 1px solid #ccc; padding: 15px; margin: 20px 0; min-height: 200px; }
+            .result-item { margin: 5px 0; padding: 5px; background: #f8f9fa; border-radius: 3px; }
+        </style>
+    </head>
+    <body>
+        <h1>🎙️ ASR语音识别测试</h1>
+        <div>
+            <button class="btn btn-primary" onclick="startASR()">开始智能识别</button>
+            <button class="btn btn-danger" onclick="stopASR()">停止识别</button>
+        </div>
+        <div id="status">状态：未连接</div>
+        <div id="results">等待语音输入...</div>
+        
+        <script>
+            const socket = io();
+            let mediaRecorder, audioContext, isRecording = false;
+            
+            socket.on('connect', () => {
+                document.getElementById('status').textContent = '状态：已连接';
+            });
+            
+            socket.on('asr_connected', () => {
+                document.getElementById('status').textContent = '状态：ASR已连接';
+            });
+            
+            socket.on('asr_smart_started', (data) => {
+                document.getElementById('status').textContent = '状态：智能录音中...';
+                isRecording = true;
+            });
+            
+            socket.on('asr_result', (data) => {
+                const results = document.getElementById('results');
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.textContent = '📝 ' + data.text;
+                results.appendChild(item);
+                results.scrollTop = results.scrollHeight;
+            });
+            
+            socket.on('asr_final_result', (data) => {
+                const results = document.getElementById('results');
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.style.background = '#d4edda';
+                item.style.fontWeight = 'bold';
+                item.textContent = '🎯 最终结果: ' + data.full_text;
+                results.appendChild(item);
+                results.scrollTop = results.scrollHeight;
+            });
+            
+            socket.on('asr_auto_stopped', () => {
+                document.getElementById('status').textContent = '状态：自动停止';
+                isRecording = false;
+            });
+            
+            async function startASR() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: { sampleRate: 16000, channelCount: 1 } 
+                    });
+                    
+                    audioContext = new AudioContext({ sampleRate: 16000 });
+                    const source = audioContext.createMediaStreamSource(stream);
+                    const processor = audioContext.createScriptProcessor(1024, 1, 1);
+                    
+                    processor.onaudioprocess = function(e) {
+                        if (isRecording) {
+                            const audioData = e.inputBuffer.getChannelData(0);
+                            const pcmData = new Int16Array(audioData.length);
+                            for (let i = 0; i < audioData.length; i++) {
+                                pcmData[i] = audioData[i] * 32767;
+                            }
+                            const audioBytes = new Uint8Array(pcmData.buffer);
+                            const base64Audio = btoa(String.fromCharCode.apply(null, audioBytes));
+                            socket.emit('audio_data', { audio: base64Audio });
+                        }
+                    };
+                    
+                    source.connect(processor);
+                    processor.connect(audioContext.destination);
+                    
+                    socket.emit('start_smart_asr');
+                    document.getElementById('results').innerHTML = '🎙️ 开始识别...';
+                    
+                } catch (err) {
+                    alert('无法访问麦克风: ' + err.message);
+                }
+            }
+            
+            function stopASR() {
+                isRecording = false;
+                if (audioContext) {
+                    audioContext.close();
+                }
+                socket.emit('stop_asr');
+            }
+        </script>
+    </body>
+    </html>
+    """
+
+
 
 # 登录验证装饰器
 def login_required(f):
@@ -564,24 +1089,50 @@ def get_interview_result_data():
         # 检查用户文件夹中的分析文件
         user_folder = os.path.join('uploads', username)
         
-        # 检查三个JSON文件是否存在
+        # 检查所有可能的分析文件
         files_to_check = [
-            'interview_summary_report.json',
-            'facial_analysis_report.json', 
-            'analysis_result.json'
+            'interview_summary_report.json',  # 面试总结报告（新增）
+            'facial_analysis_report.json',    # 微表情分析报告
+            'voice_analysis_result.json',     # 语调分析报告
+            'analysis_result.json',           # 其他分析结果
+            'QA.md'                          # 面试问答记录
         ]
         
         available_files = []
+        file_data = {}
+        
         for filename in files_to_check:
             file_path = os.path.join(user_folder, filename)
             if os.path.exists(file_path):
                 available_files.append(filename)
+                
+                # 读取文件内容
+                try:
+                    if filename.endswith('.json'):
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            file_data[filename] = json.load(f)
+                        print(f"✅ 成功读取文件: {filename}")
+                    elif filename.endswith('.md'):
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            file_data[filename] = f.read()
+                        print(f"✅ 成功读取文件: {filename}")
+                except Exception as e:
+                    print(f"❌ 读取文件 {filename} 失败: {e}")
+        
+        # 特别处理面试总结报告
+        summary_data = file_data.get('interview_summary_report.json', {})
+        if summary_data:
+            print(f"📊 找到面试总结报告，包含 {len(summary_data.get('section_evaluations', {}))} 个板块评估")
+            print(f"🎯 最终得分: {summary_data.get('overall_assessment', {}).get('final_score', 0)}")
         
         return jsonify({
             'success': True,
             'username': username,
             'available_files': available_files,
-            'user_folder': user_folder
+            'file_data': file_data,
+            'user_folder': user_folder,
+            'has_summary_report': 'interview_summary_report.json' in available_files,
+            'summary_data': summary_data
         })
         
     except Exception as e:
@@ -1559,5 +2110,984 @@ def save_voice_analysis():
         print(f"保存语调分析结果失败: {str(e)}")
         return jsonify({'success': False, 'message': f'保存失败: {str(e)}'})
 
+# ==================== TTS语音合成功能集成 ====================
+# 在ASR功能基础上添加TTS支持，不影响现有功能
+
+
+
+# 讯飞TTS配置
+XUNFEI_TTS_CONFIG = {
+    'appid': 'daa9d5d9',
+    'api_secret': 'YTBkNzA5MGVlNzYzNDVkMDk2MzcwOTIy',
+    'api_key': 'c52e142d8749090d0caa6c0fab03d2d1',
+    'url': 'wss://cbm01.cn-huabei-1.xf-yun.com/v1/private/mcd9m97e6',
+    'vcn': 'x4_lingxiaoqi_oral'  # 聆小琪
+}
+
+# TTS连接存储
+tts_connections = {}
+
+class TTSWebSocketParam:
+    """TTS WebSocket参数生成器"""
+    
+    def __init__(self, appid, api_key, api_secret, gpt_url):
+        self.appid = appid
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.host = urlparse(gpt_url).netloc
+        self.path = urlparse(gpt_url).path
+        self.gpt_url = gpt_url
+
+    def create_url(self):
+        """生成带鉴权的WebSocket URL"""
+        now = datetime.now()
+        date = format_date_time(mktime(now.timetuple()))
+
+        signature_origin = "host: " + self.host + "\n"
+        signature_origin += "date: " + date + "\n"
+        signature_origin += "GET " + self.path + " HTTP/1.1"
+
+        signature_sha = hmac.new(
+            self.api_secret.encode('utf-8'), 
+            signature_origin.encode('utf-8'),
+            digestmod=hashlib.sha256
+        ).digest()
+
+        signature_sha_base64 = base64.b64encode(signature_sha).decode(encoding='utf-8')
+
+        authorization_origin = f'api_key="{self.api_key}", algorithm="hmac-sha256", headers="host date request-line", signature="{signature_sha_base64}"'
+        authorization = base64.b64encode(authorization_origin.encode('utf-8')).decode(encoding='utf-8')
+
+        v = {
+            "authorization": authorization,
+            "date": date,
+            "host": self.host
+        }
+        
+        url = self.gpt_url + '?' + urlencode(v)
+        return url
+
+class TTSAgent:
+    """TTS语音合成代理类"""
+    
+    def __init__(self, client_id):
+        self.client_id = client_id
+        self.audio_queue = queue.Queue()
+        self.is_synthesizing = False
+        self.ws = None
+        self.total_audio_chunks = 0
+        self.session_id = f"tts_{int(time.time())}_{client_id}"
+        
+    def start_synthesis(self, text):
+        """开始语音合成"""
+        if self.is_synthesizing:
+            return False, "正在合成中，请稍候"
+            
+        if not text or not text.strip():
+            return False, "文本不能为空"
+            
+        self.is_synthesizing = True
+        self.total_audio_chunks = 0
+        
+        # 在新线程中启动WebSocket连接
+        synthesis_thread = threading.Thread(
+            target=self._synthesis_worker, 
+            args=(text,)
+        )
+        synthesis_thread.daemon = True
+        synthesis_thread.start()
+        
+        return True, "开始合成"
+    
+    def _synthesis_worker(self, text):
+        """语音合成工作线程"""
+        try:
+            # 创建WebSocket参数
+            ws_param = TTSWebSocketParam(
+                XUNFEI_TTS_CONFIG['appid'],
+                XUNFEI_TTS_CONFIG['api_key'], 
+                XUNFEI_TTS_CONFIG['api_secret'],
+                XUNFEI_TTS_CONFIG['url']
+            )
+            ws_url = ws_param.create_url()
+            
+            print(f"[{self.session_id}] 开始TTS合成: {text}")
+            print(f"[{self.session_id}] TTS WebSocket URL: {ws_url}")
+            
+            # 创建WebSocket连接
+            self.ws = websocket.WebSocketApp(
+                ws_url,
+                on_message=self._on_message,
+                on_error=self._on_error, 
+                on_close=self._on_close,
+                on_open=self._on_open
+            )
+            
+            # 存储文本到WebSocket对象
+            self.ws.synthesis_text = text
+            self.ws.client_id = self.client_id
+            self.ws.session_id = self.session_id
+            self.ws.stream_handler = self
+            
+            # 启动WebSocket连接
+            self.ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+            
+        except Exception as e:
+            print(f"[{self.session_id}] TTS合成出错: {e}")
+            self._emit_error(f"语音合成失败: {str(e)}")
+        finally:
+            self.is_synthesizing = False
+    
+    def _on_message(self, ws, message):
+        """处理WebSocket消息"""
+        try:
+            data = json.loads(message)
+            code = data['header']['code']
+            
+            if code != 0:
+                error_msg = data['header'].get('message', '未知错误')
+                print(f"[{self.session_id}] TTS API错误: {error_msg}")
+                self._emit_error(f"TTS服务错误: {error_msg}")
+                return
+                
+            status = data['header']['status']
+            payload = data.get('payload')
+            
+            # 处理音频数据
+            if payload and payload != "null":
+                audio_info = payload.get('audio')
+                if audio_info and 'audio' in audio_info:
+                    audio_data = audio_info['audio']
+                    self.total_audio_chunks += 1
+                    
+                    print(f"[{self.session_id}] 收到TTS音频块 #{self.total_audio_chunks}, 长度: {len(audio_data)}")
+                    
+                    # 实时发送音频数据到前端
+                    self._emit_audio_chunk(audio_data, self.total_audio_chunks)
+            
+            # 检查合成状态
+            if status == 2:  # 合成完成
+                print(f"[{self.session_id}] TTS合成完成，共 {self.total_audio_chunks} 个音频块")
+                self._emit_synthesis_complete()
+                ws.close()
+                
+        except Exception as e:
+            print(f"[{self.session_id}] 处理TTS消息出错: {e}")
+            self._emit_error(f"处理音频数据失败: {str(e)}")
+    
+    def _on_error(self, ws, error):
+        """WebSocket错误处理"""
+        print(f"[{self.session_id}] TTS WebSocket错误: {error}")
+        self._emit_error(f"连接错误: {str(error)}")
+    
+    def _on_close(self, ws, close_status_code, close_msg):
+        """WebSocket关闭处理"""
+        print(f"[{self.session_id}] TTS WebSocket连接已关闭")
+        self.is_synthesizing = False
+    
+    def _on_open(self, ws):
+        """WebSocket连接建立"""
+        print(f"[{self.session_id}] TTS WebSocket连接已建立")
+        thread.start_new_thread(self._send_synthesis_request, (ws,))
+    
+    def _send_synthesis_request(self, ws):
+        """发送TTS合成请求"""
+        try:
+            # 构建请求体
+            request_body = {
+                "header": {
+                    "app_id": XUNFEI_TTS_CONFIG['appid'],
+                    "status": 2
+                },
+                "parameter": {
+                    "oral": {
+                        "oral_level": "mid"
+                    },
+                    "tts": {
+                        "vcn": XUNFEI_TTS_CONFIG['vcn'],
+                        "speed": 50,
+                        "volume": 80,
+                        "pitch": 50,
+                        "bgs": 0,
+                        "reg": 0,
+                        "rdn": 0,
+                        "rhy": 0,
+                        "audio": {
+                            "encoding": "raw",  # WAV格式 (PCM)
+                            "sample_rate": 24000,
+                            "channels": 1,
+                            "bit_depth": 16,
+                            "frame_size": 0
+                        }
+                    }
+                },
+                "payload": {
+                    "text": {
+                        "encoding": "utf8",
+                        "compress": "raw",
+                        "format": "plain",
+                        "status": 2,
+                        "seq": 0,
+                        "text": str(base64.b64encode(ws.synthesis_text.encode('utf-8')), 'utf8')
+                    }
+                }
+            }
+            
+            print(f"[{ws.session_id}] 发送TTS合成请求: {ws.synthesis_text}")
+            ws.send(json.dumps(request_body))
+            
+        except Exception as e:
+            print(f"[{ws.session_id}] 发送TTS请求失败: {e}")
+            self._emit_error(f"发送请求失败: {str(e)}")
+    
+    def _emit_audio_chunk(self, audio_data, chunk_number):
+        """发送音频块到前端"""
+        socketio.emit('tts_audio_chunk', {
+            'session_id': self.session_id,
+            'audio_data': audio_data,
+            'chunk_number': chunk_number,
+            'timestamp': time.time()
+        }, room=self.client_id)
+    
+    def _emit_synthesis_complete(self):
+        """发送合成完成消息"""
+        socketio.emit('tts_synthesis_complete', {
+            'session_id': self.session_id,
+            'total_chunks': self.total_audio_chunks,
+            'timestamp': time.time()
+        }, room=self.client_id)
+    
+    def _emit_error(self, error_message):
+        """发送错误消息"""
+        socketio.emit('tts_synthesis_error', {
+            'session_id': self.session_id,
+            'error': error_message,
+            'timestamp': time.time()
+        }, room=self.client_id)
+        self.is_synthesizing = False
+
+# ==================== TTS SocketIO事件处理 ====================
+
+@socketio.on('tts_synthesize')
+def handle_tts_synthesize(data):
+    """处理TTS合成请求"""
+    client_id = request.sid
+    text = data.get('text', '').strip()
+    print("🎤 TTS合成请求"+text)
+    
+    if not text:
+        socketio.emit('tts_synthesis_error', {
+            'error': '文本不能为空',
+            'timestamp': time.time()
+        }, room=client_id)
+        return
+    
+    # 获取或创建TTS代理
+    if client_id not in tts_connections:
+        tts_connections[client_id] = TTSAgent(client_id)
+    
+    tts_agent = tts_connections[client_id]
+    
+    # 开始合成
+    success, message = tts_agent.start_synthesis(text)
+    
+    if success:
+        socketio.emit('tts_synthesis_started', {
+            'session_id': tts_agent.session_id,
+            'message': message,
+            'timestamp': time.time()
+        }, room=client_id)
+    else:
+        socketio.emit('tts_synthesis_error', {
+            'error': message,
+            'timestamp': time.time()
+        }, room=client_id)
+
+# ==================== TTS HTTP路由 ====================
+
+@app.route('/api/tts/status')
+def tts_status():
+    """TTS服务状态检查"""
+    return jsonify({
+        'success': True,
+        'message': 'TTS服务运行正常',
+        'active_connections': len(tts_connections),
+        'config': {
+            'app_id': XUNFEI_TTS_CONFIG['appid'],
+            'service': '科大讯飞语音合成',
+            'voice': '聆小琪 (x4_lingxiaoqi_oral)'
+        }
+    })
+
+@app.route('/api/tts/synthesize', methods=['POST'])
+def api_tts_synthesize():
+    """TTS合成API接口"""
+    try:
+        #打印日志
+        print("🎤 TTS合成API接口")
+        data = request.get_json()
+        text = data.get('text', '').strip()
+        client_id = data.get('client_id', 'default')
+        
+        if not text:
+            return jsonify({'success': False, 'message': '文本不能为空'})
+        
+        # 获取或创建TTS代理
+        if client_id not in tts_connections:
+            tts_connections[client_id] = TTSAgent(client_id)
+        
+        tts_agent = tts_connections[client_id]
+        
+        # 开始合成
+        success, message = tts_agent.start_synthesis(text)
+        
+        return jsonify({
+            'success': success,
+            'message': message,
+            'session_id': tts_agent.session_id if success else None
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'服务器错误: {str(e)}'})
+
+@app.route('/api/tts/test')
+def tts_test():
+    """TTS测试页面"""
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>TTS语音合成测试</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+            .btn { padding: 10px 20px; margin: 10px; border: none; border-radius: 5px; cursor: pointer; }
+            .btn-primary { background: #007bff; color: white; }
+            .btn-success { background: #28a745; color: white; }
+            #results { border: 1px solid #ccc; padding: 15px; margin: 20px 0; min-height: 200px; }
+            .result-item { margin: 5px 0; padding: 5px; background: #f8f9fa; border-radius: 3px; }
+            textarea { width: 100%; padding: 10px; margin: 10px 0; min-height: 100px; }
+            audio { width: 100%; margin: 10px 0; }
+        </style>
+    </head>
+    <body>
+        <h1>🎤 TTS语音合成测试</h1>
+        <p><strong>配音员：</strong>聆小琪 (x4_lingxiaoqi_oral)</p>
+        <textarea id="textInput" placeholder="请输入要合成的文本...">你好，我是AI语音助手，很高兴为您服务！</textarea>
+        <div>
+            <button class="btn btn-primary" onclick="startTTS()">开始语音合成</button>
+            <button class="btn btn-success" onclick="downloadAudio()" id="downloadBtn" style="display:none;">下载音频</button>
+        </div>
+        <div id="status">状态：未连接</div>
+        <audio id="audioPlayer" controls style="display:none;"></audio>
+        <div id="results">等待合成...</div>
+        
+        <script>
+            const socket = io();
+            let audioChunks = [];
+            let currentSessionId = null;
+            let wavFile = null;
+            
+            // WAV文件头生成工具
+            function createWAVHeader(dataLength, sampleRate = 24000, channels = 1, bitsPerSample = 16) {
+                const buffer = new ArrayBuffer(44);
+                const view = new DataView(buffer);
+                
+                view.setUint32(0, 0x52494646, false); // "RIFF"
+                view.setUint32(4, 36 + dataLength, true); // File size - 8
+                view.setUint32(8, 0x57415645, false); // "WAVE"
+                view.setUint32(12, 0x666d7420, false); // "fmt "
+                view.setUint32(16, 16, true); // Subchunk1Size
+                view.setUint16(20, 1, true); // AudioFormat
+                view.setUint16(22, channels, true); // NumChannels
+                view.setUint32(24, sampleRate, true); // SampleRate
+                view.setUint32(28, sampleRate * channels * bitsPerSample / 8, true); // ByteRate
+                view.setUint16(32, channels * bitsPerSample / 8, true); // BlockAlign
+                view.setUint16(34, bitsPerSample, true); // BitsPerSample
+                view.setUint32(36, 0x64617461, false); // "data"
+                view.setUint32(40, dataLength, true); // Subchunk2Size
+                
+                return new Uint8Array(buffer);
+            }
+            
+            function createWAVFile(pcmData) {
+                const wavHeader = createWAVHeader(pcmData.length);
+                const wavFile = new Uint8Array(wavHeader.length + pcmData.length);
+                wavFile.set(wavHeader, 0);
+                wavFile.set(pcmData, wavHeader.length);
+                return wavFile;
+            }
+            
+            socket.on('connect', () => {
+                document.getElementById('status').textContent = '状态：已连接';
+            });
+            
+            socket.on('tts_synthesis_started', (data) => {
+                document.getElementById('status').textContent = '状态：开始合成...';
+                currentSessionId = data.session_id;
+                audioChunks = [];
+                const results = document.getElementById('results');
+                results.innerHTML = '🎵 开始合成音频...';
+            });
+            
+            socket.on('tts_audio_chunk', (data) => {
+                if (data.session_id === currentSessionId) {
+                    audioChunks.push(data);
+                    const results = document.getElementById('results');
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.textContent = `🎵 收到音频块 #${data.chunk_number}`;
+                    results.appendChild(item);
+                    results.scrollTop = results.scrollHeight;
+                }
+            });
+            
+            socket.on('tts_synthesis_complete', (data) => {
+                if (data.session_id === currentSessionId) {
+                    document.getElementById('status').textContent = '状态：合成完成';
+                    const results = document.getElementById('results');
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.style.background = '#d4edda';
+                    item.style.fontWeight = 'bold';
+                    item.textContent = `✅ 合成完成！共${data.total_chunks}个音频块`;
+                    results.appendChild(item);
+                    
+                    // 生成WAV文件
+                    if (audioChunks.length > 0) {
+                        generateWAVFile();
+                    }
+                }
+            });
+            
+            socket.on('tts_synthesis_error', (data) => {
+                document.getElementById('status').textContent = '状态：合成失败';
+                const results = document.getElementById('results');
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.style.background = '#f8d7da';
+                item.textContent = '❌ 错误: ' + data.error;
+                results.appendChild(item);
+            });
+            
+            function generateWAVFile() {
+                try {
+                    // 合并所有PCM音频块
+                    const allPCMData = audioChunks.map(chunk => {
+                        const binaryString = atob(chunk.audio_data);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        return bytes;
+                    });
+                    
+                    // 计算总长度并合并PCM数据
+                    const totalLength = allPCMData.reduce((sum, arr) => sum + arr.length, 0);
+                    const mergedPCM = new Uint8Array(totalLength);
+                    
+                    let offset = 0;
+                    for (const data of allPCMData) {
+                        mergedPCM.set(data, offset);
+                        offset += data.length;
+                    }
+                    
+                    // 创建WAV文件
+                    wavFile = createWAVFile(mergedPCM);
+                    const wavBlob = new Blob([wavFile], { type: 'audio/wav' });
+                    const url = URL.createObjectURL(wavBlob);
+                    
+                    // 设置音频播放器
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = url;
+                    audioPlayer.style.display = 'block';
+                    
+                    // 显示下载按钮
+                    document.getElementById('downloadBtn').style.display = 'inline-block';
+                    
+                    // 自动播放
+                    audioPlayer.play();
+                    
+                    console.log(`WAV文件已生成 (${(wavFile.length / 1024).toFixed(1)} KB)`);
+                    
+                } catch (error) {
+                    console.error('生成WAV文件失败:', error);
+                }
+            }
+            
+            function startTTS() {
+                const text = document.getElementById('textInput').value.trim();
+                if (!text) {
+                    alert('请输入要合成的文本');
+                    return;
+                }
+                socket.emit('tts_synthesize', { text: text });
+            }
+            
+            function downloadAudio() {
+                if (!wavFile) {
+                    alert('没有可下载的音频文件');
+                    return;
+                }
+                
+                const blob = new Blob([wavFile], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                const filename = `tts_audio_${timestamp}.wav`;
+                
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+            }
+        </script>
+    </body>
+    </html>
+    """
+
+@app.route('/api/interview/save-results', methods=['POST'])
+@login_required
+def save_interview_results():
+    """保存面试结果到QA.md文件"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        qa_content = data.get('qa_content')
+        interview_data = data.get('interview_data', [])
+        config = data.get('config', {})
+        
+        if not username or not qa_content:
+            return jsonify({'success': False, 'message': '缺少必要的参数'})
+        
+        # 构建用户目录路径
+        user_dir = os.path.join('uploads', username)
+        if not os.path.exists(user_dir):
+            os.makedirs(user_dir)
+        
+        # QA.md文件路径
+        qa_file_path = os.path.join(user_dir, 'QA.md')
+        
+        # 追加内容到QA.md文件
+        with open(qa_file_path, 'a', encoding='utf-8') as f:
+            f.write(qa_content)
+        
+        # 保存详细的面试数据（JSON格式）
+        interview_result_path = os.path.join(user_dir, 'latest_interview_result.json')
+        interview_result = {
+            'timestamp': datetime.now().isoformat(),
+            'interview_data': interview_data,
+            'config': config,
+            'status': 'completed'
+        }
+        
+        with open(interview_result_path, 'w', encoding='utf-8') as f:
+            json.dump(interview_result, f, ensure_ascii=False, indent=2)
+        
+        print(f"✅ 用户 {username} 的面试结果已保存")
+        
+        return jsonify({
+            'success': True,
+            'message': '面试结果保存成功',
+            'qa_file': qa_file_path,
+            'result_file': interview_result_path
+        })
+        
+    except Exception as e:
+        print(f"❌ 保存面试结果失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'保存失败: {str(e)}'})
+
+@app.route('/api/interview/analyze-reverse-question', methods=['POST'])
+@login_required
+def analyze_reverse_question():
+    """使用星火大模型分析反问环节的用户问题"""
+    try:
+        print("🔍 开始处理反问分析请求...")
+        
+        # 检查请求数据
+        if not request.is_json:
+            print("❌ 请求不是JSON格式")
+            return jsonify({'success': False, 'message': '请求格式错误，需要JSON数据'})
+        
+        data = request.get_json()
+        print(f"📝 收到请求数据: {data}")
+        
+        prompt = data.get('prompt')
+        user_question = data.get('user_question')
+        interview_config = data.get('interview_config', {})
+        
+        print(f"🎯 用户问题: {user_question}")
+        print(f"📋 面试配置: {interview_config}")
+        
+        if not prompt or not user_question:
+            print("❌ 缺少必要参数")
+            return jsonify({'success': False, 'message': '缺少必要的参数: prompt或user_question'})
+        
+        # 星火大模型配置
+        try:
+            from openai import OpenAI
+            import json
+            print("✅ 成功导入OpenAI和json模块")
+        except ImportError as e:
+            print(f"❌ 导入模块失败: {e}")
+            return jsonify({'success': False, 'message': f'模块导入失败: {str(e)}'})
+        
+        try:
+            client = OpenAI(
+                api_key='QcGCOyVichfHetzkUDeM:AUoiqAJtarlstnrJMcTI',
+                base_url='https://spark-api-open.xf-yun.com/v1/'
+            )
+            print("✅ 星火大模型客户端初始化成功")
+        except Exception as e:
+            print(f"❌ 星火大模型客户端初始化失败: {e}")
+            return jsonify({'success': False, 'message': f'客户端初始化失败: {str(e)}'})
+        
+        print(f"🤖 准备调用星火大模型分析用户问题: {user_question}")
+        print(f"📝 提示词长度: {len(prompt)} 字符")
+        
+        # 调用星火大模型
+        try:
+            response = client.chat.completions.create(
+                model='generalv3.5',
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7
+            )
+            print("✅ 星火大模型API调用成功")
+        except Exception as e:
+            print(f"❌ 星火大模型API调用失败: {e}")
+            return jsonify({
+                'success': False, 
+                'message': f'AI模型调用失败: {str(e)}',
+                'analysis': {
+                    "want_to_stop": False,
+                    "answer": "抱歉，AI服务暂时不可用，请稍后再试。",
+                    "question_type": "服务错误"
+                }
+            })
+        
+        try:
+            result_text = response.choices[0].message.content
+            print(f"🎯 AI原始回复长度: {len(result_text)} 字符")
+            print(f"📄 AI原始回复内容: {result_text[:200]}...")  # 只显示前200字符
+        except Exception as e:
+            print(f"❌ 获取AI回复内容失败: {e}")
+            return jsonify({
+                'success': False, 
+                'message': f'获取AI回复失败: {str(e)}',
+                'analysis': {
+                    "want_to_stop": False,
+                    "answer": "抱歉，无法获取AI回复。",
+                    "question_type": "解析错误"
+                }
+            })
+        
+        # 清理markdown代码块标记
+        print("🧹 开始清理AI回复格式...")
+        original_text = result_text
+        result_text = result_text.strip()
+        
+        if result_text.startswith('```json'):
+            result_text = result_text[7:]  # 去除 ```json
+            print("🔧 移除了```json标记")
+        if result_text.startswith('```'):
+            result_text = result_text[3:]   # 去除 ```
+            print("🔧 移除了```标记")
+        if result_text.endswith('```'):
+            result_text = result_text[:-3]  # 去除结尾的 ```
+            print("🔧 移除了结尾```标记")
+        
+        result_text = result_text.strip()
+        print(f"🧽 清理后的文本长度: {len(result_text)} 字符")
+        print(f"📝 清理后的文本: {result_text[:300]}...")  # 显示前300字符
+        
+        # 尝试解析JSON
+        print("🔍 开始解析JSON...")
+        try:
+            analysis_result = json.loads(result_text)
+            print("✅ JSON解析成功")
+            print(f"📊 解析结果: {analysis_result}")
+            
+            # 验证必要字段
+            required_fields = ["want_to_stop", "answer", "question_type"]
+            missing_fields = [field for field in required_fields if field not in analysis_result]
+            
+            if missing_fields:
+                print(f"⚠️ 缺少必要字段: {missing_fields}")
+                # 补充缺失字段
+                if "want_to_stop" not in analysis_result:
+                    analysis_result["want_to_stop"] = False
+                if "answer" not in analysis_result:
+                    analysis_result["answer"] = result_text
+                if "question_type" not in analysis_result:
+                    analysis_result["question_type"] = "其他"
+                print(f"🔧 已补充缺失字段: {analysis_result}")
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON解析失败: {e}")
+            print(f"🔍 原始文本: '{original_text}'")
+            print(f"🔍 清理后文本: '{result_text}'")
+            # 如果不是有效JSON，创建默认响应
+            analysis_result = {
+                "want_to_stop": False,
+                "answer": result_text if result_text else "抱歉，我暂时无法理解您的问题，请您再详细说明一下。",
+                "question_type": "JSON解析失败"
+            }
+            print(f"🔧 使用默认响应: {analysis_result}")
+        except Exception as e:
+            print(f"❌ JSON处理时发生未知错误: {e}")
+            analysis_result = {
+                "want_to_stop": False,
+                "answer": "抱歉，处理您的问题时发生错误。",
+                "question_type": "处理错误"
+            }
+        
+        print(f"✅ 星火大模型分析完成: {analysis_result}")
+        
+        return jsonify({
+            'success': True,
+            'analysis': analysis_result,
+            'raw_response': result_text,
+            'debug_info': {
+                'original_length': len(original_text),
+                'cleaned_length': len(result_text),
+                'user_question': user_question
+            }
+        })
+        
+    except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"❌ 反问分析处理失败: {str(e)}")
+        print(f"📋 错误详情:\n{error_traceback}")
+        
+        return jsonify({
+            'success': False, 
+            'message': f'分析失败: {str(e)}',
+            'error_type': type(e).__name__,
+            'analysis': {
+                "want_to_stop": False,
+                "answer": "抱歉，系统暂时无法处理您的问题，请稍后再试。",
+                "question_type": "系统错误"
+            }
+        })
+
+@app.route('/api/interview/run-summary', methods=['POST'])
+@login_required
+def run_interview_summary():
+    """运行面试总结分析"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        
+        if not username:
+            return jsonify({'success': False, 'message': '缺少用户名参数'})
+        
+        print(f"🔍 开始为用户 {username} 运行面试总结分析...")
+        
+        # 检查用户目录和QA.md文件
+        user_folder = os.path.join('uploads', username)
+        if not os.path.exists(user_folder):
+            return jsonify({'success': False, 'message': f'用户目录不存在: {user_folder}'})
+        
+        qa_file_path = os.path.join(user_folder, 'QA.md')
+        if not os.path.exists(qa_file_path):
+            return jsonify({'success': False, 'message': f'面试记录文件不存在: {qa_file_path}'})
+        
+        print(f"✅ 找到面试记录文件: {qa_file_path}")
+        
+        # 导入面试总结模块
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        summary_module_path = os.path.join(current_dir, 'modules', 'Mock_interview')
+        
+        if summary_module_path not in sys.path:
+            sys.path.insert(0, summary_module_path)
+        
+        try:
+            from modules.Mock_interview.interview_summary import InterviewSummary
+            print("✅ 成功导入面试总结模块")
+        except ImportError as e:
+            print(f"❌ 导入面试总结模块失败: {e}")
+            return jsonify({'success': False, 'message': f'导入模块失败: {str(e)}'})
+        
+        # 创建面试总结实例
+        summary = InterviewSummary()
+        
+        # 修改summary实例的文件路径方法，使其从用户目录读取
+        def parse_qa_md_from_user_folder():
+            """从用户目录解析QA.md文件"""
+            try:
+                with open(qa_file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                sections = {}
+                
+                # 使用原有的解析逻辑
+                import re
+                
+                # 解析自我介绍
+                self_intro_pattern = r'<!-- START: 自我介绍 -->(.*?)<!-- END: 自我介绍 -->'
+                self_intro_match = re.search(self_intro_pattern, content, re.DOTALL)
+                if self_intro_match:
+                    sections["自我介绍"] = self_intro_match.group(1).strip()
+                
+                # 解析简历深挖（多题模式）
+                resume_pattern = r'<!-- START: 简历深挖.*? -->(.*?)<!-- END: 简历深挖.*? -->'
+                resume_matches = re.findall(resume_pattern, content, re.DOTALL)
+                if resume_matches:
+                    sections["简历深挖"] = '\n\n'.join([match.strip() for match in resume_matches])
+                
+                # 解析能力评估（多题模式）
+                ability_pattern = r'<!-- START: 能力评估.*? -->(.*?)<!-- END: 能力评估.*? -->'
+                ability_matches = re.findall(ability_pattern, content, re.DOTALL)
+                if ability_matches:
+                    sections["能力评估"] = '\n\n'.join([match.strip() for match in ability_matches])
+                
+                # 解析岗位匹配度（多题模式）
+                position_pattern = r'<!-- START: 岗位匹配度.*? -->(.*?)<!-- END: 岗位匹配度.*? -->'
+                position_matches = re.findall(position_pattern, content, re.DOTALL)
+                if position_matches:
+                    sections["岗位匹配度"] = '\n\n'.join([match.strip() for match in position_matches])
+                
+                # 解析专业能力测试（多题模式）
+                professional_pattern = r'<!-- START: 专业能力测试.*? -->(.*?)<!-- END: 专业能力测试.*? -->'
+                professional_matches = re.findall(professional_pattern, content, re.DOTALL)
+                if professional_matches:
+                    sections["专业能力测试"] = '\n\n'.join([match.strip() for match in professional_matches])
+                
+                # 解析反问环节
+                reverse_pattern = r'<!-- START: 反问环节 -->(.*?)<!-- END: 反问环节 -->'
+                reverse_match = re.search(reverse_pattern, content, re.DOTALL)
+                if reverse_match:
+                    sections["反问环节"] = reverse_match.group(1).strip()
+                
+                print(f"✅ 解析用户QA.md成功，找到 {len(sections)} 个板块:")
+                for section in sections.keys():
+                    print(f"  📋 {section}")
+                
+                return sections
+                
+            except Exception as e:
+                print(f"❌ 解析用户QA.md失败: {e}")
+                return {}
+        
+        # 替换summary实例的解析方法
+        summary.parse_qa_md = parse_qa_md_from_user_folder
+        
+        # 修改保存方法，确保保存到用户目录
+        original_save_method = summary.save_summary_report
+        def save_summary_report_to_user_folder(report_data, filename="interview_summary_report.json", current_username=None):
+            """保存总结报告到用户目录"""
+            try:
+                # 强制使用用户目录
+                filepath = os.path.join(user_folder, filename)
+                
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(report_data, f, ensure_ascii=False, indent=2)
+                print(f"✅ 面试总结报告已保存到 {filepath}")
+                print(f"📊 报告包含 {len(report_data.get('section_evaluations', {}))} 个板块评估")
+                print(f"🎯 最终得分: {report_data.get('overall_assessment', {}).get('final_score', 0)} 分")
+                print(f"📈 评级: {report_data.get('overall_assessment', {}).get('grade', '未知')}")
+                return True
+            except Exception as e:
+                print(f"❌ 保存报告失败: {e}")
+                return False
+        
+        # 替换保存方法
+        summary.save_summary_report = save_summary_report_to_user_folder
+        
+        # 运行面试总结（使用同步方式）
+        import asyncio
+        
+        # 在新的事件循环中运行异步方法
+        async def run_summary_analysis():
+            try:
+                # 1. 解析QA.md文件
+                print("📋 步骤1: 解析面试记录文件...")
+                sections_content = summary.parse_qa_md()
+                
+                if not sections_content:
+                    return False, "没有找到可评估的面试内容"
+                
+                # 2. 并行评估各板块
+                print(f"🎯 步骤2: 并行评估 {len(sections_content)} 个面试板块...")
+                evaluations = await summary.evaluate_all_sections(sections_content)
+                
+                if not evaluations:
+                    return False, "没有成功评估的板块"
+                
+                # 3. 计算最终得分
+                print(f"🧮 步骤3: 计算加权最终得分...")
+                final_score, total_weight = summary.calculate_final_score(evaluations)
+                
+                # 4. 生成总结报告
+                print(f"📝 步骤4: 生成面试总结报告...")
+                report_data = summary.generate_summary_report(evaluations, final_score, total_weight)
+                
+                # 5. 保存报告
+                success = summary.save_summary_report(report_data)
+                
+                if success:
+                    return True, f"面试总结分析完成，最终得分: {final_score:.2f}/100"
+                else:
+                    return False, "报告生成成功，但保存失败"
+                    
+            except Exception as e:
+                return False, f"分析过程出错: {str(e)}"
+        
+        # 创建新的事件循环来运行异步代码
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            success, message = loop.run_until_complete(run_summary_analysis())
+        finally:
+            loop.close()
+        
+        if success:
+            print(f"✅ 用户 {username} 的面试总结分析完成")
+            return jsonify({
+                'success': True,
+                'message': message,
+                'report_file': 'interview_summary_report.json',
+                'user_folder': user_folder
+            })
+        else:
+            print(f"❌ 用户 {username} 的面试总结分析失败: {message}")
+            return jsonify({
+                'success': False,
+                'message': message
+            })
+        
+    except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"❌ 运行面试总结分析时发生错误: {str(e)}")
+        print(f"📋 错误详情:\n{error_traceback}")
+        
+        return jsonify({
+            'success': False,
+            'message': f'分析失败: {str(e)}',
+            'error_type': type(e).__name__
+        })
+
+# ==================== 修改主程序启动方式 ====================
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    print("=" * 60)
+    print("🚀 AI面试系统启动中...")
+    print("📝 已集成ASR语音识别功能")
+    print("🎤 已集成TTS语音合成功能")
+    print("=" * 60)
+    print("🌐 主系统: http://localhost:5000")
+    print("🎙️ ASR测试: http://localhost:5000/api/asr/test")
+    print("🎵 TTS测试: http://localhost:5000/api/tts/test")
+    print("🤖 Live2D: http://localhost:5000/live2d")
+    print("=" * 60)
+    
+    # 使用SocketIO运行，同时支持原有功能、ASR功能和TTS功能
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=False)
