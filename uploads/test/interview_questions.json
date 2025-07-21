@@ -1,0 +1,30 @@
+{
+  "generated_at": "2025-07-21T09:22:55.580458",
+  "candidate_name": "杨洋",
+  "interview_position": "python全栈",
+  "tech_domain": "python",
+  "strict_mode": false,
+  "questions": {
+    "能力评估": [
+      {
+        "question": "请描述您在Python项目中遇到的一个技术难题，并详细说明您是如何解决这个问题的。",
+        "importance": 1,
+        "difficulty": "medium"
+      }
+    ],
+    "岗位匹配度": [
+      {
+        "question": "您认为在华为担任Python全栈工程师需要具备哪些核心技能和素质？",
+        "importance": 1,
+        "difficulty": "medium"
+      }
+    ],
+    "专业能力测试": [
+      {
+        "question": "请编写一个Python函数，实现对一个大型日志文件的实时监控和处理，要求能够高效地处理数据并输出统计结果。",
+        "importance": 1,
+        "difficulty": "hard"
+      }
+    ]
+  }
+}

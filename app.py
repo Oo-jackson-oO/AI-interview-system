@@ -1092,9 +1092,12 @@ def get_interview_result_data():
         # 检查所有可能的分析文件
         files_to_check = [
             'interview_summary_report.json',  # 面试总结报告（新增）
+            'latest_interview_result.json',   # 面试结果数据（新增）
             'facial_analysis_report.json',    # 微表情分析报告
             'voice_analysis_result.json',     # 语调分析报告
             'analysis_result.json',           # 其他分析结果
+            'interview_config.json',          # 面试配置
+            'interview_questions.json',       # 面试题目
             'QA.md'                          # 面试问答记录
         ]
         
@@ -1121,23 +1124,35 @@ def get_interview_result_data():
         
         # 特别处理面试总结报告
         summary_data = file_data.get('interview_summary_report.json', {})
-        if summary_data:
-            print(f"📊 找到面试总结报告，包含 {len(summary_data.get('section_evaluations', {}))} 个板块评估")
-            print(f"🎯 最终得分: {summary_data.get('overall_assessment', {}).get('final_score', 0)}")
+        
+        # 特别处理面试结果数据
+        result_data = file_data.get('latest_interview_result.json', {})
+        
+        # 特别处理面试配置数据
+        config_data = file_data.get('interview_config.json', {})
+        
+        print(f"📁 用户文件夹: {user_folder}")
+        print(f"📋 可用文件: {available_files}")
+        print(f"📊 面试总结报告: {'✅' if summary_data else '❌'}")
+        print(f"📈 面试结果数据: {'✅' if result_data else '❌'}")
+        print(f"⚙️ 面试配置数据: {'✅' if config_data else '❌'}")
         
         return jsonify({
             'success': True,
-            'username': username,
             'available_files': available_files,
             'file_data': file_data,
-            'user_folder': user_folder,
-            'has_summary_report': 'interview_summary_report.json' in available_files,
-            'summary_data': summary_data
+            'summary_data': summary_data,
+            'result_data': result_data,
+            'config_data': config_data,
+            'username': username
         })
         
     except Exception as e:
-        print(f"获取面试结果数据失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'获取数据失败: {str(e)}'})
+        print(f"❌ 获取面试结果数据失败: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'获取数据失败: {str(e)}'
+        })
 
 @app.route('/uploads/<username>/<filename>')
 @login_required

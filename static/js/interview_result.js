@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initCarousel();
     
     // 加载数据
-    loadInterviewData();
+    loadInterviewResultData();
     
     // 绑定事件监听器
     bindEventListeners();
@@ -567,10 +567,8 @@ function updateControlButtons() {
     }
 }
 
-// 加载面试数据
-async function loadInterviewData() {
-    console.log('开始加载面试数据...');
-    
+// 加载面试结果数据
+async function loadInterviewResultData() {
     try {
         // 获取面试结果数据（包含所有文件的内容）
         const dataResponse = await fetch('/api/interview-result/data');
@@ -587,11 +585,15 @@ async function loadInterviewData() {
         
         const fileData = resultData.file_data || {};
         const summaryData = resultData.summary_data || {};
+        const configData = resultData.config_data || {};
+        const resultDataFile = fileData['latest_interview_result.json'] || {};
         
         console.log('可用文件:', resultData.available_files);
         console.log('面试总结数据:', summaryData);
+        console.log('面试配置数据:', configData);
+        console.log('面试结果数据:', resultDataFile);
         
-        // 如果有面试总结报告，使用新的数据结构
+        // 优先使用面试总结报告数据
         if (summaryData && summaryData.section_evaluations) {
             console.log('✅ 使用面试总结报告数据');
             
@@ -599,6 +601,21 @@ async function loadInterviewData() {
             moduleData = extractModuleDataFromSummary(summaryData);
             
             // 补充其他分析数据
+            if (fileData['facial_analysis_report.json']) {
+                addFacialAnalysisData(moduleData, fileData['facial_analysis_report.json']);
+            }
+            
+            if (fileData['voice_analysis_result.json']) {
+                addVoiceAnalysisData(moduleData, fileData['voice_analysis_result.json']);
+            }
+            
+        } else if (configData && configData.interview_config) {
+            console.log('✅ 使用面试配置数据');
+            
+            // 从面试配置中提取模块数据
+            moduleData = extractModuleDataFromConfig(configData, resultDataFile);
+            
+            // 补充分析数据
             if (fileData['facial_analysis_report.json']) {
                 addFacialAnalysisData(moduleData, fileData['facial_analysis_report.json']);
             }
@@ -623,13 +640,11 @@ async function loadInterviewData() {
         console.log('最终模块数据:', moduleData);
         
         // 更新UI
-        updateModuleScores();
-        updateTotalScore();
-        
-        console.log('数据加载和UI更新完成');
+        updateUI(moduleData);
         
     } catch (error) {
-        console.error('加载面试数据时出错:', error);
+        console.error('加载面试结果数据失败:', error);
+        
         // 显示错误信息
         const evaluationElement = document.getElementById('totalEvaluation');
         if (evaluationElement) {
@@ -661,13 +676,28 @@ function extractModuleDataFromSummary(summaryData) {
         const sectionData = sectionEvaluations[sectionName];
         
         if (sectionData) {
+            // 正确提取分数，注意分数可能是0-100分制
+            const rawScore = sectionData.score || 0;
+            const maxScore = getMaxScoreForModule(moduleKey);
+            
+            // 如果原始分数是0-100分制，需要转换为模块对应的分数制
+            let normalizedScore = rawScore;
+            if (rawScore > maxScore) {
+                // 如果分数超过模块最大分数，说明是0-100分制，需要转换
+                normalizedScore = (rawScore / 100) * maxScore;
+            }
+            
             modules[moduleKey] = {
-                score: sectionData.score || 0,
-                maxScore: getMaxScoreForModule(moduleKey),
+                score: Math.round(normalizedScore * 10) / 10, // 保留一位小数
+                maxScore: maxScore,
                 evaluation: sectionData.evaluation || '暂无评价',
                 suggestions: sectionData.suggestions || '暂无建议',
-                source: 'interview_summary'
+                source: 'interview_summary',
+                rawScore: rawScore, // 保存原始分数用于调试
+                weightPercentage: sectionData.weight_percentage || 0
             };
+            
+            console.log(`${sectionName} 分数处理: 原始分数=${rawScore}, 转换后=${normalizedScore}, 最大分数=${maxScore}`);
         } else {
             // 如果没有数据，设置默认值
             modules[moduleKey] = {
@@ -691,13 +721,85 @@ function extractModuleDataFromSummary(summaryData) {
         };
     });
     
-    // 设置总分
-    modules.totalScore = overallAssessment.final_score || 0;
+    // 设置总分 - 使用面试总结报告中的最终分数
+    const finalScore = overallAssessment.final_score || 0;
+    modules.totalScore = finalScore;
     modules.totalMaxScore = 100;
     modules.grade = overallAssessment.grade || '未知';
     modules.recommendation = overallAssessment.recommendation || '暂无建议';
     
+    console.log(`总分设置: ${finalScore}/100, 评级: ${modules.grade}`);
+    
     return modules;
+}
+
+// 从面试配置和结果中提取模块数据
+function extractModuleDataFromConfig(configData, resultData) {
+    const modules = {};
+    
+    // 从面试配置中获取选择的板块
+    const selectedSections = configData?.interview_config?.selected_sections || [];
+    const candidateName = configData?.interview_config?.candidate_name || '未知';
+    const position = configData?.interview_config?.position || '未知';
+    
+    console.log('面试配置信息:', {
+        candidateName,
+        position,
+        selectedSections
+    });
+    
+    // 为所有模块设置默认值
+    const allModules = [
+        'self_introduction', 'resume_digging', 'ability_assessment', 
+        'position_matching', 'professional_skills', 'reverse_question',
+        'voice_tone', 'facial_analysis', 'body_language'
+    ];
+    
+    allModules.forEach(moduleKey => {
+        const moduleName = getModuleDisplayName(moduleKey);
+        const isSelected = selectedSections.includes(moduleName);
+        
+        modules[moduleKey] = {
+            score: 0,
+            maxScore: getMaxScoreForModule(moduleKey),
+            evaluation: isSelected ? '该板块已参与面试，等待详细分析' : '该板块未参与面试',
+            suggestions: isSelected ? '建议查看详细分析结果' : '建议在下次面试中包含此板块',
+            source: isSelected ? 'config_selected' : 'default'
+        };
+    });
+    
+    // 如果有面试结果数据，尝试从中提取信息
+    if (resultData && resultData.interview_data && resultData.interview_data.length > 0) {
+        console.log('发现面试结果数据，包含', resultData.interview_data.length, '条记录');
+        
+        // 这里可以根据实际的面试数据结构来提取评分
+        // 目前先设置为默认值，后续可以根据实际数据结构调整
+        modules.totalScore = 0;
+        modules.totalMaxScore = 100;
+        modules.grade = '待评估';
+        modules.recommendation = '面试已完成，建议查看详细分析';
+    } else {
+        modules.totalScore = 0;
+        modules.totalMaxScore = 100;
+        modules.grade = '未完成';
+        modules.recommendation = '面试尚未完成或数据不完整';
+    }
+    
+    return modules;
+}
+
+// 获取模块的显示名称
+function getModuleDisplayName(moduleKey) {
+    const displayNames = {
+        'self_introduction': '自我介绍',
+        'resume_digging': '简历深挖',
+        'ability_assessment': '能力评估',
+        'position_matching': '岗位匹配度',
+        'professional_skills': '专业能力测试',
+        'reverse_question': '反问环节'
+    };
+    
+    return displayNames[moduleKey] || moduleKey;
 }
 
 // 获取模块的最大分数
@@ -721,15 +823,34 @@ function getMaxScoreForModule(moduleKey) {
 function addFacialAnalysisData(moduleData, facialData) {
     console.log('添加微表情分析数据:', facialData);
     
-    if (facialData && facialData.overall_score) {
-        const score = parseFloat(facialData.overall_score) * 10; // 转换为10分制
-        moduleData.facial_analysis = {
-            score: Math.min(score, 10),
-            maxScore: 10,
-            evaluation: `综合得分 ${facialData.overall_score}/10，检测到 ${facialData.total_detections || 0} 次表情变化`,
-            suggestions: facialData.suggestions || '保持自然的面部表情，适当的微笑会增加亲和力',
-            source: 'facial_analysis'
-        };
+    if (facialData && facialData.performance_summary) {
+        const performanceSummary = facialData.performance_summary;
+        
+        // 微表情分析
+        if (performanceSummary['微表情表现']) {
+            const facialScore = performanceSummary['微表情表现']['平均分'] || 0;
+            moduleData.facial_analysis = {
+                score: Math.min(facialScore, 10),
+                maxScore: 10,
+                evaluation: `微表情综合得分 ${facialScore}/10，检测到 ${facialData.total_analysis_count || 0} 次表情变化`,
+                suggestions: facialData['改进建议汇总']?.['微表情建议']?.join(' ') || '保持自然的面部表情，适当的微笑会增加亲和力',
+                source: 'facial_analysis'
+            };
+            console.log(`微表情分析分数: ${facialScore}/10`);
+        }
+        
+        // 肢体语言分析
+        if (performanceSummary['肢体动作表现']) {
+            const bodyScore = performanceSummary['肢体动作表现']['平均分'] || 0;
+            moduleData.body_language = {
+                score: Math.min(bodyScore, 10),
+                maxScore: 10,
+                evaluation: `肢体语言综合得分 ${bodyScore}/10，检测到 ${facialData.total_analysis_count || 0} 次动作变化`,
+                suggestions: facialData['改进建议汇总']?.['肢体动作建议']?.join(' ') || '保持良好的坐姿和手势',
+                source: 'facial_analysis'
+            };
+            console.log(`肢体语言分析分数: ${bodyScore}/10`);
+        }
     }
 }
 
@@ -739,15 +860,17 @@ function addVoiceAnalysisData(moduleData, voiceData) {
     
     if (voiceData && voiceData.analysis_info) {
         const analysisInfo = voiceData.analysis_info;
-        const score = (analysisInfo.overall_score || 0) * 5; // 转换为5分制
+        const rawScore = analysisInfo.overall_score || 0;
+        const score = rawScore * 5; // 转换为5分制
         
         moduleData.voice_tone = {
             score: Math.min(score, 5),
             maxScore: 5,
-            evaluation: `语调综合得分 ${analysisInfo.overall_score || 0}/1.0，音调变化 ${analysisInfo.pitch_variation || 0}`,
+            evaluation: `语调综合得分 ${rawScore}/1.0 (${score}/5.0)，音调变化 ${analysisInfo.pitch_variation || 0}`,
             suggestions: '保持语调自然变化，避免过于单调',
             source: 'voice_analysis'
         };
+        console.log(`语调分析分数: ${rawScore}/1.0 -> ${score}/5.0`);
     }
 }
 
@@ -790,13 +913,15 @@ function mergeTraditionalData(facialData, voiceData) {
     }
     
     // 设置肢体语言默认值
-    modules.body_language = {
-        score: 0,
-        maxScore: 10,
-        evaluation: '肢体语言分析数据未找到',
-        suggestions: '保持良好的坐姿和手势',
-        source: 'default'
-    };
+    if (!modules.body_language) {
+        modules.body_language = {
+            score: 0,
+            maxScore: 10,
+            evaluation: '肢体语言分析数据未找到',
+            suggestions: '保持良好的坐姿和手势',
+            source: 'default'
+        };
+    }
     
     // 计算总分（基于可用数据）
     let totalScore = 0;
@@ -839,136 +964,96 @@ function normalizeScore(rawScore, maxScore) {
     return 0;
 }
 
-// 更新模块分数
-function updateModuleScores() {
-    console.log('更新模块分数...');
+// 统一的UI更新函数
+function updateUI(moduleData) {
+    console.log('开始更新UI，模块数据:', moduleData);
     
-    Object.keys(moduleData).forEach(moduleName => {
-        const data = moduleData[moduleName];
-        const scoreElement = document.getElementById(`${moduleName}_score`);
-        const planetElement = document.querySelector(`[data-module="${moduleName}"]`);
+    // 更新总分
+    updateTotalScore(moduleData);
+    
+    // 更新各模块分数
+    updateModuleScores(moduleData);
+    
+    console.log('UI更新完成');
+}
+
+// 更新总分
+function updateTotalScore(moduleData) {
+    const totalScoreElement = document.getElementById('totalScore');
+    const totalProgressElement = document.getElementById('totalProgress');
+    const totalEvaluationElement = document.getElementById('totalEvaluation');
+    
+    if (totalScoreElement && totalProgressElement && totalEvaluationElement) {
+        const totalScore = moduleData.totalScore || 0;
+        const totalMaxScore = moduleData.totalMaxScore || 100;
+        const grade = moduleData.grade || '未知';
+        const recommendation = moduleData.recommendation || '暂无建议';
         
-        console.log(`更新模块 ${moduleName}:`, data);
+        // 更新分数显示
+        totalScoreElement.textContent = Math.round(totalScore);
         
-        if (scoreElement && data) {
-            // 动画更新分数
-            animateScore(scoreElement, 0, data.score);
-            
-            // 更新模块状态
-            if (planetElement) {
-                if (data.score > 0) {
-                    planetElement.classList.add('active');
-                    planetElement.classList.remove('inactive');
-                    console.log(`${moduleName} 设置为活跃状态，分数: ${data.score}`);
-                } else {
-                    planetElement.classList.add('inactive');
-                    planetElement.classList.remove('active');
-                    console.log(`${moduleName} 设置为黯淡状态，分数: ${data.score}`);
-                }
+        // 更新进度条
+        const progressPercentage = (totalScore / totalMaxScore) * 100;
+        totalProgressElement.style.width = `${progressPercentage}%`;
+        
+        // 更新评价
+        totalEvaluationElement.textContent = `${grade} - ${recommendation}`;
+        
+        console.log(`总分更新: ${totalScore}/${totalMaxScore} (${progressPercentage.toFixed(1)}%)`);
+    }
+}
+
+// 更新各模块分数
+function updateModuleScores(moduleData) {
+    const moduleKeys = [
+        'self_introduction', 'resume_digging', 'ability_assessment',
+        'position_matching', 'professional_skills', 'reverse_question',
+        'voice_tone', 'facial_analysis', 'body_language'
+    ];
+    
+    moduleKeys.forEach(moduleKey => {
+        const scoreElement = document.getElementById(`${moduleKey}_score`);
+        if (scoreElement) {
+            const moduleData_item = moduleData[moduleKey];
+            if (moduleData_item) {
+                scoreElement.textContent = Math.round(moduleData_item.score);
+                console.log(`${moduleKey} 分数更新: ${moduleData_item.score}/${moduleData_item.maxScore}`);
             }
-        } else {
-            console.warn(`未找到模块 ${moduleName} 的分数元素或数据`);
         }
     });
 }
 
-// 动画更新分数
-function animateScore(element, startValue, endValue) {
-    const duration = 1000;
-    const startTime = performance.now();
-    
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // 使用缓动函数
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const currentValue = startValue + (endValue - startValue) * easeOutQuart;
-        
-        element.textContent = currentValue.toFixed(1);
-        
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        } else {
-            element.textContent = endValue.toFixed(1);
-        }
-    }
-    
-    requestAnimationFrame(update);
-}
-
-// 更新总分
-function updateTotalScore() {
-    console.log('更新总分...');
-    
-    const activeModules = Object.values(moduleData).filter(module => module.score > 0);
-    
-    console.log('活跃模块:', activeModules);
-    
-    if (activeModules.length === 0) {
-        console.log('没有活跃模块，总分设为0');
-        document.getElementById('totalScore').textContent = '0';
-        document.getElementById('totalProgress').style.width = '0%';
-        document.getElementById('totalEvaluation').textContent = '暂无有效数据';
-        return;
-    }
-    
-    const totalScore = activeModules.reduce((sum, module) => sum + module.score, 0);
-    const totalMaxScore = activeModules.reduce((sum, module) => sum + module.maxScore, 0);
-    const percentage = (totalScore / totalMaxScore) * 100;
-    
-    console.log(`总分计算: ${totalScore}/${totalMaxScore} = ${percentage.toFixed(1)}%`);
-    
-    // 动画更新总分
-    const totalScoreElement = document.getElementById('totalScore');
-    const progressElement = document.getElementById('totalProgress');
-    
-    animateScore(totalScoreElement, 0, totalScore);
-    
-    // 动画更新进度条
-    setTimeout(() => {
-        progressElement.style.width = `${percentage}%`;
-    }, 500);
-    
-    // 更新评价
-    let evaluation = '';
-    if (percentage >= 90) {
-        evaluation = '优秀！您的面试表现非常出色，展现了扎实的专业能力和良好的沟通技巧。';
-    } else if (percentage >= 80) {
-        evaluation = '良好！您的面试表现不错，在大部分方面都有很好的表现。';
-    } else if (percentage >= 70) {
-        evaluation = '中等！您的面试表现尚可，但还有提升空间。';
-    } else if (percentage >= 60) {
-        evaluation = '及格！您的面试表现基本合格，建议加强薄弱环节。';
-    } else {
-        evaluation = '需要改进！建议您针对性地提升面试技巧和专业知识。';
-    }
-    
-    document.getElementById('totalEvaluation').textContent = evaluation;
-}
-
 // 显示模块详情
-function showModuleDetails(moduleName) {
-    console.log(`显示模块详情: ${moduleName}`);
+function showModuleDetails(moduleKey) {
+    console.log(`显示模块详情: ${moduleKey}`);
     
-    const data = moduleData[moduleName];
-    if (!data) {
-        console.warn(`模块 ${moduleName} 没有数据`);
+    const moduleData_item = moduleData[moduleKey];
+    if (!moduleData_item) {
+        console.warn(`未找到模块 ${moduleKey} 的数据`);
         return;
     }
+    
+    // 获取模块显示名称
+    const displayName = getModuleDisplayName(moduleKey);
     
     // 更新模态框内容
-    document.getElementById('modalTitle').textContent = getModuleDisplayName(moduleName);
-    document.getElementById('modalScore').textContent = data.score.toFixed(1);
-    document.getElementById('modalMax').textContent = `/${data.maxScore}`;
-    document.getElementById('modalEvaluation').textContent = data.evaluation;
-    document.getElementById('modalSuggestions').textContent = data.suggestions;
+    const modalTitle = document.getElementById('modalTitle');
+    const modalScore = document.getElementById('modalScore');
+    const modalMax = document.getElementById('modalMax');
+    const modalEvaluation = document.getElementById('modalEvaluation');
+    const modalSuggestions = document.getElementById('modalSuggestions');
+    
+    if (modalTitle) modalTitle.textContent = displayName;
+    if (modalScore) modalScore.textContent = Math.round(moduleData_item.score);
+    if (modalMax) modalMax.textContent = `/${moduleData_item.maxScore}`;
+    if (modalEvaluation) modalEvaluation.textContent = moduleData_item.evaluation || '暂无评价';
+    if (modalSuggestions) modalSuggestions.textContent = moduleData_item.suggestions || '暂无建议';
     
     // 显示模态框
     const modal = document.getElementById('moduleModal');
     modal.classList.add('active');
     
-    console.log('模态框已显示');
+    console.log(`模块详情已更新: ${displayName} - ${moduleData_item.score}/${moduleData_item.maxScore}`);
 }
 
 // 关闭模态框
@@ -976,21 +1061,4 @@ function closeModal() {
     console.log('关闭模态框');
     const modal = document.getElementById('moduleModal');
     modal.classList.remove('active');
-}
-
-// 获取模块显示名称
-function getModuleDisplayName(moduleName) {
-    const displayNames = {
-        'self_introduction': '个人介绍',
-        'resume_digging': '简历深挖',
-        'ability_assessment': '能力评估',
-        'position_matching': '岗位匹配',
-        'professional_skills': '专业能力',
-        'reverse_question': '反问环节',
-        'voice_tone': '语音语调',
-        'facial_analysis': '神态分析',
-        'body_language': '肢体语言'
-    };
-    
-    return displayNames[moduleName] || moduleName;
 } 
