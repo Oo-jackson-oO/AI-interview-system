@@ -94,21 +94,146 @@ AI面试系统/
 
 ### 1. 克隆项目
 ```bash
-git clone https://github.com/your-repo/AI-interview-web.git
+git clone https://github.com/yy13213/AI-intervuew-web.git
 cd AI-interview-web
 ```
 
 ### 2. 安装依赖
 ```bash
 pip install -r requirements.txt
+
 ```
 
-### 3. 启动系统
+### 3. ffmpeg安装（支持window和linux）
+
+#### Windows系统安装
+```bash
+# 方法1：使用chocolatey包管理器（推荐）
+# 首先安装chocolatey（如果还没有安装）
+# 以管理员身份运行PowerShell，执行：
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# 安装ffmpeg
+choco install ffmpeg
+
+# 方法2：手动安装
+# 1. 访问 https://ffmpeg.org/download.html
+# 2. 下载Windows版本的ffmpeg
+# 3. 解压到C:\ffmpeg
+# 4. 将C:\ffmpeg\bin添加到系统环境变量PATH中
+# 5. 重启命令行工具验证安装
+ffmpeg -version
+
+# 方法3：使用winget（Windows 10/11）
+winget install ffmpeg
+```
+
+#### Linux系统安装
+```bash
+# Ubuntu/Debian系统
+sudo apt update
+sudo apt install ffmpeg
+
+# CentOS/RHEL/Fedora系统
+# CentOS 7/RHEL 7
+sudo yum install epel-release
+sudo yum install ffmpeg ffmpeg-devel
+
+# CentOS 8/RHEL 8/Fedora
+sudo dnf install ffmpeg ffmpeg-devel
+
+# Arch Linux
+sudo pacman -S ffmpeg
+
+# 验证安装
+ffmpeg -version
+```
+
+#### macOS系统安装
+```bash
+# 使用Homebrew（推荐）
+brew install ffmpeg
+
+# 使用MacPorts
+sudo port install ffmpeg
+
+# 验证安装
+ffmpeg -version
+```
+
+#### 验证安装是否成功
+```bash
+# 检查ffmpeg版本信息
+ffmpeg -version
+
+# 检查支持的编解码器
+ffmpeg -codecs
+
+# 如果显示版本信息，说明安装成功
+```
+
+#### 常见问题解决
+```bash
+# 如果提示"ffmpeg不是内部或外部命令"
+# Windows：检查环境变量PATH是否包含ffmpeg的bin目录
+# Linux：重新安装或检查软件包源
+
+# 如果权限问题
+# Linux：使用sudo权限安装
+# Windows：以管理员身份运行命令行
+
+# 如果安装失败
+# 检查网络连接
+# 更新包管理器源
+# 尝试从官网直接下载编译好的版本
+```
+
+### 4. 可选：配置API密钥（内置默认API）
+在项目正常运行前，需要配置以下API密钥：
+
+#### 讯飞API配置
+```python
+# 在 modules/ASR-API.py 中配置
+ASR_APP_ID = "your-asr-app-id"
+ASR_API_KEY = "your-asr-api-key"
+
+# 在 modules/TTS-API.py 中配置  
+TTS_APP_ID = "your-tts-app-id"
+TTS_API_KEY = "your-tts-api-key"
+TTS_API_SECRET = "your-tts-api-secret"
+
+# 在 modules/Mock_interview/init.py 中配置星火大模型
+client = OpenAI(
+    api_key='your-spark-api-key',
+    base_url='https://spark-api-open.xf-yun.com/v1/'
+)
+```
+
+#### API密钥获取方式
+1. **访问讯飞开放平台**：https://www.xfyun.cn/
+2. **注册并登录账户**
+3. **创建应用获取密钥**：
+   - 语音听写（ASR）
+   - 语音合成（TTS）
+   - 星火认知大模型
+4. **将获取的密钥填入对应文件**
+
+#### 配置文件位置
+```
+项目根目录/
+├── modules/
+│   ├── ASR-API.py          # ASR语音识别密钥
+│   ├── TTS-API.py          # TTS语音合成密钥
+│   └── Mock_interview/
+│       └── init.py         # 星火大模型密钥
+```
+
+### 5. 启动系统
 ```bash
 python app.py
 ```
 
-### 4. 访问系统
+### 6. 访问系统
 打开浏览器访问：`http://localhost:5000`
 
 ## 🎮 使用指南
@@ -303,14 +428,6 @@ analysis_dimensions = {
 }
 ```
 
-## 🤝 贡献指南
-
-1. Fork 本项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
-
 ## 📄 许可证
 
 本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
@@ -318,8 +435,7 @@ analysis_dimensions = {
 ## 🙏 致谢
 
 - 讯飞开放平台提供语音技术支持
-- Live2D团队提供数字人技术
-- 开源社区的各种优秀项目和库
+- Live2D提供数字人技术
 
 ## 📞 联系方式
 
