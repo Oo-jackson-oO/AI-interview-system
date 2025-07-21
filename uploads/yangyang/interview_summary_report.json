@@ -1,0 +1,70 @@
+{
+  "report_info": {
+    "generated_at": "2025-07-21 14:49:35",
+    "report_version": "1.0",
+    "evaluation_sections_count": 2
+  },
+  "overall_assessment": {
+    "final_score": 60.0,
+    "grade": "较差",
+    "grade_level": "C",
+    "recommendation": "不推荐录用，建议提升后再次面试",
+    "weight_coverage_percentage": 25.0
+  },
+  "section_evaluations": {
+    "专业能力测试": {
+      "score": 60,
+      "weight_percentage": 20.0,
+      "weighted_score": 12.0,
+      "evaluation": "面试者在回答高并发场景下的性能优化问题时，未能给出任何实质性的回答，仅以'嗯'作为回应。这显示出面试者在专业知识、技术深度、实践经验、技术视野以及问题解决能力方面均存在明显不足。无法根据回答内容评估其相关能力水平。",
+      "suggestions": "建议面试者在面试前充分准备，确保对应聘岗位所需的专业知识有深入理解，并能够结合实际案例进行阐述。同时，应加强实践能力的培养，通过实际操作提升解决问题的能力。在面试过程中，应积极回应面试官的问题，清晰、准确地表达自己的观点和思路。"
+    },
+    "反问环节": {
+      "score": 60,
+      "weight_percentage": 5.0,
+      "weighted_score": 3.0,
+      "evaluation": "面试者在反问环节表现较差，两次提问均因系统错误未能有效进行，且问题本身缺乏针对性和深度，未展现出对职业发展的关注或主动了解的意愿。沟通技巧和思维深度方面也未能得到体现。",
+      "suggestions": "建议面试者提前准备有价值且针对性的问题，如询问团队文化、项目挑战或职业发展路径等，以展现主动学习和思考的能力。同时，注意沟通时的清晰度和流畅度，避免因紧张或技术问题影响表达。"
+    }
+  },
+  "performance_analysis": {
+    "best_performance": {
+      "section": "专业能力测试",
+      "score": 60
+    },
+    "worst_performance": {
+      "section": "反问环节",
+      "score": 60
+    },
+    "average_score": 60.0
+  },
+  "recommendations": {
+    "overall_suggestion": "根据60.0分的综合得分，不推荐录用，建议提升后再次面试。",
+    "next_actions": [
+      "建议候选人提升相关技能后重新申请",
+      "可提供具体的学习建议和资源"
+    ],
+    "improvement_areas": [
+      {
+        "section": "专业能力测试",
+        "score": 60,
+        "suggestions": "建议面试者在面试前充分准备，确保对应聘岗位所需的专业知识有深入理解，并能够结合实际案例进行阐述。同时，应加强实践能力的培养，通过实际操作提升解决问题的能力。在面试过程中，应积极回应面试官的问题，清晰、准确地表达自己的观点和思路。"
+      },
+      {
+        "section": "反问环节",
+        "score": 60,
+        "suggestions": "建议面试者提前准备有价值且针对性的问题，如询问团队文化、项目挑战或职业发展路径等，以展现主动学习和思考的能力。同时，注意沟通时的清晰度和流畅度，避免因紧张或技术问题影响表达。"
+      }
+    ]
+  },
+  "metadata": {
+    "evaluation_timestamp": "2025-07-21 14:49:35",
+    "sections_evaluated": [
+      "专业能力测试",
+      "反问环节"
+    ],
+    "total_questions_answered": 2,
+    "evaluation_method": "AI并行评估",
+    "scoring_range": "0-100分"
+  }
+}

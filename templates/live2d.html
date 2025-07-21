@@ -685,16 +685,6 @@
     <span id="asrStatus">未连接</span>
   </div> -->
   
-  <!-- ASR转写结果显示区域 -->
-  <div class="asr-results" id="asrResults">
-    <div class="asr-title">
-      <i class="fas fa-microphone"></i> 语音转写结果
-    </div>
-    <div class="asr-content" id="asrContent">
-      <div class="asr-status">等待语音输入...</div>
-    </div>
-  </div>
-  
   <!-- 系统设置面板 -->
   <div class="system-settings">
     <div class="settings-toggle" onclick="toggleSettings()">
@@ -703,6 +693,53 @@
     <div class="settings-panel" id="settingsPanel">
       <div class="panel-title">
         <i class="fas fa-tools"></i> 系统设置
+      </div>
+            <!-- 面试功能区域 -->
+      <div class="setting-item" style="border-top: 1px solid rgba(255, 255, 255, 0.2); margin-top: 15px; padding-top: 15px;">
+        <div class="setting-label" style="width: 100%; flex-direction: column; align-items: stretch; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-user-tie"></i>
+            <span>AI面试系统</span>
+          </div>
+          
+          <!-- 面试状态显示 -->
+          <div id="interviewStatus" style="
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+          ">正在初始化...</div>
+          
+          <!-- 面试进度 -->
+          <div id="interviewProgress" style="display: none;">
+            <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6); margin-bottom: 4px;">
+              <span id="currentSection">准备中</span> (<span id="questionProgress">0/0</span>)
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.2); height: 4px; border-radius: 2px; overflow: hidden;">
+              <div id="progressBar" style="
+                height: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                width: 0%;
+                transition: width 0.3s ease;
+              "></div>
+            </div>
+          </div>
+          
+          <!-- 面试控制按钮 -->
+          <div style="display: flex; gap: 5px; margin-top: 8px;">
+            <button class="setting-button" onclick="startInterview()" id="startInterviewBtn" style="flex: 1;" disabled>
+              <i class="fas fa-play"></i> 开始面试
+            </button>
+            <button class="setting-button" onclick="pauseInterview()" id="pauseInterviewBtn" style="flex: 1;" disabled>
+              <i class="fas fa-pause"></i> 暂停
+            </button>
+            <button class="setting-button" onclick="stopInterview()" id="stopInterviewBtn" style="flex: 1;" disabled>
+              <i class="fas fa-stop"></i> 结束
+            </button>
+          </div>
+        </div>
       </div>
       
       <div class="setting-item">
@@ -850,6 +887,45 @@
         </button>
       </div>
       
+      <!-- ASR转写结果显示区域 -->
+      <div class="setting-item" style="border-top: 1px solid rgba(255, 255, 255, 0.2); margin-top: 15px; padding-top: 15px;">
+        <div class="asr-results" id="asrResults" style="
+          position: relative;
+          bottom: auto;
+          left: auto;
+          width: auto;
+          max-height: 200px;
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: none;
+          border-radius: 8px;
+          padding: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          z-index: auto;
+          display: none;
+          flex-direction: column;
+          gap: 8px;
+        ">
+          <div class="asr-title" style="
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 6px;
+          ">
+            <i class="fas fa-microphone"></i> 语音转写结果
+          </div>
+          <div class="asr-content" id="asrContent" style="
+            flex: 1;
+            overflow-y: auto;
+            max-height: 150px;
+          ">
+            <div class="asr-status">等待语音输入...</div>
+          </div>
+        </div>
+      </div>
+      
       <div class="setting-item">
         <button class="setting-button" onclick="resetLive2D()">
           <i class="fas fa-redo"></i> 重置模型
@@ -857,61 +933,15 @@
         <button class="setting-button" onclick="toggleDebugInfo()">
           <i class="fas fa-bug"></i> 调试信息
         </button>
-          </div>
-          
+      </div>
+      
       <div class="setting-item">
         <button class="setting-button" onclick="exportSettings()">
           <i class="fas fa-download"></i> 导出设置
         </button>
       </div>
       
-      <!-- 面试功能区域 -->
-      <div class="setting-item" style="border-top: 1px solid rgba(255, 255, 255, 0.2); margin-top: 15px; padding-top: 15px;">
-        <div class="setting-label" style="width: 100%; flex-direction: column; align-items: stretch; gap: 10px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-user-tie"></i>
-            <span>AI面试系统</span>
-          </div>
-          
-          <!-- 面试状态显示 -->
-          <div id="interviewStatus" style="
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
-          ">正在初始化...</div>
-          
-          <!-- 面试进度 -->
-          <div id="interviewProgress" style="display: none;">
-            <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6); margin-bottom: 4px;">
-              <span id="currentSection">准备中</span> (<span id="questionProgress">0/0</span>)
-            </div>
-            <div style="background: rgba(255, 255, 255, 0.2); height: 4px; border-radius: 2px; overflow: hidden;">
-              <div id="progressBar" style="
-                height: 100%;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                width: 0%;
-                transition: width 0.3s ease;
-              "></div>
-            </div>
-          </div>
-          
-          <!-- 面试控制按钮 -->
-          <div style="display: flex; gap: 5px; margin-top: 8px;">
-            <button class="setting-button" onclick="startInterview()" id="startInterviewBtn" style="flex: 1;" disabled>
-              <i class="fas fa-play"></i> 开始面试
-            </button>
-            <button class="setting-button" onclick="pauseInterview()" id="pauseInterviewBtn" style="flex: 1;" disabled>
-              <i class="fas fa-pause"></i> 暂停
-            </button>
-            <button class="setting-button" onclick="stopInterview()" id="stopInterviewBtn" style="flex: 1;" disabled>
-              <i class="fas fa-stop"></i> 结束
-            </button>
-          </div>
-        </div>
-      </div>
+
       
       <div class="debug-info" id="debugInfo" style="display: none;">
         Live2D状态: 正常

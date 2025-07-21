@@ -338,9 +338,8 @@ class ASRAgent:
             # 发送结束标记
             end_tag = "{\"end\": true}"
             try:
-                binary_data = json.dumps(end_tag).encode('utf-8')  # 将 JSON 转为字节流
-                self.ws.send(binary_data)  # 发送二进制数据
-                print("已发送结束标记二进制")
+                self.ws.send(bytes(end_tag.encode('utf-8')))
+                print("已发送结束标记")
             except Exception as e:
                 # 捕获异常并打印日志
                 print(f"发送结束标记失败: {e}")
@@ -2132,9 +2131,9 @@ def save_voice_analysis():
 
 # 讯飞TTS配置
 XUNFEI_TTS_CONFIG = {
-    'appid': 'daa9d5d9',
-    'api_secret': 'YTBkNzA5MGVlNzYzNDVkMDk2MzcwOTIy',
-    'api_key': 'c52e142d8749090d0caa6c0fab03d2d1',
+    'appid': 'dacc7aaf',
+    'api_secret': 'MGE1YzA0ZGE3ZTRjYTcxMmZkYTU4Njhh',
+    'api_key': '45a514a1a752face8d5b7ea4903f28af',
     'url': 'wss://cbm01.cn-huabei-1.xf-yun.com/v1/private/mcd9m97e6',
     'vcn': 'x4_lingxiaoqi_oral'  # 聆小琪
 }

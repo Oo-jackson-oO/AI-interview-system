@@ -29,9 +29,9 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # 讯飞TTS配置
 TTS_CONFIG = {
-    'appid': 'daa9d5d9',
-    'api_secret': 'YTBkNzA5MGVlNzYzNDVkMDk2MzcwOTIy',
-    'api_key': 'c52e142d8749090d0caa6c0fab03d2d1',
+    'appid': 'dacc7aaf',
+    'api_secret': 'MGE1YzA0ZGE3ZTRjYTcxMmZkYTU4Njhh',
+    'api_key': '45a514a1a752face8d5b7ea4903f28af',
     'url': 'wss://cbm01.cn-huabei-1.xf-yun.com/v1/private/mcd9m97e6',
     'vcn': 'x4_lingxiaoqi_oral'  # 聆小琪
 }

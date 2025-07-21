@@ -1,27 +1,27 @@
 {
-  "generated_at": "2025-07-21T03:46:28.928129",
+  "generated_at": "2025-07-21T14:54:20.299978",
   "candidate_name": "杨洋",
   "interview_position": "python工程师",
   "tech_domain": "python",
-  "strict_mode": true,
+  "strict_mode": false,
   "questions": {
     "能力评估": [
       {
-        "question": "明您是如何分析和解决的。",
+        "question": "请描述您在处理大规模数据处理或分布式系统时遇到的一个技术挑战，以及您是如何解决这个问题的。",
         "importance": 1,
         "difficulty": "hard"
       }
     ],
     "岗位匹配度": [
       {
-        "question": "请结合业务场景说明。",
+        "question": "京东的业务场景中，经常需要处理高并发和实时数据流，您认为Python工程师在这个环境下需要具备哪些特定的技能或经验？",
         "importance": 1,
-        "difficulty": "hard"
+        "difficulty": "medium"
       }
     ],
     "专业能力测试": [
       {
-        "question": "考虑高并发场景下的性能优化。",
+        "question": "请编写一个Python函数，用于在电商平台中计算用户购物车中商品的总价，考虑满减、折扣、优惠券等复杂促销规则。",
         "importance": 1,
         "difficulty": "hard"
       }
@@ -29,16 +29,16 @@
     "candidate_name": "杨洋",
     "简历深挖": [
       {
-        "question": "请结合具体案例说明。",
+        "question": "您在贵泽实业有限公司担任行政主管期间，如何确保公司规章制度的有效落实？请举例说明您采取的具体措施。",
         "importance": 1,
-        "difficulty": "hard",
-        "focus_area": "工作经验与技能匹配"
+        "difficulty": "medium",
+        "focus_area": "工作经验"
       },
       {
-        "question": "请举例说明。",
+        "question": "京东作为一家大型互联网公司，对技术团队的协作和项目管理能力有较高要求。您在以往的工作中是如何组建和扩充团队的？请分享一次成功的团队管理经验。",
         "importance": 2,
-        "difficulty": "medium",
-        "focus_area": "技能匹配与目标公司背景"
+        "difficulty": "high",
+        "focus_area": "团队能力"
       }
     ]
   }

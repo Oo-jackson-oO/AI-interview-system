@@ -1,32 +1,32 @@
 {
   "analysis_info": {
-    "audio_file": "tmp0ki6lnbo.wav",
-    "analysis_time": "2025-07-21 08:35:37",
-    "analysis_timestamp": "2025-07-21T08:35:37.572595",
+    "audio_file": "tmpxphjniwk.wav",
+    "analysis_time": "2025-07-21 14:49:22",
+    "analysis_timestamp": "2025-07-21T14:49:22.936657",
     "overall_score": 0.68
   },
   "speech_rate_analysis": {
     "level": "快",
     "score": 0.8,
-    "syllable_rate": 2.638,
-    "speech_activity_ratio": 0.033,
-    "total_duration": 132.42
+    "syllable_rate": 2.148,
+    "speech_activity_ratio": 0.021,
+    "total_duration": 54.3
   },
   "emotion_tone_analysis": {
     "emotion_type": "兴奋/激动",
     "emotion_score": 0.8,
-    "average_pitch": 1046.9000244140625,
-    "pitch_variation": 790.2999877929688,
-    "pitch_range": 3822.10009765625,
+    "average_pitch": 1322.0999755859375,
+    "pitch_variation": 939.7000122070312,
+    "pitch_range": 3836.39990234375,
     "energy_variation": 0.0010000000474974513
   },
   "fluency_analysis": {
     "fluency_level": "不流利",
     "fluency_score": 0.4,
-    "pause_count": 5,
-    "pause_ratio": 0.928,
-    "speech_continuity": 0.072,
-    "rhythm_stability": 0.984000027179718
+    "pause_count": 13,
+    "pause_ratio": 0.869,
+    "speech_continuity": 0.131,
+    "rhythm_stability": 0.972000002861023
   },
   "recommendations": {
     "speech_rate_advice": "建议调整语速到适中范围",

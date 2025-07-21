@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-07-21T03:46:28.927128",
+  "generated_at": "2025-07-21T14:54:20.299461",
   "interview_config": {
     "candidate_name": "杨洋",
     "current_username": "yangyang",
@@ -9,8 +9,13 @@
     "has_resume": true,
     "resume_path": "uploads\\yangyang\\yangyang_简历_8.txt",
     "interview_type": "单人",
-    "strict_mode": true,
+    "strict_mode": false,
     "selected_sections": [
+      "自我介绍",
+      "简历深挖",
+      "能力评估",
+      "岗位匹配度",
+      "专业能力测试",
       "反问环节"
     ]
   },

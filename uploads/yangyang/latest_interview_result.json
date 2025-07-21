@@ -1,6 +1,17 @@
 {
-  "timestamp": "2025-07-21T08:35:39.793696",
-  "interview_data": [],
+  "timestamp": "2025-07-21T14:49:24.969297",
+  "interview_data": [
+    {
+      "section": "专业能力测试",
+      "question": "考虑高并发场景下的性能优化。",
+      "questionIndex": 1,
+      "importance": 1,
+      "difficulty": "hard",
+      "timestamp": "2025-07-21T06:48:35.474Z",
+      "answer": "嗯",
+      "answered_at": "2025-07-21T06:48:53.873Z"
+    }
+  ],
   "config": {
     "generated_at": "2025-07-21T03:46:28.927128",
     "interview_config": {
@@ -11,6 +22,7 @@
       "position": "python工程师",
       "resume_path": "uploads\\yangyang\\yangyang_简历_8.txt",
       "selected_sections": [
+        "专业能力测试",
         "反问环节"
       ],
       "strict_mode": true,
