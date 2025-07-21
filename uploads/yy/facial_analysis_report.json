@@ -1,0 +1,299 @@
+{
+  "report_generated_at": "2025-07-21 20:41:52",
+  "total_analysis_count": 27,
+  "analysis_duration": "2025-07-21 20:37:26 到 2025-07-21 20:41:47",
+  "performance_summary": {
+    "微表情表现": {
+      "平均分": 6.26,
+      "最高分": 8.0,
+      "最低分": 5.0,
+      "表现评级": "一般"
+    },
+    "肢体动作表现": {
+      "平均分": 5.41,
+      "最高分": 7.0,
+      "最低分": 4.0,
+      "表现评级": "一般"
+    },
+    "综合表现": {
+      "综合平均分": 5.83,
+      "综合评级": "一般"
+    }
+  },
+  "改进建议汇总": {
+    "微表情建议": [
+      "尝试增加眼神接触的频率，保持微笑，以显得更自信和友好。",
+      "尝试保持眼神接触，放松面部表情，展现自然的微笑。",
+      "尝试增加眼神接触，保持微笑，以显得更加自信和友好。",
+      "尝试保持眼神接触，减少紧张的表情如抿嘴，增加微笑。",
+      "尝试保持眼神接触，减少频繁眨眼，可以适时展现微笑以增强亲和力。",
+      "尝试保持眼神接触，减少频繁眨眼。可以轻轻微笑，以显得更自然和友好。",
+      "保持眼神接触，尝试展现自然的微笑，以增强亲和力和自信。",
+      "尝试保持眼神接触，减少频繁眨眼，可以适度展现微笑以增强亲和力。",
+      "保持眼神接触，减少眨眼频率，尝试自然微笑。",
+      "保持眼神接触，增加微笑频率",
+      "保持眼神接触，尝试展现自然的微笑。",
+      "尝试增加眼神接触，保持微笑，放松面部表情以显得更自然和自信。",
+      "尝试保持眼神接触，减少频繁的眼神移动，以增加自信和可信度。",
+      "增加眼神接触，保持自然的微笑，减少紧张的表情如抿嘴。",
+      "尝试保持眼神接触，减少紧张的表情，可以适度微笑以显得更加友好和自信。",
+      "尝试保持眼神接触，减少频繁眨眼，增加微笑。",
+      "尝试保持眼神接触，减少频繁眨眼和抿嘴的动作，展现出更自然的微笑。",
+      "尝试保持眼神接触，保持面部表情自然，可以适度微笑以增加亲和力。",
+      "尝试保持更自然的微笑，减少紧张的迹象，如抿嘴。",
+      "尝试保持更自然的微笑，减少眼神游离，增加眼神接触的频率。",
+      "尝试保持眼神接触，减少频繁眨眼，增加微笑以显得更自然和自信。",
+      "尝试保持眼神接触，放松面部表情，可以轻微微笑以显得更友好和自信。",
+      "尝试保持眼神接触，减少频繁眨眼。可以轻微微笑，以显得更加亲切和自信。",
+      "尝试保持眼神接触，减少频繁眨眼，保持微笑。",
+      "尝试保持眼神接触，减少紧张的表情如抿嘴，增加自然的微笑。"
+    ],
+    "肢体动作建议": [
+      "注意坐姿，保持背部挺直，可以尝试在讲话时使用手势来增强表达，同时确保眼神交流自然。",
+      "注意坐姿，尽量保持端正，避免身体前倾或后仰。",
+      "坐姿调整为更自然的状态，确保有适当的眼神交流，避免小动作。",
+      "坐姿需更自然，避免身体前倾或后仰，确保手部动作得体。",
+      "改善坐姿，保持背部挺直，减少不必要的小动作，使整体形象更加专业。",
+      "建议保持良好的坐姿，避免身体前倾或后仰。确保手部动作自然，不要有过多的小动作。",
+      "注意坐姿，尽量坐直，避免身体前倾或后仰。确保手部动作得当，不要有过多的小动作。",
+      "改善坐姿，保持自然，减少小动作。",
+      "改善坐姿，确保身体直立，避免小动作，保持专业形象。",
+      "改善坐姿，确保背部挺直，减少不必要的小动作，使用手势来增强表达。",
+      "改善坐姿，确保身体语言展现出自信和专业，避免小动作，保持手势得当。",
+      "调整坐姿以显得更加专注和自信，避免小动作，确保手势得当。",
+      "改善坐姿，确保身体语言显得更加自信和开放。",
+      "注意坐姿，保持自然，避免小动作。",
+      "注意坐姿，尽量坐直，避免小动作，确保手势得体以增强专业形象。",
+      "注意调整坐姿，确保背部挺直，避免小动作，保持手部自然放置于桌面或膝盖上。",
+      "改善坐姿，确保背部挺直，避免身体前倾或侧倾。减少不必要的小动作，如频繁调整姿势。",
+      "建议保持良好的坐姿，避免身体前倾或后仰，确保手势自然，以展现专业形象。",
+      "改善坐姿，保持背部挺直，减少不必要的小动作。",
+      "改善坐姿，确保肩膀放松，保持良好的姿势，避免小动作，以展现专业形象。",
+      "建议改善坐姿的自信度，如背部挺直，避免过多的小动作，确保手势自然得体。",
+      "注意坐姿，保持良好的身体语言，减少不必要的小动作。",
+      "改善坐姿，保持背部挺直，避免小动作，确保手势得当以增强专业形象。",
+      "改善坐姿，确保背部挺直，避免小动作，保持手部静止或使用得当的手势。",
+      "调整坐姿，保持背部挺直，避免显得过于放松或紧张，确保手势自然得体。",
+      "注意坐姿，确保背部挺直，避免小动作，如调整头发或衣服，以显得更专业。",
+      "调整坐姿以显得更自然和放松"
+    ]
+  },
+  "详细分析记录": [
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试保持眼神接触，减少紧张的表情，可以适度微笑以显得更加友好和自信。",
+      "body_suggestions": "注意坐姿，保持背部挺直，可以尝试在讲话时使用手势来增强表达，同时确保眼神交流自然。",
+      "timestamp": "2025-07-21 20:37:26",
+      "photo_path": "browser_capture_0.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，增加微笑以显得更自然和自信。",
+      "body_suggestions": "改善坐姿，确保背部挺直，避免小动作，保持手部静止或使用得当的手势。",
+      "timestamp": "2025-07-21 20:37:37",
+      "photo_path": "browser_capture_1.jpg"
+    },
+    {
+      "facial_score": 8.0,
+      "body_score": 7.0,
+      "facial_suggestions": "保持眼神接触，减少眨眼频率，尝试自然微笑。",
+      "body_suggestions": "改善坐姿，保持背部挺直，减少不必要的小动作。",
+      "timestamp": "2025-07-21 20:37:45",
+      "photo_path": "browser_capture_2.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，保持微笑。",
+      "body_suggestions": "改善坐姿，保持自然，减少小动作。",
+      "timestamp": "2025-07-21 20:37:55",
+      "photo_path": "browser_capture_3.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试保持更自然的微笑，减少眼神游离，增加眼神接触的频率。",
+      "body_suggestions": "建议改善坐姿的自信度，如背部挺直，避免过多的小动作，确保手势自然得体。",
+      "timestamp": "2025-07-21 20:38:06",
+      "photo_path": "browser_capture_4.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试增加眼神接触的频率，保持微笑，以显得更自信和友好。",
+      "body_suggestions": "改善坐姿，保持背部挺直，减少不必要的小动作，使整体形象更加专业。",
+      "timestamp": "2025-07-21 20:38:16",
+      "photo_path": "browser_capture_5.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "增加眼神接触，保持自然的微笑，减少紧张的表情如抿嘴。",
+      "body_suggestions": "调整坐姿以显得更加专注和自信，避免小动作，确保手势得当。",
+      "timestamp": "2025-07-21 20:38:26",
+      "photo_path": "browser_capture_6.jpg"
+    },
+    {
+      "facial_score": 8.0,
+      "body_score": 7.0,
+      "facial_suggestions": "保持眼神接触，增加微笑频率",
+      "body_suggestions": "调整坐姿以显得更自然和放松",
+      "timestamp": "2025-07-21 20:38:35",
+      "photo_path": "browser_capture_7.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，保持面部表情自然，可以适度微笑以增加亲和力。",
+      "body_suggestions": "注意坐姿，尽量坐直，避免小动作，确保手势得体以增强专业形象。",
+      "timestamp": "2025-07-21 20:38:46",
+      "photo_path": "browser_capture_8.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试增加眼神接触，保持微笑，以显得更加自信和友好。",
+      "body_suggestions": "改善坐姿，确保肩膀放松，保持良好的姿势，避免小动作，以展现专业形象。",
+      "timestamp": "2025-07-21 20:38:56",
+      "photo_path": "browser_capture_9.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少紧张的表情如抿嘴，增加自然的微笑。",
+      "body_suggestions": "改善坐姿，确保身体语言展现出自信和专业，避免小动作，保持手势得当。",
+      "timestamp": "2025-07-21 20:39:06",
+      "photo_path": "browser_capture_10.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少紧张的表情如抿嘴，增加微笑。",
+      "body_suggestions": "改善坐姿，确保身体直立，避免小动作，保持专业形象。",
+      "timestamp": "2025-07-21 20:39:15",
+      "photo_path": "browser_capture_11.jpg"
+    },
+    {
+      "facial_score": 5.0,
+      "body_score": 4.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，保持微笑。",
+      "body_suggestions": "坐姿需更自然，避免身体前倾或后仰，确保手部动作得体。",
+      "timestamp": "2025-07-21 20:39:25",
+      "photo_path": "browser_capture_12.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，放松面部表情，展现自然的微笑。",
+      "body_suggestions": "注意坐姿，保持良好的身体语言，减少不必要的小动作。",
+      "timestamp": "2025-07-21 20:39:35",
+      "photo_path": "browser_capture_13.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，保持微笑。",
+      "body_suggestions": "注意坐姿，保持自然，避免小动作。",
+      "timestamp": "2025-07-21 20:39:45",
+      "photo_path": "browser_capture_14.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "保持眼神接触，尝试展现自然的微笑。",
+      "body_suggestions": "注意坐姿，尽量保持端正，避免身体前倾或后仰。",
+      "timestamp": "2025-07-21 20:39:56",
+      "photo_path": "browser_capture_15.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，放松面部表情，可以轻微微笑以显得更友好和自信。",
+      "body_suggestions": "改善坐姿，确保背部挺直，避免身体前倾或侧倾。减少不必要的小动作，如频繁调整姿势。",
+      "timestamp": "2025-07-21 20:40:06",
+      "photo_path": "browser_capture_16.jpg"
+    },
+    {
+      "facial_score": 5.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，增加微笑。",
+      "body_suggestions": "坐姿调整为更自然的状态，确保有适当的眼神交流，避免小动作。",
+      "timestamp": "2025-07-21 20:40:16",
+      "photo_path": "browser_capture_17.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持更自然的微笑，减少紧张的迹象，如抿嘴。",
+      "body_suggestions": "改善坐姿，确保身体语言显得更加自信和开放。",
+      "timestamp": "2025-07-21 20:40:26",
+      "photo_path": "browser_capture_18.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，可以适度展现微笑以增强亲和力。",
+      "body_suggestions": "注意调整坐姿，确保背部挺直，避免小动作，保持手部自然放置于桌面或膝盖上。",
+      "timestamp": "2025-07-21 20:40:37",
+      "photo_path": "browser_capture_19.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁的眼神移动，以增加自信和可信度。",
+      "body_suggestions": "建议保持良好的坐姿，避免身体前倾或后仰，确保手势自然，以展现专业形象。",
+      "timestamp": "2025-07-21 20:40:46",
+      "photo_path": "browser_capture_20.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，可以适时展现微笑以增强亲和力。",
+      "body_suggestions": "注意坐姿，确保背部挺直，避免小动作，如调整头发或衣服，以显得更专业。",
+      "timestamp": "2025-07-21 20:40:57",
+      "photo_path": "browser_capture_21.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼。可以轻微微笑，以显得更加亲切和自信。",
+      "body_suggestions": "建议保持良好的坐姿，避免身体前倾或后仰。确保手部动作自然，不要有过多的小动作。",
+      "timestamp": "2025-07-21 20:41:07",
+      "photo_path": "browser_capture_22.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼和抿嘴的动作，展现出更自然的微笑。",
+      "body_suggestions": "改善坐姿，保持背部挺直，避免小动作，确保手势得当以增强专业形象。",
+      "timestamp": "2025-07-21 20:41:17",
+      "photo_path": "browser_capture_23.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "保持眼神接触，尝试展现自然的微笑，以增强亲和力和自信。",
+      "body_suggestions": "调整坐姿，保持背部挺直，避免显得过于放松或紧张，确保手势自然得体。",
+      "timestamp": "2025-07-21 20:41:26",
+      "photo_path": "browser_capture_24.jpg"
+    },
+    {
+      "facial_score": 5.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试增加眼神接触，保持微笑，放松面部表情以显得更自然和自信。",
+      "body_suggestions": "改善坐姿，确保背部挺直，减少不必要的小动作，使用手势来增强表达。",
+      "timestamp": "2025-07-21 20:41:36",
+      "photo_path": "browser_capture_25.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼。可以轻轻微笑，以显得更自然和友好。",
+      "body_suggestions": "注意坐姿，尽量坐直，避免身体前倾或后仰。确保手部动作得当，不要有过多的小动作。",
+      "timestamp": "2025-07-21 20:41:47",
+      "photo_path": "browser_capture_26.jpg"
+    }
+  ]
+}

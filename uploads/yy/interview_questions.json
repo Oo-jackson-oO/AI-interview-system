@@ -1,0 +1,45 @@
+{
+  "generated_at": "2025-07-21T20:07:53.342611",
+  "candidate_name": "杨洋",
+  "interview_position": "ai架构师",
+  "tech_domain": "python",
+  "strict_mode": false,
+  "questions": {
+    "能力评估": [
+      {
+        "question": "请描述您在AI项目中遇到的一个重大技术挑战，以及您是如何解决这个问题的",
+        "importance": 1,
+        "difficulty": "hard"
+      }
+    ],
+    "岗位匹配度": [
+      {
+        "question": "您认为作为科大讯飞的AI架构师，最需要具备哪些技能和素质？",
+        "importance": 1,
+        "difficulty": "medium"
+      }
+    ],
+    "专业能力测试": [
+      {
+        "question": "解释感知机的工作原理。",
+        "importance": 1,
+        "difficulty": "hard"
+      }
+    ],
+    "candidate_name": "杨洋",
+    "简历深挖": [
+      {
+        "question": "在氢能垂直领域大模型构建项目中，您如何结合知识图谱和语言模型解决专业文献解读与自动摘要的技术难点？请具体说明技术实现路径及创新点。",
+        "importance": 1,
+        "difficulty": "high",
+        "focus_area": "项目经验"
+      },
+      {
+        "question": "您刚刚提到的两阶段建模结构，具体是指什么，能详细说一下吗。",
+        "importance": 2,
+        "difficulty": "medium",
+        "focus_area": "技能匹配度"
+      }
+    ]
+  }
+}
