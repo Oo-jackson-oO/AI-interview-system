@@ -121,7 +121,7 @@ choco install ffmpeg
 # 2. 下载Windows版本的ffmpeg
 # 3. 解压到C:\ffmpeg
 # 4. 将C:\ffmpeg\bin添加到系统环境变量PATH中
-# 5. 重启命令行工具验证安装
+# 5. 重启IDE和命令行工具验证安装
 ffmpeg -version
 
 # 方法3：使用winget（Windows 10/11）

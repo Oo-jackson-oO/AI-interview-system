@@ -1,37 +1,37 @@
 {
   "analysis_info": {
-    "audio_file": "tmpxphjniwk.wav",
-    "analysis_time": "2025-07-21 14:49:22",
-    "analysis_timestamp": "2025-07-21T14:49:22.936657",
-    "overall_score": 0.68
+    "audio_file": "tmp9c6p4ws5.wav",
+    "analysis_time": "2025-07-21 22:59:52",
+    "analysis_timestamp": "2025-07-21T22:59:52.676380",
+    "overall_score": 0.71
   },
   "speech_rate_analysis": {
     "level": "快",
     "score": 0.8,
-    "syllable_rate": 2.148,
-    "speech_activity_ratio": 0.021,
-    "total_duration": 54.3
+    "syllable_rate": 1.363,
+    "speech_activity_ratio": 0.246,
+    "total_duration": 91.62
   },
   "emotion_tone_analysis": {
     "emotion_type": "兴奋/激动",
     "emotion_score": 0.8,
-    "average_pitch": 1322.0999755859375,
-    "pitch_variation": 939.7000122070312,
-    "pitch_range": 3836.39990234375,
+    "average_pitch": 698.5,
+    "pitch_variation": 784.5999755859375,
+    "pitch_range": 3838.39990234375,
     "energy_variation": 0.0010000000474974513
   },
   "fluency_analysis": {
-    "fluency_level": "不流利",
-    "fluency_score": 0.4,
-    "pause_count": 13,
-    "pause_ratio": 0.869,
-    "speech_continuity": 0.131,
-    "rhythm_stability": 0.972000002861023
+    "fluency_level": "一般",
+    "fluency_score": 0.5,
+    "pause_count": 112,
+    "pause_ratio": 0.234,
+    "speech_continuity": 0.766,
+    "rhythm_stability": 0.9729999899864197
   },
   "recommendations": {
     "speech_rate_advice": "建议调整语速到适中范围",
     "emotion_advice": "建议增强情感表达，使语调更加生动有感染力",
-    "fluency_advice": "流利度需要改善，建议多加练习以减少停顿和提高连贯性"
+    "fluency_advice": "流利度一般，检测到112次停顿，可通过练习减少不必要停顿"
   },
   "metadata": {
     "analysis_version": "1.0",
