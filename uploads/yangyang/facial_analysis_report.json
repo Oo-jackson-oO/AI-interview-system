@@ -1,51 +1,268 @@
 {
-  "report_generated_at": "2025-07-23 01:00:43",
-  "total_analysis_count": 2,
-  "analysis_duration": "2025-07-23 01:00:30 到 2025-07-23 01:00:40",
+  "report_generated_at": "2025-08-07 22:56:13",
+  "total_analysis_count": 24,
+  "analysis_duration": "2025-08-07 22:52:15 到 2025-08-07 22:56:06",
   "performance_summary": {
     "微表情表现": {
-      "平均分": 4.0,
-      "最高分": 4.0,
-      "最低分": 4.0,
-      "表现评级": "较差"
+      "平均分": 5.25,
+      "最高分": 7.0,
+      "最低分": 1,
+      "表现评级": "一般"
     },
     "肢体动作表现": {
-      "平均分": 4.5,
-      "最高分": 5.0,
-      "最低分": 4.0,
+      "平均分": 4.88,
+      "最高分": 7.0,
+      "最低分": 1,
       "表现评级": "较差"
     },
     "综合表现": {
-      "综合平均分": 4.25,
-      "综合评级": "较差"
+      "综合平均分": 5.06,
+      "综合评级": "一般"
     }
   },
   "改进建议汇总": {
     "微表情建议": [
+      "建议保持眼神接触，减少频繁眨眼。尝试放松面部表情，展现出更多的自信和自然的微笑。",
+      "由于照片中人物的头部低垂，面部表情无法观察，建议保持头部抬起，与面试官进行眼神交流。",
       "保持眼神接触，减少紧张表情，尝试自然微笑",
-      "尝试保持眼神接触，减少频繁眨眼。保持面部表情自然，适当微笑可以增加亲和力。"
+      "保持眼神接触，尽量放松面部表情，展现自然微笑。",
+      "AI分析异常，原始返回: 由于提供的照片中人物的面部表情和肢体动作并不清晰，无法进行准确的微表情和肢体动作分析。因此，我无法给出专业的评估和评分。\n\n然而，如果你需要一般性的建议，以下是一些面试时可以考虑的要点：\n\n1. **...",
+      "尝试保持眼神接触，减少紧张的表情如抿嘴。",
+      "保持眼神接触，尝试自然微笑。",
+      "尝试保持眼神接触，减少频繁眨眼，保持表情自然。",
+      "增强眼神接触，减少紧张表情，尝试自然微笑",
+      "保持眼神接触，尝试放松面部表情，减少紧张的迹象。",
+      "AI分析异常，原始返回: 很抱歉，由于图片中的人物背对镜头，无法进行微表情和肢体动作的分析。因此，无法提供专业的评估和建议。...",
+      "尝试保持眼神接触，减少频繁眨眼，保持面部表情自然。",
+      "抬起头来，与面试官进行眼神交流，保持自然的表情。",
+      "保持眼神交流，尝试展现自然的微笑以增强亲和力。",
+      "由于无法看到面部，无法提供具体建议。",
+      "AI分析异常，原始返回: 根据您提供的图片，以下是我的分析：\n\n```json\n{\n  \"facial_score\": 5,\n  \"body_score\": 5,\n  \"facial_suggestions\": \"保持眼神接触...",
+      "尝试保持眼神接触，放松面部表情，展现出更多的自信和微笑。",
+      "保持眼神交流，减少频繁眨眼",
+      "尝试保持更自然的微笑，增加眼神接触频率，以提升自信和亲和力。",
+      "由于照片中人物的面部表情不可见，无法提供具体的微表情改进建议。",
+      "尝试保持眼神接触，减少抿嘴等可能表达紧张的微表情，增加自然的微笑。",
+      "尝试保持眼神接触，减少频繁的眨眼，保持微笑以显得更加自信。",
+      "保持眼神接触，减少紧张表情"
     ],
     "肢体动作建议": [
-      "调整坐姿以显得更专业，避免不必要的小动作",
-      "保持良好的坐姿，避免身体前倾或后仰过度。在讲话时可以使用手势，但要避免过多的小动作。"
+      "建议保持自然的面部表情和专业的坐姿",
+      "改善坐姿，确保背部挺直，避免显得过于放松或紧张。",
+      "调整坐姿，确保身体挺直，避免低头看桌面或其他地方。",
+      "改善坐姿，确保自然且专业，避免小动作。",
+      "考虑到照片中的人物头部朝下，且未呈现任何肢体动作，建议在面试时保持坐姿端正，进行适当的眼神交流，并避免过度低头或遮挡面部，以展现更专业的形象。",
+      "坐姿更自然，避免小动作",
+      "改善坐姿，确保身体语言显得更自然和专业。",
+      "坐姿更直，避免小动作",
+      "坐姿应更挺直，减少小动作，增加眼神交流。",
+      "保持坐姿端正，减少小动作，增加眼神交流。",
+      "建议保持良好的坐姿，避免身体前倾或者后仰。确保双手放置得当，减少不必要的小动作。加强眼神交流，以提升专业形象。",
+      "建议改善坐姿，保持背部挺直，减少小动作，以展现更加专业的形象。",
+      "调整坐姿，保持背部挺直，避免小动作，增强眼神交流。",
+      "改善坐姿，尽量坐直，避免小动作，确保手势自然得当。",
+      "注意坐姿，避免小动作",
+      "保持坐姿端正，避免小动作",
+      "改善坐姿，确保身体稍微前倾以显示兴趣，减少小动作，保持手势自然。",
+      "照片显示的姿势不利于面试，建议坐直身体，展现出自信和专业的态度，避免低头或弯腰的姿势。",
+      "考虑到只能看到后脑勺，建议在面试时确保身体正对面试官，保持良好的坐姿和眼神交流。",
+      "改善坐姿，确保背部挺直，避免身体前倾或后仰；在交谈时可以适当使用手势，但需保持自然不做作。",
+      "改善坐姿，确保身体语言显得更加专业和自信，避免小动作。",
+      "改善坐姿，确保身体语言更加开放和自信，避免不必要的动作。"
     ]
   },
   "详细分析记录": [
     {
-      "facial_score": 4.0,
-      "body_score": 5.0,
-      "facial_suggestions": "保持眼神接触，减少紧张表情，尝试自然微笑",
-      "body_suggestions": "调整坐姿以显得更专业，避免不必要的小动作",
-      "timestamp": "2025-07-23 01:00:30",
+      "facial_score": 5.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，保持面部表情自然。",
+      "body_suggestions": "改善坐姿，确保身体语言显得更加专业和自信，避免小动作。",
+      "timestamp": "2025-08-07 22:52:15",
       "photo_path": "browser_capture_0.jpg"
     },
     {
-      "facial_score": 4.0,
-      "body_score": 4.0,
-      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼。保持面部表情自然，适当微笑可以增加亲和力。",
-      "body_suggestions": "保持良好的坐姿，避免身体前倾或后仰过度。在讲话时可以使用手势，但要避免过多的小动作。",
-      "timestamp": "2025-07-23 01:00:40",
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "保持眼神接触，尝试自然微笑。",
+      "body_suggestions": "坐姿应更挺直，减少小动作，增加眼神交流。",
+      "timestamp": "2025-08-07 22:52:25",
       "photo_path": "browser_capture_1.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "保持眼神交流，尝试展现自然的微笑以增强亲和力。",
+      "body_suggestions": "改善坐姿，确保背部挺直，避免显得过于放松或紧张。",
+      "timestamp": "2025-08-07 22:52:34",
+      "photo_path": "browser_capture_2.jpg"
+    },
+    {
+      "facial_score": 5.0,
+      "body_score": 6.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁眨眼，保持表情自然。",
+      "body_suggestions": "保持坐姿端正，减少小动作，增加眼神交流。",
+      "timestamp": "2025-08-07 22:52:45",
+      "photo_path": "browser_capture_3.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少抿嘴等可能表达紧张的微表情，增加自然的微笑。",
+      "body_suggestions": "改善坐姿，确保背部挺直，避免身体前倾或后仰；在交谈时可以适当使用手势，但需保持自然不做作。",
+      "timestamp": "2025-08-07 22:52:56",
+      "photo_path": "browser_capture_4.jpg"
+    },
+    {
+      "facial_score": 5.0,
+      "body_score": 6.0,
+      "facial_suggestions": "保持眼神接触，减少紧张表情，尝试自然微笑",
+      "body_suggestions": "坐姿更直，避免小动作",
+      "timestamp": "2025-08-07 22:53:05",
+      "photo_path": "browser_capture_5.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少紧张的表情如抿嘴。",
+      "body_suggestions": "改善坐姿，确保身体语言显得更自然和专业。",
+      "timestamp": "2025-08-07 22:53:15",
+      "photo_path": "browser_capture_6.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "增强眼神接触，减少紧张表情，尝试自然微笑",
+      "body_suggestions": "保持坐姿端正，避免小动作",
+      "timestamp": "2025-08-07 22:53:25",
+      "photo_path": "browser_capture_7.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "保持眼神接触，尝试放松面部表情，减少紧张的迹象。",
+      "body_suggestions": "改善坐姿，确保身体语言更加开放和自信，避免不必要的动作。",
+      "timestamp": "2025-08-07 22:53:35",
+      "photo_path": "browser_capture_8.jpg"
+    },
+    {
+      "facial_score": 3.0,
+      "body_score": 4.0,
+      "facial_suggestions": "建议保持眼神接触，减少频繁眨眼。尝试放松面部表情，展现出更多的自信和自然的微笑。",
+      "body_suggestions": "建议保持良好的坐姿，避免身体前倾或者后仰。确保双手放置得当，减少不必要的小动作。加强眼神交流，以提升专业形象。",
+      "timestamp": "2025-08-07 22:53:47",
+      "photo_path": "browser_capture_9.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "保持眼神接触，减少紧张表情",
+      "body_suggestions": "注意坐姿，避免小动作",
+      "timestamp": "2025-08-07 22:53:54",
+      "photo_path": "browser_capture_10.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少紧张的表情如抿嘴。",
+      "body_suggestions": "改善坐姿，确保自然且专业，避免小动作。",
+      "timestamp": "2025-08-07 22:54:05",
+      "photo_path": "browser_capture_11.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 7.0,
+      "facial_suggestions": "AI分析异常，原始返回: 由于提供的照片中人物的面部表情和肢体动作并不清晰，无法进行准确的微表情和肢体动作分析。因此，我无法给出专业的评估和评分。\n\n然而，如果你需要一般性的建议，以下是一些面试时可以考虑的要点：\n\n1. **...",
+      "body_suggestions": "建议保持自然的面部表情和专业的坐姿",
+      "timestamp": "2025-08-07 22:54:18",
+      "photo_path": "browser_capture_12.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，放松面部表情，展现出更多的自信和微笑。",
+      "body_suggestions": "改善坐姿，确保身体稍微前倾以显示兴趣，减少小动作，保持手势自然。",
+      "timestamp": "2025-08-07 22:54:26",
+      "photo_path": "browser_capture_13.jpg"
+    },
+    {
+      "facial_score": 1,
+      "body_score": 1,
+      "facial_suggestions": "由于无法看到面部，无法提供具体建议。",
+      "body_suggestions": "考虑到只能看到后脑勺，建议在面试时确保身体正对面试官，保持良好的坐姿和眼神交流。",
+      "timestamp": "2025-08-07 22:54:35",
+      "photo_path": "browser_capture_14.jpg"
+    },
+    {
+      "facial_score": 1,
+      "body_score": 1,
+      "facial_suggestions": "由于照片中人物的面部表情不可见，无法提供具体的微表情改进建议。",
+      "body_suggestions": "考虑到照片中的人物头部朝下，且未呈现任何肢体动作，建议在面试时保持坐姿端正，进行适当的眼神交流，并避免过度低头或遮挡面部，以展现更专业的形象。",
+      "timestamp": "2025-08-07 22:54:47",
+      "photo_path": "browser_capture_15.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 7.0,
+      "facial_suggestions": "AI分析异常，原始返回: 根据您提供的图片，以下是我的分析：\n\n```json\n{\n  \"facial_score\": 5,\n  \"body_score\": 5,\n  \"facial_suggestions\": \"保持眼神接触...",
+      "body_suggestions": "建议保持自然的面部表情和专业的坐姿",
+      "timestamp": "2025-08-07 22:54:55",
+      "photo_path": "browser_capture_16.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "保持眼神接触，尽量放松面部表情，展现自然微笑。",
+      "body_suggestions": "调整坐姿，保持背部挺直，避免小动作，增强眼神交流。",
+      "timestamp": "2025-08-07 22:55:05",
+      "photo_path": "browser_capture_17.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 7.0,
+      "facial_suggestions": "AI分析异常，原始返回: 很抱歉，由于图片中的人物背对镜头，无法进行微表情和肢体动作的分析。因此，无法提供专业的评估和建议。...",
+      "body_suggestions": "建议保持自然的面部表情和专业的坐姿",
+      "timestamp": "2025-08-07 22:55:13",
+      "photo_path": "browser_capture_18.jpg"
+    },
+    {
+      "facial_score": 7.0,
+      "body_score": 6.0,
+      "facial_suggestions": "保持眼神交流，减少频繁眨眼",
+      "body_suggestions": "坐姿更自然，避免小动作",
+      "timestamp": "2025-08-07 22:55:25",
+      "photo_path": "browser_capture_19.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持眼神接触，减少频繁的眨眼，保持微笑以显得更加自信。",
+      "body_suggestions": "改善坐姿，尽量坐直，避免小动作，确保手势自然得当。",
+      "timestamp": "2025-08-07 22:55:36",
+      "photo_path": "browser_capture_20.jpg"
+    },
+    {
+      "facial_score": 1,
+      "body_score": 1,
+      "facial_suggestions": "抬起头来，与面试官进行眼神交流，保持自然的表情。",
+      "body_suggestions": "调整坐姿，确保身体挺直，避免低头看桌面或其他地方。",
+      "timestamp": "2025-08-07 22:55:45",
+      "photo_path": "browser_capture_21.jpg"
+    },
+    {
+      "facial_score": 1,
+      "body_score": 1,
+      "facial_suggestions": "由于照片中人物的头部低垂，面部表情无法观察，建议保持头部抬起，与面试官进行眼神交流。",
+      "body_suggestions": "照片显示的姿势不利于面试，建议坐直身体，展现出自信和专业的态度，避免低头或弯腰的姿势。",
+      "timestamp": "2025-08-07 22:55:56",
+      "photo_path": "browser_capture_22.jpg"
+    },
+    {
+      "facial_score": 6.0,
+      "body_score": 5.0,
+      "facial_suggestions": "尝试保持更自然的微笑，增加眼神接触频率，以提升自信和亲和力。",
+      "body_suggestions": "建议改善坐姿，保持背部挺直，减少小动作，以展现更加专业的形象。",
+      "timestamp": "2025-08-07 22:56:06",
+      "photo_path": "browser_capture_23.jpg"
     }
   ]
 }

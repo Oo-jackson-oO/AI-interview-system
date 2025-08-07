@@ -167,25 +167,56 @@
     
     /* 返回按钮 */
     .back-btn {
-  position: fixed;
-  top: 20px;
-  right: 80px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 15px 25px;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  z-index: 100;
-  font-size: 16px;
-  font-weight: 500;
-}
+      position: fixed;
+      top: 20px;
+      right: 140px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      font-size: 16px;
+      font-weight: 500;
+    }
     
     .back-btn:hover {
       background: rgba(255, 255, 255, 0.2);
       transform: translateY(-2px);
+    }
+    
+    /* 主界面开始面试按钮 */
+    .main-start-interview-btn {
+      position: fixed;
+      top: 20px;
+      left: 80px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .main-start-interview-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .main-start-interview-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
     
     /* 波动效果样式 */
@@ -464,10 +495,10 @@
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
-      padding: 16px 24px;
-      border-radius: 16px;
+      padding: 8px 16px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 12px;
       transition: all 0.3s ease;
     }
     
@@ -659,12 +690,12 @@
   <button class="back-btn" onclick="goBack()">
     <i class="fas fa-arrow-left"></i> 返回主页
   </button>
-  
-  <button class="setting-button" onclick="startInterview()" id="startInterviewBtn" style="flex: 1;" disabled>
+
+  <!-- 主界面开始面试按钮 -->
+  <button class="main-start-interview-btn" onclick="startInterview()" id="mainStartInterviewBtn" disabled>
     <i class="fas fa-play"></i> 开始面试
   </button>
 
-  
   <!-- AI思考动画 -->
   <div class="ai-thinking" id="aiThinking">
     <div class="thinking-progress">
@@ -2823,7 +2854,7 @@
       ttsActive = false;
       updateTTSButtons();
       updateTTSStatus('已禁用', false);
-      console.log('�� TTS功能已禁用');
+      console.log('   TTS功能已禁用');
     }
     
     // 全局TTS函数
@@ -2900,11 +2931,13 @@
         // 更新面试状态显示
         updateInterviewStatus('面试已就绪，点击开始面试');
         document.getElementById('startInterviewBtn').disabled = false;
+        document.getElementById('mainStartInterviewBtn').disabled = false;
         
       } catch (error) {
         console.error('❌ 初始化面试系统失败:', error);
         updateInterviewStatus('初始化失败');
         document.getElementById('startInterviewBtn').disabled = true;
+        document.getElementById('mainStartInterviewBtn').disabled = true;
       }
     }
     
@@ -3005,6 +3038,7 @@
       
       // 更新按钮状态
       document.getElementById('startInterviewBtn').disabled = true;
+      document.getElementById('mainStartInterviewBtn').disabled = true;
       document.getElementById('pauseInterviewBtn').disabled = false;
       document.getElementById('stopInterviewBtn').disabled = false;
       
@@ -3273,6 +3307,7 @@
           
           // 4. 更新按钮状态
           document.getElementById('startInterviewBtn').disabled = false;
+          document.getElementById('mainStartInterviewBtn').disabled = false;
           document.getElementById('pauseInterviewBtn').disabled = true;
           document.getElementById('stopInterviewBtn').disabled = true;
           
@@ -3325,6 +3360,7 @@
       
       // 更新按钮状态
       document.getElementById('startInterviewBtn').disabled = false;
+      document.getElementById('mainStartInterviewBtn').disabled = false;
       document.getElementById('pauseInterviewBtn').disabled = true;
       
       showNotification('⏸️ 面试已暂停', 'info');
@@ -3353,6 +3389,7 @@
       
       // 更新按钮状态
       document.getElementById('startInterviewBtn').disabled = false;
+      document.getElementById('mainStartInterviewBtn').disabled = false;
       document.getElementById('pauseInterviewBtn').disabled = true;
       document.getElementById('stopInterviewBtn').disabled = true;
       
@@ -3531,7 +3568,7 @@
     // 进行一轮反问
     async function conductReverseQARound() {
       if (currentReverseRound >= maxReverseRounds) {
-        console.log('�� 反问环节已达到最大轮数，结束');
+        console.log('   反问环节已达到最大轮数，结束');
         await finalizeInterview();
         return;
       }

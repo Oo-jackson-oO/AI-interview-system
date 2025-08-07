@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-07-23T00:59:53.057085",
+  "generated_at": "2025-08-07T22:47:19.954541",
   "candidate_name": "杨洋",
   "interview_position": "python工程师",
   "tech_domain": "python",
@@ -7,21 +7,21 @@
   "questions": {
     "能力评估": [
       {
-        "question": "请描述您在开发过程中遇到的一个复杂问题，并详细说明您是如何解决这个问题的。",
+        "question": "请举例说明您如何优化过一个高并发的Python服务，并具体阐述采用的技术方案及最终效果（如性能提升比例、资源利用率变化等）",
         "importance": 1,
         "difficulty": "medium"
       }
     ],
     "岗位匹配度": [
       {
-        "question": "京东的业务场景中，Python工程师需要具备哪些特定的技能和经验？",
+        "question": "京东电商业务场景中存在大量异步任务处理需求（如订单状态更新、库存同步），您会如何设计基于Python的分布式任务调度系统来应对这类挑战？",
         "importance": 1,
         "difficulty": "medium"
       }
     ],
     "专业能力测试": [
       {
-        "question": "请编写一个Python函数，实现对京东商品评论数据的实时情感分析，并返回正面、负面或中性的结果。",
+        "question": "在京东这样规模的电商平台下，当遇到GIL限制导致多线程性能瓶颈时，您有哪些替代方案可以突破该限制？请结合具体实现原理和适用场景进行分析",
         "importance": 1,
         "difficulty": "hard"
       }
@@ -29,16 +29,18 @@
     "candidate_name": "杨洋",
     "简历深挖": [
       {
-        "question": "您在贵泽实业有限公司担任行政主管期间，如何确保公司规章制度的有效落实？请举例说明。",
+        "question": "在‘专利猫’项目中，您如何利用FastAPI和Vue3实现前后端分离开发？请详细描述技术选型依据、架构设计思路以及遇到的主要挑战及解决方案。",
         "importance": 1,
-        "difficulty": "medium",
-        "focus_area": "工作经验"
+        "difficulty": "high",
+        "focus_area": "项目经验/技能匹配度",
+        "context": "结合京东电商场景下对高并发、低延迟系统的需求，考察候选人是否具备构建可扩展Web应用的能力"
       },
       {
-        "question": "您在团队管理中遇到过哪些挑战，如何解决的？请分享一个具体的案例。",
+        "question": "您主导研发的基于GPT的专利生成与检索智能体涉及多模块协作（如语义解析、模板生成、API部署）。如果将其迁移至京东商品评论分析场景，您会如何调整模型结构和处理流程？请说明关键技术改造点。",
         "importance": 2,
-        "difficulty": "high",
-        "focus_area": "管理能力"
+        "difficulty": "very_high",
+        "focus_area": "工作经验/创新能力",
+        "context": "测试候选人对NLP技术的迁移学习能力及业务场景适配性，契合京东在智能客服、舆情监控等领域的技术需求"
       }
     ]
   }
