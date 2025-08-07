@@ -1,0 +1,153 @@
+
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>简历修改建议（修改部分高亮）</title>
+                    <style>
+                        body { 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6; 
+                            background-color: #f8f9fa;
+                        }
+                        .container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        }
+                        .highlight { 
+                            background-color: #E6FFE6; 
+                            padding: 3px 6px; 
+                            border-radius: 4px;
+                            font-weight: bold;
+                            border: 2px solid #E6FFE6;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            display: inline-block;
+                            margin: 1px 2px;
+                        }
+                        /* 高亮样式优化 */
+                        span[style*="background-color"] {
+                            border-radius: 4px !important;
+                            font-weight: bold !important;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+                            display: inline-block !important;
+                            margin: 1px 2px !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        span[style*="background-color"]:hover {
+                            transform: translateY(-1px) !important;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+                        }
+                        div[style*="background-color"] {
+                            border-radius: 6px !important;
+                            box-shadow: 0 3px 6px rgba(0,0,0,0.15) !important;
+                            margin: 4px 0 !important;
+                            font-weight: 500 !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        div[style*="background-color"]:hover {
+                            transform: translateY(-2px) !important;
+                            box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+                        }
+                        h1 {
+                            color: #333;
+                            border-bottom: 2px solid #28a745;
+                            padding-bottom: 10px;
+                        }
+                        .content {
+                            white-space: pre-wrap;
+                            background: #f8f9fa;
+                            padding: 20px;
+                            border-radius: 8px;
+                            border: 1px solid #e9ecef;
+                        }
+                        /* Markdown样式 */
+                        .content h1, .content h2, .content h3 {
+                            color: #667eea;
+                            margin-top: 20px;
+                            margin-bottom: 10px;
+                        }
+                        .content ul, .content ol {
+                            margin: 10px 0;
+                            padding-left: 20px;
+                        }
+                        .content li {
+                            margin: 5px 0;
+                        }
+                        .content strong {
+                            color: #667eea;
+                            font-weight: 600;
+                        }
+                        .content code {
+                            background: rgba(102, 126, 234, 0.2);
+                            padding: 2px 6px;
+                            border-radius: 3px;
+                            font-family: 'Courier New', monospace;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>✨ 简历修改建议（修改部分已高亮）</h1>
+                        <div class="content">```markdown
+# 个人简历 - 杨洋
+
+<div style="background-color: #FFD700; padding: 8px 12px; border-radius: 6px; border: 2px solid #FFD700; box-shadow: 0 3px 6px rgba(0,0,0,0.15); margin: 4px 0; font-weight: 500;">## 基本信息
+- **姓名**: 杨洋  
+- **年龄**: 23岁  
+- **学历**: 大学本科  
+- **求职意向**: 人工智能方向  
+- **学校**: 华北电力大学（人工智能专业）  
+- **在校时间**: 2023.09 – 2025.07  </div>
+
+---
+
+## 教育背景
+### 核心课程
+机器学习、深度学习、计算机视觉、自然语言处理、数据结构与算法、操作系统、数据库系统、软件工程等。
+
+<div style="background-color: #87CEEB; padding: 8px 12px; border-radius: 6px; border: 2px solid #87CEEB; box-shadow: 0 3px 6px rgba(0,0,0,0.15); margin: 4px 0; font-weight: 500;">### 技术栈
+| 类别               | 技能/工具                                                                 |
+|--------------------|--------------------------------------------------------------------------|
+| **编程语言**       | Python（熟练）、JavaScript、C++                                             |
+| **AI框架**         | PyTorch、TensorFlow、Transformers（Huggingface）                              |
+| **Web开发**        | FastAPI、Flask、Vue3、React、Node.js                                       |
+| **数据库**         | MySQL、MongoDB                                                             |
+| **工具与平台**     | Git、Docker、Linux、OpenAI API、科大讯飞开放平台                             |</div>
+
+---
+
+## 项目经验
+### 🔧 专利猫智能体（与美团合作）｜2024.05–2025.01
+- ✅ **主导研发**基于GPT的专利生成与检索系统，集成撰写辅助、审查建议、相似度比对等功能模块；
+- ⚙️ **架构设计**搭建从语义解析→模板生成→API部署的全流程技术栈，推动项目商业化落地并持有股份；
+- 🚀 **技术实现**采用FastAPI+Vue3前后端分离架构，目前已服务超2000+企业用户。
+
+### ⚡ 氢能领域大模型构建｜2023.12–2024.08
+- 🧠 **模型训练**结合知识图谱与语言模型开发行业专属问答系统；
+- 📄 **学术成果**以第二作者身份向SCI一区TOP期刊投稿论文，实现专业文献自动解读与摘要生成；
+- 💡 **创新突破**突破垂直领域知识增强技术瓶颈，提升特定场景下的推理准确性。
+
+---
+
+## 实践成果
+- 🌟 **创业经历**：成功主导4个创新项目从概念到商业化运营；
+- 🏆 **知识产权**：累计申请6项发明专利（含1项已授权）；
+- 🎉 **竞赛荣誉**：斩获2项国家级学科竞赛奖项；
+- ✍️ **科研能力**：具备SCI论文撰写与发表经验。
+
+---
+
+## 自我评价
+我是一名兼具技术深度与商业思维的复合型人才，擅长将AI算法转化为实际生产力。通过多个完整项目周期历练，形成了从需求分析、技术选型到团队管理的闭环能力体系。持续关注大模型前沿动态，致力于探索人工智能在垂直领域的落地应用场景。
+
+> "我一直在努力！" — 以工程化思维驱动技术创新，用产品化视角实现价值交付。
+```</div>
+                    </div>
+                </body>
+                </html>
+                

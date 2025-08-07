@@ -22,6 +22,7 @@ sys.path.insert(0, current_dir)
 
 # 导入各个模块
 from modules.resume_parsing import ResumeParser
+from modules.resume_parsing.backend.resume_analyzer import ResumeAnalyzer
 from modules.skill_training import SkillManager
 from modules.learning_path import LearningPlanner
 from modules.user_management import UserManager
@@ -559,6 +560,7 @@ def login_required(f):
 
 # 初始化各个模块
 resume_parser = ResumeParser()
+resume_analyzer = ResumeAnalyzer()
 skill_manager = SkillManager()
 learning_planner = LearningPlanner()
 user_manager = UserManager()
@@ -855,6 +857,11 @@ def download_resume_file(resume_id):
 def resume_page():
     return render_template('resume.html')
 
+@app.route('/resume-analysis')
+@login_required
+def resume_analysis_page():
+    return render_template('resume_analysis.html')
+
 @app.route('/my-resumes')
 @login_required
 def my_resumes_page():
@@ -944,6 +951,121 @@ def resume_chat():
                 'Connection': 'keep-alive'
             }
         )
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/resume/analyze-enhanced', methods=['POST'])
+@login_required
+def analyze_resume_enhanced():
+    """增强版简历分析接口 - 模仿专利对比功能"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': '没有上传文件'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': '没有选择文件'}), 400
+        
+        if not allowed_file(file.filename):
+            return jsonify({'error': '不支持的文件格式'}), 400
+        
+        # 获取用户信息
+        username = session['user']['username']
+        
+        # 提取文本
+        text = resume_parser.extract_text_from_file(file)
+        
+        # 保存简历文本到文件
+        filepath = save_resume_to_file(username, text, file.filename)
+        if not filepath:
+            return jsonify({'error': '保存文件失败'}), 500
+        
+        # 保存简历信息到用户数据
+        filename = file.filename or 'unknown'
+        resume_data = {
+            'filename': filename,
+            'text': text,
+            'file_path': filepath,
+            'file_size': len(file.read()),
+            'file_type': filename.split('.')[-1].lower() if '.' in filename else 'unknown',
+            'upload_time': datetime.now().isoformat()
+        }
+        file.seek(0)  # 重置文件指针
+        
+        # 保存到用户数据
+        save_result = user_manager.add_resume(username, resume_data)
+        if not save_result['success']:
+            return jsonify({'error': save_result['message']}), 500
+        
+        # 使用新的简历分析器进行完整分析
+        analysis_result = resume_analyzer.analyze_resume_complete(text, username)
+        
+        if not analysis_result['success']:
+            return jsonify({'error': analysis_result['error']}), 500
+        
+        # 返回分析结果
+        return jsonify({
+            'success': True,
+            'message': '简历分析完成',
+            'data': {
+                'original_text': analysis_result['original_text'],
+                'markdown_text': analysis_result['markdown_text'],
+                'original_highlighted': analysis_result['original_highlighted'],
+                'suggested_highlighted': analysis_result['suggested_highlighted'],
+                'analysis_result': analysis_result['analysis_result'],
+                'evaluation': analysis_result['evaluation'],
+                'files': analysis_result['files']
+            }
+        }), 200
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/resume/analyze-existing', methods=['POST'])
+@login_required
+def analyze_existing_resume():
+    """分析已上传的简历"""
+    try:
+        data = request.get_json()
+        resume_id = data.get('resume_id')
+        
+        if not resume_id:
+            return jsonify({'error': '请提供简历ID'}), 400
+        
+        # 获取用户信息
+        username = session['user']['username']
+        
+        # 获取简历信息
+        resume = user_manager.get_resume(username, resume_id)
+        if not resume:
+            return jsonify({'error': '简历不存在'}), 404
+        
+        # 获取简历文本
+        resume_text = resume.get('text', '')
+        if not resume_text:
+            return jsonify({'error': '简历内容为空'}), 400
+        
+        # 使用新的简历分析器进行完整分析
+        analysis_result = resume_analyzer.analyze_resume_complete(resume_text, username)
+        
+        if not analysis_result['success']:
+            return jsonify({'error': analysis_result['error']}), 500
+        
+        # 返回分析结果
+        return jsonify({
+            'success': True,
+            'message': '简历分析完成',
+            'data': {
+                'original_text': analysis_result['original_text'],
+                'markdown_text': analysis_result['markdown_text'],
+                'original_highlighted': analysis_result['original_highlighted'],
+                'suggested_highlighted': analysis_result['suggested_highlighted'],
+                'analysis_result': analysis_result['analysis_result'],
+                'evaluation': analysis_result['evaluation'],
+                'files': analysis_result['files']
+            }
+        }), 200
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500

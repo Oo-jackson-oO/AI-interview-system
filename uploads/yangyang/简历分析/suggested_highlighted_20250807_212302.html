@@ -1,0 +1,153 @@
+
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>简历修改建议（修改部分高亮）</title>
+                    <style>
+                        body { 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6; 
+                            background-color: #f8f9fa;
+                        }
+                        .container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        }
+                        .highlight { 
+                            background-color: #E6FFE6; 
+                            padding: 3px 6px; 
+                            border-radius: 4px;
+                            font-weight: bold;
+                            border: 2px solid #E6FFE6;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            display: inline-block;
+                            margin: 1px 2px;
+                        }
+                        /* 高亮样式优化 */
+                        span[style*="background-color"] {
+                            border-radius: 4px !important;
+                            font-weight: bold !important;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+                            display: inline-block !important;
+                            margin: 1px 2px !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        span[style*="background-color"]:hover {
+                            transform: translateY(-1px) !important;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+                        }
+                        div[style*="background-color"] {
+                            border-radius: 6px !important;
+                            box-shadow: 0 3px 6px rgba(0,0,0,0.15) !important;
+                            margin: 4px 0 !important;
+                            font-weight: 500 !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        div[style*="background-color"]:hover {
+                            transform: translateY(-2px) !important;
+                            box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+                        }
+                        h1 {
+                            color: #333;
+                            border-bottom: 2px solid #28a745;
+                            padding-bottom: 10px;
+                        }
+                        .content {
+                            white-space: pre-wrap;
+                            background: #f8f9fa;
+                            padding: 20px;
+                            border-radius: 8px;
+                            border: 1px solid #e9ecef;
+                        }
+                        /* Markdown样式 */
+                        .content h1, .content h2, .content h3 {
+                            color: #667eea;
+                            margin-top: 20px;
+                            margin-bottom: 10px;
+                        }
+                        .content ul, .content ol {
+                            margin: 10px 0;
+                            padding-left: 20px;
+                        }
+                        .content li {
+                            margin: 5px 0;
+                        }
+                        .content strong {
+                            color: #667eea;
+                            font-weight: 600;
+                        }
+                        .content code {
+                            background: rgba(102, 126, 234, 0.2);
+                            padding: 2px 6px;
+                            border-radius: 3px;
+                            font-family: 'Courier New', monospace;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>✨ 简历修改建议（修改部分已高亮）</h1>
+                        <div class="content">```markdown
+# 个人简历 - 杨洋
+
+## 基本信息
+- **姓名**: 杨洋
+- **年龄**: 23岁
+- **学历**: 大学本科（在读）
+- **专业**: 人工智能
+- **院校**: 华北电力大学
+- **就读时间**: 2023.09 - 2025.07
+- **求职意向**: 人工智能方向
+
+---
+
+## 教育背景
+### 华北电力大学 | 人工智能专业 (2023.09–2025.07)
+#### 核心课程
+✔️ 机器学习、深度学习、计算机视觉、自然语言处理  
+✔️ 数据结构与算法、操作系统、数据库系统、软件工程等
+
+#### 技术栈
+| 类别               | 技能项                                                                 |
+|--------------------|-----------------------------------------------------------------------|
+| **编程语言**       | Python（熟练）、JavaScript、C++                                       |
+| **AI框架**         | PyTorch、TensorFlow、Transformers (Huggingface)                       |
+| **Web开发**        | FastAPI、Flask、Vue3、React、Node.js                                 |
+| **数据库**         | MySQL、MongoDB                                                        |
+| **工具/平台**      | Git、Docker、Linux、OpenAI API、科大讯飞开放平台                      |
+
+---
+
+## 项目经验
+### 🔧 专利猫智能体 · 与美团合作 (2024.05–2025.01)
+- ✅ **主导研发**基于GPT的专利生成与检索系统“专利猫”，集成撰写/审查建议/相似比对等功能模块
+- 🏗️ **架构设计**搭建语义解析→模板生成→API部署全流程系统，成功实现商业化上线并持有股份
+- 💻 **技术实现**采用FastAPI+Vue3前后端分离开发模式，累计服务用户超2000+
+
+### ⚛️ 氢能智能体与垂直领域大模型构建 (2023.12–2024.08)
+- 🤖 **模型训练**基于知识图谱与语言模型完成氢能材料领域专用大模型开发
+- 📚 **学术成果**以第二作者身份向SCI一区TOP期刊投稿，实现专业文献解读及自动摘要功能
+
+---
+
+## 专业技能亮点
+🔥 **创新能力**：主持4项创业项目，完整经历从概念设计到落地运营全过程  
+🏆 **科研成果**：持有6项发明专利（含1项已授权），获2项国家级竞赛奖项  
+💡 **商业意识**：成功推动“专利猫”项目商业化并实现股权收益  
+👥 **团队协作**：具备跨职能团队管理经验，擅长技术方案与业务需求的衔接转化
+
+---
+
+## 自我评价
+我是一名专注于AI技术创新的应用型人才，兼具扎实的编程基础与丰富的实战经验。擅长将前沿算法转化为可落地的产品解决方案，在智能体开发、项目管理及商业变现方面形成独特方法论。持续关注大模型与垂直领域的结合应用，致力于推动人工智能技术的产业化落地。
+```</div>
+                    </div>
+                </body>
+                </html>
+                

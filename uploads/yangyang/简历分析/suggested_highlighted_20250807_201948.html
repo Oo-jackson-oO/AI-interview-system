@@ -1,0 +1,167 @@
+
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>简历修改建议（修改部分高亮）</title>
+                    <style>
+                        body { 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6; 
+                            background-color: #f8f9fa;
+                        }
+                        .container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        }
+                        .highlight { 
+                            background-color: #E6FFE6; 
+                            padding: 3px 6px; 
+                            border-radius: 4px;
+                            font-weight: bold;
+                            border: 2px solid #E6FFE6;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            display: inline-block;
+                            margin: 1px 2px;
+                        }
+                        /* 高亮样式优化 */
+                        span[style*="background-color"] {
+                            border-radius: 4px !important;
+                            font-weight: bold !important;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+                            display: inline-block !important;
+                            margin: 1px 2px !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        span[style*="background-color"]:hover {
+                            transform: translateY(-1px) !important;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+                        }
+                        div[style*="background-color"] {
+                            border-radius: 6px !important;
+                            box-shadow: 0 3px 6px rgba(0,0,0,0.15) !important;
+                            margin: 4px 0 !important;
+                            font-weight: 500 !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        div[style*="background-color"]:hover {
+                            transform: translateY(-2px) !important;
+                            box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+                        }
+                        h1 {
+                            color: #333;
+                            border-bottom: 2px solid #28a745;
+                            padding-bottom: 10px;
+                        }
+                        .content {
+                            white-space: pre-wrap;
+                            background: #f8f9fa;
+                            padding: 20px;
+                            border-radius: 8px;
+                            border: 1px solid #e9ecef;
+                        }
+                        /* Markdown样式 */
+                        .content h1, .content h2, .content h3 {
+                            color: #667eea;
+                            margin-top: 20px;
+                            margin-bottom: 10px;
+                        }
+                        .content ul, .content ol {
+                            margin: 10px 0;
+                            padding-left: 20px;
+                        }
+                        .content li {
+                            margin: 5px 0;
+                        }
+                        .content strong {
+                            color: #667eea;
+                            font-weight: 600;
+                        }
+                        .content code {
+                            background: rgba(102, 126, 234, 0.2);
+                            padding: 2px 6px;
+                            border-radius: 3px;
+                            font-family: 'Courier New', monospace;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>✨ 简历修改建议（修改部分已高亮）</h1>
+                        <div class="content">```markdown
+# 个人简历
+
+<div style="background-color: #FFB6C1; padding: 8px 12px; border-radius: 6px; border: 2px solid #FFB6C1; box-shadow: 0 3px 6px rgba(0,0,0,0.15); margin: 4px 0; font-weight: 500;">## 基本信息
+- **姓名**：余涵  
+- **年龄**：23岁  
+- **学历**：大学本科  
+- **求职意向**：行政经理/主管  
+- **联系方式**：  
+  - 手机：15834598856  
+  - 邮箱：5689745@qq.com  
+  - 微信：jianlimoban-ziyuan.com  
+  - 地址：上海市浦东区  </div>
+
+---
+
+<div style="background-color: #90EE90; padding: 8px 12px; border-radius: 6px; border: 2px solid #90EE90; box-shadow: 0 3px 6px rgba(0,0,0,0.15); margin: 4px 0; font-weight: 500;">## 教育背景
+**工商管理（本科）** | 上海大学  
+⏰ 2012.09 - 2016.07  
+✅ 主修课程包括：基础会计学、货币银行学、统计学、经济法概论、财务会计学、管理学原理、组织行为学、市场营销学、国际贸易理论与实务、人力资源开发与管理、财务管理学、企业经营战略概论、质量管理学、西方经济学等。</div>
+
+---
+
+## 职业技能
+### 语言能力
+- 持有大学英语六级证书；  
+- 荣获全国大学生英语竞赛一等奖；  
+- 具备优秀的听、说、读、写能力。
+
+### 计算机技能
+- 通过计算机二级考试；  
+- 熟练使用Windows平台下的办公软件（Word/Excel/PowerPoint）。
+
+### 团队协作
+- 拥有丰富的团队组建与扩充经验；  
+- 擅长项目管理及跨部门协调，可独立承担重要职责。
+
+---
+
+## 工作经验
+### 行政助理 | 一路网络科技有限公司  
+📅 2015.03 - 2016.01  
+▸ 负责公司前台接待与日常行政事务管理；  
+▸ 协助处理客户咨询及基础投诉问题；  
+▸ 统筹中心财务管理与资产管控工作；  
+▸ 优化前台服务流程，提升访客满意度。
+
+<div style="background-color: #87CEEB; padding: 8px 12px; border-radius: 6px; border: 2px solid #87CEEB; box-shadow: 0 3px 6px rgba(0,0,0,0.15); margin: 4px 0; font-weight: 500;">### 行政主管 | 贵泽实业有限公司  
+📅 2016.03 - 至今  
+核心职责：  
+✔️ 统筹本部行政人事全流程管理，落实公司规章制度；  
+✔️ 编制并完善人事管理制度，有效规避用工风险；  
+✔️ 制定人力资源发展规划，搭建人才梯队储备体系；  
+✔️ 监督各项制度执行情况，推动跨部门协作效率提升；  
+✔️ 主导会议决议跟进与督办，确保战略目标落地。</div>
+
+---
+
+## 自我评价
+☑️ **专业素养**：工作严谨细致，精通办公自动化工具，擅长分析与解决问题；  
+☑️ **学习能力**：保持持续学习态度，具备快速适应新领域的实践能力；  
+☑️ **工作风格**：执行力强、责任心重，兼具创新意识与社会责任感；  
+☑️ **抗压能力**：勇于迎接挑战，能在高强度环境中保持稳定输出。
+
+---
+
+> "我一直在努力！"
+```</div>
+                    </div>
+                </body>
+                </html>
+                
