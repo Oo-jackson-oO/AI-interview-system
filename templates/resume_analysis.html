@@ -707,7 +707,7 @@
         <!-- 加载状态 -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <h5 style="color: rgba(255, 255, 255, 0.8);">正在分析简历，请稍候...</h5>
+            <h5 style="color: rgba(255, 255, 255, 0.8);">正在分析并修改简历，需要5分钟左右，请耐心等待...</h5>
             <div class="progress-indicator">
                 <div class="progress-dot"></div>
                 <div class="progress-dot"></div>
@@ -904,17 +904,88 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    currentAnalysisData = data.data;
-                    displayAnalysisResults(data.data);
-                    showSuccess('简历分析完成！');
+                    // 开始轮询任务状态
+                    pollTaskStatus(data.task_id);
                 } else {
                     showError(data.error || '分析失败');
+                    showLoading(false);
                 }
             } catch (error) {
                 console.error('分析失败:', error);
                 showError('网络错误，请稍后重试');
-            } finally {
                 showLoading(false);
+            }
+        }
+        
+        // 轮询任务状态
+        async function pollTaskStatus(taskId) {
+            const maxAttempts = 300; // 最多轮询5分钟（每1秒一次）
+            let attempts = 0;
+            
+            const poll = async () => {
+                try {
+                    const response = await fetch(`/api/resume/analysis-status/${taskId}`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'completed') {
+                        // 任务完成，显示结果
+                        currentAnalysisData = data.result;
+                        displayAnalysisResults(data.result);
+                        showSuccess('简历分析完成！');
+                        showLoading(false);
+                        return;
+                    } else if (data.status === 'failed') {
+                        // 任务失败
+                        showError(data.error || '分析失败');
+                        showLoading(false);
+                        return;
+                    } else if (data.status === 'processing') {
+                        // 任务处理中，继续轮询
+                        attempts++;
+                        if (attempts >= maxAttempts) {
+                            showError('分析超时，请稍后重试');
+                            showLoading(false);
+                            return;
+                        }
+                        
+                        // 更新加载提示
+                        updateLoadingMessage(attempts);
+                        
+                        // 1秒后继续轮询
+                        setTimeout(poll, 1000);
+                    } else {
+                        // 其他状态，继续轮询
+                        attempts++;
+                        if (attempts >= maxAttempts) {
+                            showError('分析超时，请稍后重试');
+                            showLoading(false);
+                            return;
+                        }
+                        setTimeout(poll, 1000);
+                    }
+                } catch (error) {
+                    console.error('轮询失败:', error);
+                    attempts++;
+                    if (attempts >= maxAttempts) {
+                        showError('网络错误，请稍后重试');
+                        showLoading(false);
+                        return;
+                    }
+                    setTimeout(poll, 1000);
+                }
+            };
+            
+            // 开始轮询
+            poll();
+        }
+        
+        // 更新加载提示信息
+        function updateLoadingMessage(attempts) {
+            const loadingText = document.querySelector('#loading h5');
+            if (loadingText) {
+                const minutes = Math.floor(attempts / 60);
+                const seconds = attempts % 60;
+                loadingText.textContent = `正在分析并修改简历，需要5分钟左右，请耐心等待...`;
             }
         }
         

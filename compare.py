@@ -549,3 +549,18 @@ def process_markdown_content(file_path: str) -> str:
     except Exception as e:
         app.logger.error(f"处理 Markdown 文件失败: {str(e)}")
         raise
+
+import queue
+from datetime import datetime
+from urllib.parse import urlparse, urlencode
+from wsgiref.handlers import format_date_time
+from time import mktime
+import _thread as thread
+# 添加模块路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+
+# 导入各个模块
+from modules.resume_parsing import ResumeParser
+from modules.resume_parsing.backend.resume_analyzer import ResumeAnalyzer
+
