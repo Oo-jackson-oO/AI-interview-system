@@ -41,7 +41,6 @@ import threading
 import websocket
 from urllib.parse import quote
 from flask_socketio import SocketIO, emit
-
 # 初始化SocketIO（如果还没有初始化）
 try:
     # 尝试检查是否已经有socketio实例
