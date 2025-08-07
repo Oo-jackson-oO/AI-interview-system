@@ -5,7 +5,7 @@ import uuid
 import threading
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response, send_from_directory
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response, send_from_directory, send_file
 from flask_socketio import SocketIO, emit
 from werkzeug.utils import secure_filename
 from pathlib import Path
@@ -19,18 +19,19 @@ from PIL import Image
 import io
 import wave
 import pyaudio
-import threading
 import queue
 import websocket
 import hmac
 import hashlib
-import base64
-import time
-import json
 import ssl
+import sys
 import urllib.parse
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from urllib.parse import urlparse, urlencode
+from wsgiref.handlers import format_date_time
+from time import mktime
+import _thread as thread
 
 # 导入自定义模块
 from modules.user_management import UserManager
@@ -39,11 +40,14 @@ from modules.resume_parsing.backend.resume_analyzer import ResumeAnalyzer
 from modules.skill_training import SkillManager
 from modules.learning_path import LearningPlanner
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+# 初始化管理器
+
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# 初始化管理器
 user_manager = UserManager()
 resume_parser = ResumeParser()
 resume_analyzer = ResumeAnalyzer()
@@ -1857,7 +1861,7 @@ def check_resume_status():
 def live2d_static(filename):
     """服务live2d静态文件"""
     try:
-        live2d_dir = os.path.join(current_dir, 'live2d')
+        live2d_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live2d')
         return send_file(os.path.join(live2d_dir, filename))
     except Exception as e:
         print(f"Live2D文件访问错误: {str(e)}")
@@ -1882,7 +1886,6 @@ def start_facial_analysis():
             app.facial_analyzers = {}
         
         # 导入面试模块
-        current_dir = os.path.dirname(os.path.abspath(__file__))
         facial_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview')
         
         if facial_analysis_path not in sys.path:
@@ -1918,7 +1921,6 @@ def start_voice_analysis():
             app.voice_analyzers = {}
         
         # 导入语调分析模块
-        current_dir = os.path.dirname(os.path.abspath(__file__))
         voice_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview', '语调识别', 'Speech-Analysis')
         
         if voice_analysis_path not in sys.path:
