@@ -956,10 +956,55 @@ def resume_chat():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# 添加请求去重机制
+import hashlib
+from threading import Lock
+import time
+
+# 全局变量用于存储正在处理的请求
+processing_requests = {}
+processing_lock = Lock()
+
+def cleanup_expired_requests():
+    """清理过期的请求记录（超过30分钟）"""
+    current_time = datetime.now()
+    with processing_lock:
+        expired_keys = []
+        for request_id, request_data in processing_requests.items():
+            # 检查是否超过30分钟
+            if (current_time - request_data['start_time']).total_seconds() > 1800:
+                expired_keys.append(request_id)
+        
+        # 删除过期的记录
+        for key in expired_keys:
+            del processing_requests[key]
+        
+        if expired_keys:
+            print(f"清理了 {len(expired_keys)} 个过期的请求记录")
+
+# 在应用启动时启动清理任务
+def start_cleanup_task():
+    """启动定时清理任务"""
+    def cleanup_worker():
+        while True:
+            try:
+                cleanup_expired_requests()
+                time.sleep(300)  # 每5分钟清理一次
+            except Exception as e:
+                print(f"清理任务出错: {e}")
+                time.sleep(300)
+    
+    import threading
+    cleanup_thread = threading.Thread(target=cleanup_worker, daemon=True)
+    cleanup_thread.start()
+
+# 启动清理任务
+start_cleanup_task()
+
 @app.route('/api/resume/analyze-enhanced', methods=['POST'])
 @login_required
 def analyze_resume_enhanced():
-    """增强版简历分析接口 - 模仿专利对比功能"""
+    """增强版简历分析接口 """
     try:
         if 'file' not in request.files:
             return jsonify({'error': '没有上传文件'}), 400
@@ -974,53 +1019,84 @@ def analyze_resume_enhanced():
         # 获取用户信息
         username = session['user']['username']
         
-        # 提取文本
-        text = resume_parser.extract_text_from_file(file)
-        
-        # 保存简历文本到文件
-        filepath = save_resume_to_file(username, text, file.filename)
-        if not filepath:
-            return jsonify({'error': '保存文件失败'}), 500
-        
-        # 保存简历信息到用户数据
-        filename = file.filename or 'unknown'
-        resume_data = {
-            'filename': filename,
-            'text': text,
-            'file_path': filepath,
-            'file_size': len(file.read()),
-            'file_type': filename.split('.')[-1].lower() if '.' in filename else 'unknown',
-            'upload_time': datetime.now().isoformat()
-        }
+        # 生成请求唯一标识（基于用户名和文件内容）
+        file_content = file.read()
         file.seek(0)  # 重置文件指针
         
-        # 保存到用户数据
-        save_result = user_manager.add_resume(username, resume_data)
-        if not save_result['success']:
-            return jsonify({'error': save_result['message']}), 500
+        # 计算文件内容的哈希值
+        file_hash = hashlib.md5(file_content).hexdigest()
+        request_id = f"{username}_{file_hash}"
         
-        # 使用新的简历分析器进行完整分析
-        analysis_result = resume_analyzer.analyze_resume_complete(text, username)
-        
-        if not analysis_result['success']:
-            return jsonify({'error': analysis_result['error']}), 500
-        
-        # 返回分析结果
-        return jsonify({
-            'success': True,
-            'message': '简历分析完成',
-            'data': {
-                'original_text': analysis_result['original_text'],
-                'markdown_text': analysis_result['markdown_text'],
-                'original_highlighted': analysis_result['original_highlighted'],
-                'suggested_highlighted': analysis_result['suggested_highlighted'],
-                'analysis_result': analysis_result['analysis_result'],
-                'evaluation': analysis_result['evaluation'],
-                'files': analysis_result['files']
+        # 检查是否正在处理相同的请求
+        with processing_lock:
+            if request_id in processing_requests:
+                return jsonify({'error': '相同的文件正在分析中，请稍后重试'}), 429
+            
+            # 标记请求为处理中
+            processing_requests[request_id] = {
+                'username': username,
+                'filename': file.filename,
+                'start_time': datetime.now()
             }
-        }), 200
+        
+        try:
+            # 提取文本
+            text = resume_parser.extract_text_from_file(file)
+            
+            # 保存简历文本到文件
+            filepath = save_resume_to_file(username, text, file.filename)
+            if not filepath:
+                return jsonify({'error': '保存文件失败'}), 500
+            
+            # 保存简历信息到用户数据
+            filename = file.filename or 'unknown'
+            resume_data = {
+                'filename': filename,
+                'text': text,
+                'file_path': filepath,
+                'file_size': len(file_content),
+                'file_type': filename.split('.')[-1].lower() if '.' in filename else 'unknown',
+                'upload_time': datetime.now().isoformat()
+            }
+            
+            # 保存到用户数据
+            save_result = user_manager.add_resume(username, resume_data)
+            if not save_result['success']:
+                return jsonify({'error': save_result['message']}), 500
+            
+            # 使用新的简历分析器进行完整分析
+            analysis_result = resume_analyzer.analyze_resume_complete(text, username)
+            
+            if not analysis_result['success']:
+                return jsonify({'error': analysis_result['error']}), 500
+            
+            # 返回分析结果
+            return jsonify({
+                'success': True,
+                'message': '简历分析完成',
+                'data': {
+                    'original_text': analysis_result['original_text'],
+                    'markdown_text': analysis_result['markdown_text'],
+                    'original_highlighted': analysis_result['original_highlighted'],
+                    'suggested_highlighted': analysis_result['suggested_highlighted'],
+                    'analysis_result': analysis_result['analysis_result'],
+                    'evaluation': analysis_result['evaluation'],
+                    'files': analysis_result['files']
+                }
+            }), 200
+            
+        finally:
+            # 清理处理中的请求记录
+            with processing_lock:
+                if request_id in processing_requests:
+                    del processing_requests[request_id]
     
     except Exception as e:
+        # 确保异常时也清理请求记录
+        if 'request_id' in locals():
+            with processing_lock:
+                if request_id in processing_requests:
+                    del processing_requests[request_id]
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/resume/analyze-existing', methods=['POST'])
@@ -3228,3 +3304,29 @@ if __name__ == '__main__':
     
     # 使用SocketIO运行，同时支持原有功能、ASR功能和TTS功能
     socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+
+@app.route('/api/resume/processing-status', methods=['GET'])
+@login_required
+def get_processing_status():
+    """获取当前用户的处理状态"""
+    try:
+        username = session['user']['username']
+        
+        with processing_lock:
+            user_requests = []
+            for request_id, request_data in processing_requests.items():
+                if request_data['username'] == username:
+                    user_requests.append({
+                        'filename': request_data['filename'],
+                        'start_time': request_data['start_time'].isoformat(),
+                        'duration': (datetime.now() - request_data['start_time']).total_seconds()
+                    })
+            
+            return jsonify({
+                'success': True,
+                'processing_count': len(user_requests),
+                'requests': user_requests
+            }), 200
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
