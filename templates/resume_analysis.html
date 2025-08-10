@@ -678,6 +678,7 @@
             <div class="particle"></div>
             <div class="particle"></div>
             <div class="particle"></div>
+            <div class="particle"></div>
         </div>
     </div>
     
@@ -773,24 +774,9 @@
             smartypants: true
         });
         
-        // 显示调试信息
-        function showDebugInfo(message) {
-            console.log(`[DEBUG] ${new Date().toLocaleTimeString()}: ${message}`);
-            
-            // 在页面上显示调试信息（可选）
-            const debugDiv = document.getElementById('debugInfo');
-            if (debugDiv) {
-                debugDiv.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
-                debugDiv.scrollTop = debugDiv.scrollHeight;
-            }
-        }
-        
         // 页面加载时检查用户登录状态
         document.addEventListener('DOMContentLoaded', function() {
             checkUserLogin();
-            checkProcessingStatus(); // 检查处理状态
-            
-            showDebugInfo('页面加载完成，开始初始化...');
             
             // 初始化背景特效系统
             // 初始化火箭鼠标系统
@@ -817,94 +803,7 @@
             if (typeof LoadingSystem !== 'undefined') {
                 new LoadingSystem();
             }
-            
-            showDebugInfo('初始化完成');
         });
-        
-        // 检查处理状态
-        async function checkProcessingStatus() {
-            try {
-                const response = await fetch('/api/resume/processing-status');
-                const data = await response.json();
-                
-                if (data.success && data.processing_count > 0) {
-                    console.log('检测到正在处理的请求:', data);
-                    
-                    // 如果当前没有在分析中，说明可能是之前的请求还在处理
-                    if (!isAnalyzing) {
-                        showLoading(true);
-                        showSuccess(`检测到有 ${data.processing_count} 个文件正在处理中，请耐心等待...`);
-                        
-                        // 定期检查状态，直到没有正在处理的请求
-                        setTimeout(checkProcessingStatus, 5000);
-                    }
-                } else {
-                    // 没有正在处理的请求，隐藏加载状态
-                    if (!isAnalyzing) {
-                        showLoading(false);
-                    }
-                }
-            } catch (error) {
-                console.error('检查处理状态失败:', error);
-            }
-        }
-        
-        // 添加重试机制
-        async function retryAnalysis() {
-            if (isAnalyzing) {
-                console.log('分析正在进行中，无法重试');
-                return;
-            }
-            
-            const fileInput = document.getElementById('resumeFile');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                showError('没有可重试的文件');
-                return;
-            }
-            
-            console.log('开始重试分析...');
-            await analyzeResume();
-        }
-        
-        // 手动清理处理状态
-        async function clearProcessingStatus() {
-            try {
-                showDebugInfo('手动清理处理状态...');
-                
-                const response = await fetch('/api/resume/clear-processing-status', {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showDebugInfo(`清理成功: ${data.message}`);
-                    showSuccess(`清理了 ${data.cleared_count} 个处理记录`);
-                    
-                    // 隐藏重试按钮
-                    const retryBtn = document.getElementById('retryBtn');
-                    if (retryBtn) {
-                        retryBtn.style.display = 'none';
-                    }
-                    
-                    // 隐藏清理按钮
-                    const clearBtn = document.getElementById('clearBtn');
-                    if (clearBtn) {
-                        clearBtn.style.display = 'none';
-                    }
-                    
-                    // 重新检查处理状态
-                    setTimeout(checkProcessingStatus, 1000);
-                } else {
-                    showError(data.error || '清理失败');
-                }
-            } catch (error) {
-                showDebugInfo(`清理失败: ${error.message}`);
-                showError('清理处理状态失败');
-            }
-        }
         
         // 触发返回转场效果
         function triggerReturnTransition() {
@@ -957,9 +856,6 @@
         
         // 处理文件上传
         function handleFileUpload(file) {
-            // 重置分析状态
-            isAnalyzing = false;
-            
             // 显示文件信息
             const fileInfo = document.getElementById('fileInfo');
             fileInfo.innerHTML = `
@@ -971,20 +867,10 @@
                             <small style="color: rgba(255, 255, 255, 0.5);">大小: ${(file.size / 1024).toFixed(2)} KB</small>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn" onclick="retryAnalysis()" id="retryBtn" style="display: none;">
-                            <i class="fas fa-redo me-2"></i>
-                            重试
-                        </button>
-                        <button class="btn btn-secondary" onclick="clearProcessingStatus()" id="clearBtn" style="display: none;">
-                            <i class="fas fa-broom me-2"></i>
-                            清理状态
-                        </button>
-                        <button class="btn" onclick="analyzeResume()" id="analyzeBtn">
-                            <i class="fas fa-play me-2"></i>
-                            开始分析
-                        </button>
-                    </div>
+                    <button class="btn" onclick="analyzeResume()">
+                        <i class="fas fa-play me-2"></i>
+                        开始分析
+                    </button>
                 </div>
             `;
             fileInfo.style.display = 'block';
@@ -992,19 +878,10 @@
             // 隐藏其他消息
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
-            document.getElementById('loading').style.display = 'none';
         }
         
         // 分析新上传的简历
-        let isAnalyzing = false; // 添加分析状态标志
-        
         async function analyzeResume() {
-            // 防止重复提交
-            if (isAnalyzing) {
-                showDebugInfo('分析正在进行中，请勿重复提交');
-                return;
-            }
-            
             const fileInput = document.getElementById('resumeFile');
             const file = fileInput.files[0];
             
@@ -1013,102 +890,33 @@
                 return;
             }
             
-            showDebugInfo(`开始分析文件: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
-            
-            // 设置分析状态
-            isAnalyzing = true;
             showLoading(true);
-            
-            // 禁用分析按钮
-            const analyzeButton = document.getElementById('analyzeBtn');
-            if (analyzeButton) {
-                analyzeButton.disabled = true;
-                analyzeButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>分析中...';
-            }
             
             try {
                 const formData = new FormData();
                 formData.append('file', file);
-                
-                showDebugInfo('发送分析请求...');
                 
                 const response = await fetch('/api/resume/analyze-enhanced', {
                     method: 'POST',
                     body: formData
                 });
                 
-                showDebugInfo(`收到响应: HTTP ${response.status}`);
-                
-                // 先检查HTTP状态码
-                if (response.status === 429) {
-                    // 重复提交的情况
-                    const errorData = await response.json();
-                    showDebugInfo('检测到重复请求，显示重试选项');
-                    console.log('检测到重复请求:', errorData);
-                    
-                    // 显示更友好的错误信息
-                    if (errorData.request_id) {
-                        showError('检测到相同的文件正在处理中，请稍后重试。如果问题持续存在，请刷新页面后重新上传。');
-                    } else {
-                        showError('请求过于频繁，请稍后重试');
-                    }
-                    
-                    // 显示重试按钮
-                    const retryBtn = document.getElementById('retryBtn');
-                    if (retryBtn) {
-                        retryBtn.style.display = 'inline-block';
-                    }
-                    
-                    // 显示清理按钮
-                    const clearBtn = document.getElementById('clearBtn');
-                    if (clearBtn) {
-                        clearBtn.style.display = 'inline-block';
-                    }
-                    
-                    showLoading(false);
-                    return;
-                }
-                
-                // 检查其他HTTP错误
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
                 const data = await response.json();
                 
                 if (data.success) {
-                    showDebugInfo('分析成功，显示结果');
                     currentAnalysisData = data.data;
                     displayAnalysisResults(data.data);
                     showSuccess('简历分析完成！');
-                    showLoading(false); // 确保隐藏加载状态
-                    
-                    // 隐藏重试按钮
-                    const retryBtn = document.getElementById('retryBtn');
-                    if (retryBtn) {
-                        retryBtn.style.display = 'none';
-                    }
+                    // // 开始轮询任务状态
+                    // pollTaskStatus(data.task_id);
                 } else {
-                    showDebugInfo(`分析失败: ${data.error}`);
                     showError(data.error || '分析失败');
-                    showLoading(false);
+                    // showLoading(false);
                 }
             } catch (error) {
-                showDebugInfo(`分析出错: ${error.message}`);
                 console.error('分析失败:', error);
                 showError('网络错误，请稍后重试');
                 showLoading(false);
-            } finally {
-                // 重置分析状态
-                isAnalyzing = false;
-                showDebugInfo('分析状态已重置');
-                
-                // 恢复分析按钮
-                const analyzeButton = document.getElementById('analyzeBtn');
-                if (analyzeButton) {
-                    analyzeButton.disabled = false;
-                    analyzeButton.innerHTML = '<i class="fas fa-play me-2"></i>开始分析';
-                }
             }
         }
         
@@ -1273,16 +1081,7 @@ ${currentAnalysisData.analysis_result}
             document.getElementById('analysisSection').style.display = 'none';
             document.getElementById('fileInfo').style.display = 'none';
             document.getElementById('resumeFile').value = '';
-            document.getElementById('loading').style.display = 'none';
             currentAnalysisData = null;
-            isAnalyzing = false; // 重置分析状态
-            
-            // 重置按钮状态
-            const analyzeButton = document.getElementById('analyzeBtn');
-            if (analyzeButton) {
-                analyzeButton.disabled = false;
-                analyzeButton.innerHTML = '<i class="fas fa-play me-2"></i>开始分析';
-            }
         }
         
         // 显示/隐藏加载状态
