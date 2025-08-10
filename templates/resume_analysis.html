@@ -904,11 +904,14 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // 开始轮询任务状态
-                    pollTaskStatus(data.task_id);
+                    currentAnalysisData = data.data;
+                    displayAnalysisResults(data.data);
+                    showSuccess('简历分析完成！');
+                    // // 开始轮询任务状态
+                    // pollTaskStatus(data.task_id);
                 } else {
                     showError(data.error || '分析失败');
-                    showLoading(false);
+                    // showLoading(false);
                 }
             } catch (error) {
                 console.error('分析失败:', error);

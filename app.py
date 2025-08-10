@@ -1,112 +1,35 @@
+from flask import Flask, render_template, request, jsonify, send_file, Response, stream_template, redirect, url_for, session
 import os
-import json
-import time
-import uuid
-import threading
-from datetime import datetime
-from functools import wraps
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response, send_from_directory, send_file
-from flask_socketio import SocketIO, emit
-from werkzeug.utils import secure_filename
-from pathlib import Path
-import traceback
-import requests
-import subprocess
-import base64
-import cv2
-import numpy as np
-from PIL import Image
-import io
-import wave
-import pyaudio
-import queue
-import websocket
-import hmac
-import hashlib
-import ssl
 import sys
-import urllib.parse
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import json
+import base64
+from datetime import datetime
+from werkzeug.utils import secure_filename
+import io
+from functools import wraps
+import time
+# TTS相关导入
+import ssl
+import queue
+from datetime import datetime
 from urllib.parse import urlparse, urlencode
 from wsgiref.handlers import format_date_time
 from time import mktime
 import _thread as thread
+# 添加模块路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
 
-# 导入自定义模块
-from modules.user_management import UserManager
+# 导入各个模块
 from modules.resume_parsing.backend.resume_parser import ResumeParser
 from modules.resume_parsing.backend.resume_analyzer import ResumeAnalyzer
 from modules.skill_training import SkillManager
 from modules.learning_path import LearningPlanner
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
-# 初始化管理器
+from modules.user_management import UserManager
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-user_manager = UserManager()
-resume_parser = ResumeParser()
-resume_analyzer = ResumeAnalyzer()
-
-# 任务队列管理
-analysis_tasks = {}
-task_lock = threading.Lock()
-
-def generate_task_id():
-    """生成唯一的任务ID"""
-    return str(uuid.uuid4())
-
-def add_task(task_id, task_info):
-    """添加任务到队列"""
-    with task_lock:
-        analysis_tasks[task_id] = task_info
-
-def get_task(task_id):
-    """获取任务信息"""
-    with task_lock:
-        return analysis_tasks.get(task_id)
-
-def update_task_status(task_id, status, result=None, error=None):
-    """更新任务状态"""
-    with task_lock:
-        if task_id in analysis_tasks:
-            analysis_tasks[task_id].update({
-                'status': status,
-                'result': result,
-                'error': error,
-                'updated_at': datetime.now().isoformat()
-            })
-
-def cleanup_completed_tasks():
-    """清理已完成的任务（保留最近的任务）"""
-    with task_lock:
-        current_time = datetime.now()
-        tasks_to_remove = []
-        
-        for task_id, task_info in analysis_tasks.items():
-            # 保留最近1小时的任务
-            if 'created_at' in task_info:
-                created_time = datetime.fromisoformat(task_info['created_at'])
-                if (current_time - created_time).total_seconds() > 3600:  # 1小时
-                    tasks_to_remove.append(task_id)
-        
-        for task_id in tasks_to_remove:
-            del analysis_tasks[task_id]
-
-# 定期清理任务
-def cleanup_tasks_periodically():
-    """定期清理已完成的任务"""
-    while True:
-        time.sleep(300)  # 每5分钟清理一次
-        cleanup_completed_tasks()
-
-# 启动清理线程
-cleanup_thread = threading.Thread(target=cleanup_tasks_periodically, daemon=True)
-cleanup_thread.start()
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.secret_key = 'your-secret-key-here'  # 用于session加密
 
 # ==================== ASR语音识别功能集成 ====================
 # 在原有功能基础上添加ASR支持，不影响现有功能
@@ -119,6 +42,7 @@ import threading
 import websocket
 from urllib.parse import quote
 from flask_socketio import SocketIO, emit
+
 # 初始化SocketIO（如果还没有初始化）
 try:
     # 尝试检查是否已经有socketio实例
@@ -637,10 +561,10 @@ def login_required(f):
 
 # 初始化各个模块
 resume_parser = ResumeParser()
-resume_analyzer = ResumeAnalyzer()
 skill_manager = SkillManager()
 learning_planner = LearningPlanner()
 user_manager = UserManager()
+resume_analyzer = ResumeAnalyzer()
 
 # 文件上传配置
 UPLOAD_FOLDER = 'uploads'
@@ -1035,7 +959,7 @@ def resume_chat():
 @app.route('/api/resume/analyze-enhanced', methods=['POST'])
 @login_required
 def analyze_resume_enhanced():
-    """增强版简历分析接口 - 异步处理"""
+    """增强版简历分析接口 - 模仿专利对比功能"""
     try:
         if 'file' not in request.files:
             return jsonify({'error': '没有上传文件'}), 400
@@ -1075,81 +999,26 @@ def analyze_resume_enhanced():
         if not save_result['success']:
             return jsonify({'error': save_result['message']}), 500
         
-        # 生成任务ID
-        task_id = generate_task_id()
+        # 使用新的简历分析器进行完整分析
+        analysis_result = resume_analyzer.analyze_resume_complete(text, username)
         
-        # 创建任务信息
-        task_info = {
-            'task_id': task_id,
-            'username': username,
-            'resume_text': text,
-            'filename': filename,
-            'status': 'pending',
-            'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat()
-        }
+        if not analysis_result['success']:
+            return jsonify({'error': analysis_result['error']}), 500
         
-        # 添加到任务队列
-        add_task(task_id, task_info)
-        
-        # 启动异步处理
-        def process_analysis():
-            try:
-                update_task_status(task_id, 'processing')
-                
-                # 使用新的简历分析器进行完整分析
-                analysis_result = resume_analyzer.analyze_resume_complete(text, username)
-                
-                if analysis_result['success']:
-                    update_task_status(task_id, 'completed', result=analysis_result)
-                else:
-                    update_task_status(task_id, 'failed', error=analysis_result['error'])
-                    
-            except Exception as e:
-                update_task_status(task_id, 'failed', error=str(e))
-        
-        # 在新线程中启动处理
-        analysis_thread = threading.Thread(target=process_analysis, daemon=True)
-        analysis_thread.start()
-        
-        # 立即返回任务ID
+        # 返回分析结果
         return jsonify({
             'success': True,
-            'message': '简历分析任务已启动',
-            'task_id': task_id,
-            'status': 'pending'
-        }), 202
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/resume/analysis-status/<task_id>', methods=['GET'])
-@login_required
-def get_analysis_status(task_id):
-    """获取分析任务状态"""
-    try:
-        task = get_task(task_id)
-        if not task:
-            return jsonify({'error': '任务不存在'}), 404
-        
-        # 检查任务是否属于当前用户
-        username = session['user']['username']
-        if task['username'] != username:
-            return jsonify({'error': '无权访问此任务'}), 403
-        
-        response_data = {
-            'task_id': task_id,
-            'status': task['status'],
-            'created_at': task['created_at'],
-            'updated_at': task['updated_at']
-        }
-        
-        if task['status'] == 'completed':
-            response_data['result'] = task['result']
-        elif task['status'] == 'failed':
-            response_data['error'] = task['error']
-        
-        return jsonify(response_data), 200
+            'message': '简历分析完成',
+            'data': {
+                'original_text': analysis_result['original_text'],
+                'markdown_text': analysis_result['markdown_text'],
+                'original_highlighted': analysis_result['original_highlighted'],
+                'suggested_highlighted': analysis_result['suggested_highlighted'],
+                'analysis_result': analysis_result['analysis_result'],
+                'evaluation': analysis_result['evaluation'],
+                'files': analysis_result['files']
+            }
+        }), 200
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -1157,7 +1026,7 @@ def get_analysis_status(task_id):
 @app.route('/api/resume/analyze-existing', methods=['POST'])
 @login_required
 def analyze_existing_resume():
-    """分析已上传的简历 - 异步处理"""
+    """分析已上传的简历"""
     try:
         data = request.get_json()
         resume_id = data.get('resume_id')
@@ -1178,54 +1047,30 @@ def analyze_existing_resume():
         if not resume_text:
             return jsonify({'error': '简历内容为空'}), 400
         
-        # 生成任务ID
-        task_id = generate_task_id()
+        # 使用新的简历分析器进行完整分析
+        analysis_result = resume_analyzer.analyze_resume_complete(resume_text, username)
         
-        # 创建任务信息
-        task_info = {
-            'task_id': task_id,
-            'username': username,
-            'resume_text': resume_text,
-            'resume_id': resume_id,
-            'filename': resume.get('filename', 'unknown'),
-            'status': 'pending',
-            'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat()
-        }
+        if not analysis_result['success']:
+            return jsonify({'error': analysis_result['error']}), 500
         
-        # 添加到任务队列
-        add_task(task_id, task_info)
-        
-        # 启动异步处理
-        def process_analysis():
-            try:
-                update_task_status(task_id, 'processing')
-                
-                # 使用新的简历分析器进行完整分析
-                analysis_result = resume_analyzer.analyze_resume_complete(resume_text, username)
-                
-                if analysis_result['success']:
-                    update_task_status(task_id, 'completed', result=analysis_result)
-                else:
-                    update_task_status(task_id, 'failed', error=analysis_result['error'])
-                    
-            except Exception as e:
-                update_task_status(task_id, 'failed', error=str(e))
-        
-        # 在新线程中启动处理
-        analysis_thread = threading.Thread(target=process_analysis, daemon=True)
-        analysis_thread.start()
-        
-        # 立即返回任务ID
+        # 返回分析结果
         return jsonify({
             'success': True,
-            'message': '简历分析任务已启动',
-            'task_id': task_id,
-            'status': 'pending'
-        }), 202
+            'message': '简历分析完成',
+            'data': {
+                'original_text': analysis_result['original_text'],
+                'markdown_text': analysis_result['markdown_text'],
+                'original_highlighted': analysis_result['original_highlighted'],
+                'suggested_highlighted': analysis_result['suggested_highlighted'],
+                'analysis_result': analysis_result['analysis_result'],
+                'evaluation': analysis_result['evaluation'],
+                'files': analysis_result['files']
+            }
+        }), 200
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 # 技能培训相关路由
 @app.route('/training')
@@ -1861,7 +1706,7 @@ def check_resume_status():
 def live2d_static(filename):
     """服务live2d静态文件"""
     try:
-        live2d_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live2d')
+        live2d_dir = os.path.join(current_dir, 'live2d')
         return send_file(os.path.join(live2d_dir, filename))
     except Exception as e:
         print(f"Live2D文件访问错误: {str(e)}")
@@ -1886,6 +1731,7 @@ def start_facial_analysis():
             app.facial_analyzers = {}
         
         # 导入面试模块
+        current_dir = os.path.dirname(os.path.abspath(__file__))
         facial_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview')
         
         if facial_analysis_path not in sys.path:
@@ -1921,6 +1767,7 @@ def start_voice_analysis():
             app.voice_analyzers = {}
         
         # 导入语调分析模块
+        current_dir = os.path.dirname(os.path.abspath(__file__))
         voice_analysis_path = os.path.join(current_dir, 'modules', 'Mock_interview', '语调识别', 'Speech-Analysis')
         
         if voice_analysis_path not in sys.path:
@@ -2407,9 +2254,9 @@ def save_voice_analysis():
 
 # 讯飞TTS配置
 XUNFEI_TTS_CONFIG = {
-    'appid': 'dacc7aaf',
-    'api_secret': 'MGE1YzA0ZGE3ZTRjYTcxMmZkYTU4Njhh',
-    'api_key': '45a514a1a752face8d5b7ea4903f28af',
+    'appid': '2d597818',
+    'api_secret': 'OWYxMzM1NmMzMjY4NDIwNTA0ZGNiZTg5',
+    'api_key': '0548bfa3f54fc525cbd79b49c33c6001',
     'url': 'wss://cbm01.cn-huabei-1.xf-yun.com/v1/private/mcd9m97e6',
     'vcn': 'x4_lingxiaoqi_oral'  # 聆小琪
 }
