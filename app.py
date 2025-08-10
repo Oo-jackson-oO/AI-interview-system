@@ -966,13 +966,13 @@ processing_requests = {}
 processing_lock = Lock()
 
 def cleanup_expired_requests():
-    """清理过期的请求记录（超过30分钟）"""
+    """清理过期的请求记录（超过10分钟）"""
     current_time = datetime.now()
     with processing_lock:
         expired_keys = []
         for request_id, request_data in processing_requests.items():
-            # 检查是否超过30分钟
-            if (current_time - request_data['start_time']).total_seconds() > 1800:
+            # 检查是否超过10分钟（减少超时时间）
+            if (current_time - request_data['start_time']).total_seconds() > 600:
                 expired_keys.append(request_id)
         
         # 删除过期的记录
@@ -989,10 +989,10 @@ def start_cleanup_task():
         while True:
             try:
                 cleanup_expired_requests()
-                time.sleep(300)  # 每5分钟清理一次
+                time.sleep(120)  # 每2分钟清理一次
             except Exception as e:
                 print(f"清理任务出错: {e}")
-                time.sleep(300)
+                time.sleep(120)
     
     import threading
     cleanup_thread = threading.Thread(target=cleanup_worker, daemon=True)
@@ -1019,24 +1019,38 @@ def analyze_resume_enhanced():
         # 获取用户信息
         username = session['user']['username']
         
-        # 生成请求唯一标识（基于用户名和文件内容）
+        # 生成请求唯一标识（基于用户名、文件名和文件大小，更宽松的去重策略）
         file_content = file.read()
         file.seek(0)  # 重置文件指针
         
-        # 计算文件内容的哈希值
-        file_hash = hashlib.md5(file_content).hexdigest()
+        # 使用文件名和大小的组合，而不是完整内容哈希
+        file_size = len(file_content)
+        file_hash = hashlib.md5(f"{file.filename}_{file_size}".encode()).hexdigest()
         request_id = f"{username}_{file_hash}"
         
         # 检查是否正在处理相同的请求
         with processing_lock:
             if request_id in processing_requests:
-                return jsonify({'error': '相同的文件正在分析中，请稍后重试'}), 429
+                # 检查是否超过5分钟，如果超过则允许重新处理
+                request_data = processing_requests[request_id]
+                if (datetime.now() - request_data['start_time']).total_seconds() > 300:
+                    # 超过5分钟，删除旧记录，允许重新处理
+                    del processing_requests[request_id]
+                    print(f"请求 {request_id} 超时，允许重新处理")
+                else:
+                    # 仍在处理中，返回429
+                    return jsonify({
+                        'error': '相同的文件正在分析中，请稍后重试',
+                        'request_id': request_id,
+                        'start_time': request_data['start_time'].isoformat()
+                    }), 429
             
             # 标记请求为处理中
             processing_requests[request_id] = {
                 'username': username,
                 'filename': file.filename,
-                'start_time': datetime.now()
+                'start_time': datetime.now(),
+                'status': 'processing'
             }
         
         try:
@@ -1054,7 +1068,7 @@ def analyze_resume_enhanced():
                 'filename': filename,
                 'text': text,
                 'file_path': filepath,
-                'file_size': len(file_content),
+                'file_size': file_size,
                 'file_type': filename.split('.')[-1].lower() if '.' in filename else 'unknown',
                 'upload_time': datetime.now().isoformat()
             }
@@ -1074,6 +1088,7 @@ def analyze_resume_enhanced():
             return jsonify({
                 'success': True,
                 'message': '简历分析完成',
+                'request_id': request_id,
                 'data': {
                     'original_text': analysis_result['original_text'],
                     'markdown_text': analysis_result['markdown_text'],
@@ -3326,6 +3341,28 @@ def get_processing_status():
                 'success': True,
                 'processing_count': len(user_requests),
                 'requests': user_requests
+            }), 200
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/resume/clear-processing-status', methods=['POST'])
+@login_required
+def clear_processing_status():
+    """手动清理当前用户的处理状态（用于调试）"""
+    try:
+        username = session['user']['username']
+        
+        with processing_lock:
+            # 清理该用户的所有处理记录
+            user_keys = [key for key, data in processing_requests.items() if data['username'] == username]
+            for key in user_keys:
+                del processing_requests[key]
+            
+            return jsonify({
+                'success': True,
+                'message': f'清理了 {len(user_keys)} 个处理记录',
+                'cleared_count': len(user_keys)
             }), 200
             
     except Exception as e:
