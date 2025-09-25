@@ -2,6 +2,20 @@
 
 一个基于AI大模型、Live2D数字人和多模态技术的智能面试系统，集成了语音识别、语音合成、微表情分析、语调分析等先进技术，为用户提供沉浸式的AI面试体验。
 
+## 🌐 在线体验
+
+**立即体验：** [https://ai-interview-system-jdkl.onrender.com](https://ai-interview-system-jdkl.onrender.com)
+
+### 快速开始
+1. 访问上述链接
+2. 注册新账户或使用现有账户登录
+3. 上传简历开始您的AI面试之旅
+
+### 系统要求
+- 现代浏览器（Chrome、Firefox、Safari、Edge）
+- 稳定的网络连接
+- 麦克风和摄像头权限（用于语音和视频功能）
+
 ## ✨ 项目特色
 
 ### 🤖 AI数字人面试官
@@ -86,16 +100,27 @@ AI面试系统/
 
 ## 📦 安装部署
 
-### 环境要求
+### 🌐 云端部署（推荐）
+
+项目已部署在Render平台，可直接在线使用：
+- **在线地址**：https://ai-interview-system-jdkl.onrender.com
+- **部署状态**：✅ 正常运行
+- **免费使用**：无需安装，直接访问
+
+### 💻 本地部署
+
+如需在本地运行项目，请按照以下步骤：
+
+#### 环境要求
 - Python 3.9——3.12
 - 现代浏览器（支持WebRTC）
 - 麦克风和摄像头权限
 - 稳定的网络连接
 
-### 1. 克隆项目
+#### 1. 克隆项目
 ```bash
-git clone https://github.com/yy13213/AI-intervuew-web.git
-cd AI-interview-web
+git clone https://github.com/Oo-jackson-oO/AI-interview-system.git
+cd AI-interview-system
 ```
 
 ### 2. 安装依赖
@@ -238,33 +263,56 @@ python app.py
 
 ## 🎮 使用指南
 
-### 1. 用户注册登录
-- 访问系统首页
-- 注册新用户或登录现有账户
-- 完善个人信息
+### 🌟 在线使用（推荐）
 
-### 2. 简历上传与解析
-- 上传PDF/DOCX格式简历
-- 系统自动解析简历内容
-- 提取关键信息用于面试生成
+1. **访问系统**
+   - 打开浏览器，访问：https://ai-interview-system-jdkl.onrender.com
+   - 无需下载安装，直接在线使用
 
-### 3. 面试配置
-- 选择目标岗位和技术领域
-- 配置面试模式（普通/严格）
-- 选择面试板块组合
-- 生成个性化面试题目
+2. **用户注册登录**
+   - 点击"登录"按钮
+   - 选择"立即注册"创建新账户
+   - 或使用现有账户登录
 
-### 4. Live2D面试体验
-- 进入Live2D数字人界面
-- 系统自动开启语音和视频分析
+3. **开始使用**
+   - 注册成功后自动进入主界面
+   - 可以看到五个功能模块：简历解析、模拟面试、面试解析、学习路径、技能培训
+
+### 📋 详细功能使用
+
+#### 1. 简历解析
+- 点击"星球1 - 个人简历"
+- 上传PDF或DOCX格式的简历文件
+- 系统自动解析并提取关键信息
+- 查看智能简历分析结果
+
+#### 2. 模拟面试
+- 点击"星球2 - 模拟面试"
+- 配置面试参数（岗位、难度等）
+- 进入Live2D数字人面试界面
 - 与AI面试官进行实时对话
-- 系统记录并分析面试过程
 
-### 5. 结果查看
-- 查看详细面试报告
-- 多维度评分和建议
-- 语音和表情分析结果
-- 改进建议和学习计划
+#### 3. 面试解析
+- 点击"星球3 - 面试解析"
+- 查看详细的面试分析报告
+- 了解多维度评分结果
+- 获取改进建议
+
+#### 4. 学习路径
+- 点击"星球4 - 学习路径"
+- 查看个性化学习方案
+- 根据面试结果制定学习计划
+
+#### 5. 技能培训
+- 点击"星球5 - 技能培训"
+- 参与在线技能培训课程
+- 提升专业技能水平
+
+### 💡 使用技巧
+- **首次使用**：建议先上传简历，再进行模拟面试
+- **面试准备**：可以多次进行模拟面试，熟悉流程
+- **结果分析**：仔细阅读面试解析报告，了解自己的优缺点
+- **持续改进**：根据建议制定学习计划，不断提升技能
 
 ## 🎯 核心模块介绍
 
@@ -437,12 +485,49 @@ analysis_dimensions = {
 - 讯飞开放平台提供语音技术支持
 - Live2D提供数字人技术
 
+## 📊 项目状态
+
+- **部署状态**：✅ 正常运行
+- **在线地址**：https://ai-interview-system-jdkl.onrender.com
+- **最后更新**：2025年1月
+- **技术栈**：Python Flask + AI大模型 + Live2D
+- **部署平台**：Render
+
+## 🎯 功能特性
+
+### ✅ 已实现功能
+- 用户注册登录系统
+- 简历上传和智能解析
+- AI模拟面试对话
+- Live2D数字人交互
+- 面试结果分析
+- 个性化学习路径
+- 技能培训模块
+- 太空主题UI设计
+
+### 🔄 持续优化
+- 语音识别准确率提升
+- 面试题目智能生成
+- 用户体验优化
+- 性能提升
+
 ## 📞 联系方式
 
-- 项目地址：[GitHub Repository](https://github.com/your-repo/AI-interview-system)
-- 问题反馈：[Issues](https://github.com/your-repo/AI-interview-system/issues)
-- 技术交流：[Discussions](https://github.com/your-repo/AI-interview-system/discussions)
+- **项目地址**：[GitHub Repository](https://github.com/Oo-jackson-oO/AI-interview-system)
+- **在线体验**：[https://ai-interview-system-jdkl.onrender.com](https://ai-interview-system-jdkl.onrender.com)
+- **问题反馈**：[GitHub Issues](https://github.com/Oo-jackson-oO/AI-interview-system/issues)
+- **技术交流**：[GitHub Discussions](https://github.com/Oo-jackson-oO/AI-interview-system/discussions)
+
+## 🙏 致谢
+
+感谢以下技术和服务提供商：
+- **讯飞开放平台** - 提供AI大模型和语音技术
+- **Live2D** - 提供数字人技术支持
+- **Render** - 提供免费的云端部署服务
+- **Flask** - 优秀的Python Web框架
 
 ---
 
 **🚀 让AI面试更智能，让求职更高效！**
+
+**立即体验：** [https://ai-interview-system-jdkl.onrender.com](https://ai-interview-system-jdkl.onrender.com)
