@@ -3215,16 +3215,20 @@ def run_interview_summary():
 # ==================== 修改主程序启动方式 ====================
 
 if __name__ == '__main__':
+    # 获取Render分配的端口，如果没有则使用默认端口5000
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
+    
     print("=" * 60)
     print("🚀 AI面试系统启动中...")
     print("📝 已集成ASR语音识别功能")
     print("🎤 已集成TTS语音合成功能")
     print("=" * 60)
-    print("🌐 主系统: http://localhost:5000")
-    print("🎙️ ASR测试: http://localhost:5000/api/asr/test")
-    print("🎵 TTS测试: http://localhost:5000/api/tts/test")
-    print("🤖 Live2D: http://localhost:5000/live2d")
+    print(f"🌐 主系统: http://0.0.0.0:{port}")
+    print(f"🎙️ ASR测试: http://0.0.0.0:{port}/api/asr/test")
+    print(f"🎵 TTS测试: http://0.0.0.0:{port}/api/tts/test")
+    print(f"🤖 Live2D: http://0.0.0.0:{port}/live2d")
     print("=" * 60)
     
     # 使用SocketIO运行，同时支持原有功能、ASR功能和TTS功能
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+    socketio.run(app, host='0.0.0.0', port=port, debug=debug_mode, use_reloader=False)
