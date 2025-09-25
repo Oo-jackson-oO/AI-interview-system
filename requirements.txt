@@ -1,4 +1,4 @@
-# AI智能面试系统依赖包
+# AI智能面试系统依赖包 - Render优化版本
 
 # Web框架
 Flask>=2.3.0
@@ -18,33 +18,29 @@ docx2txt>=0.8
 
 # 图像处理
 Pillow>=9.0.0
-opencv-python>=4.8.0
-
-# 音频处理
-librosa>=0.9.0
-soundfile>=0.12.0
-pydub>=0.25.0
-pygame>=2.5.0
-
-# AI模型
-openai==1.3.0
-transformers>=4.20.0
-torch>=1.12.0
-torchaudio>=0.12.0
-
-# 数据处理
-numpy>=1.20.0
-scipy>=1.7.0
 
 # HTTP请求
 requests>=2.32.3
 aiohttp>=3.9.1
-httpx>=0.22.0,<1
+httpx>=0.27.0
+
+# AI模型
+openai>=1.50.0
 
 # 工具包
 python-dotenv>=0.19.0
 
-# 注意：以下包在Render上可能无法安装，已注释
+# 注意：以下重型依赖已移除，避免Render构建超时
+# opencv-python>=4.8.0      # 太大
+# librosa>=0.9.0            # 太大，依赖多
+# soundfile>=0.12.0         # 太大
+# pydub>=0.25.0             # 太大
+# pygame>=2.5.0             # 太大
+# transformers>=4.20.0      # 太大
+# torch>=1.12.0             # 太大
+# torchaudio>=0.12.0        # 太大
+# numpy>=1.20.0             # 太大
+# scipy>=1.7.0              # 太大
 # openai-whisper>=20231117  # 太大，可能超时
 # pyaudio>=0.2.11           # 需要系统音频库
 # ffmpeg                    # 需要系统安装ffmpeg

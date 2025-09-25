@@ -14,10 +14,15 @@ from wsgiref.handlers import format_date_time
 class InterviewAgent:
     def __init__(self):
         """初始化面试智能体"""
-        self.client = OpenAI(
-            api_key='QcGCOyVichfHetzkUDeM:AUoiqAJtarlstnrJMcTI',
-            base_url='https://spark-api-open.xf-yun.com/v1/'
-        )
+        try:
+            self.client = OpenAI(
+                api_key='QcGCOyVichfHetzkUDeM:AUoiqAJtarlstnrJMcTI',
+                base_url='https://spark-api-open.xf-yun.com/v1/'
+            )
+        except Exception as e:
+            print(f"⚠️ OpenAI客户端初始化失败: {e}")
+            # 如果初始化失败，设置为None，后续调用时会有错误处理
+            self.client = None
         
         # 面试配置
         self.interview_config = {}

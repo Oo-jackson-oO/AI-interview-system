@@ -20,12 +20,22 @@ import _thread as thread
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 
-# 导入各个模块
-from modules.resume_parsing.backend.resume_parser import ResumeParser
-from modules.resume_parsing.backend.resume_analyzer import ResumeAnalyzer
-from modules.skill_training import SkillManager
-from modules.learning_path import LearningPlanner
-from modules.user_management import UserManager
+# 导入各个模块（添加容错处理）
+try:
+    from modules.resume_parsing.backend.resume_parser import ResumeParser
+    from modules.resume_parsing.backend.resume_analyzer import ResumeAnalyzer
+    from modules.skill_training import SkillManager
+    from modules.learning_path import LearningPlanner
+    from modules.user_management import UserManager
+    print("✅ 所有模块导入成功")
+except ImportError as e:
+    print(f"⚠️ 部分模块导入失败: {e}")
+    # 设置默认值，避免启动失败
+    ResumeParser = None
+    ResumeAnalyzer = None
+    SkillManager = None
+    LearningPlanner = None
+    UserManager = None
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -559,12 +569,21 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# 初始化各个模块
-resume_parser = ResumeParser()
-skill_manager = SkillManager()
-learning_planner = LearningPlanner()
-user_manager = UserManager()
-resume_analyzer = ResumeAnalyzer()
+# 初始化各个模块（添加容错处理）
+try:
+    resume_parser = ResumeParser() if ResumeParser else None
+    skill_manager = SkillManager() if SkillManager else None
+    learning_planner = LearningPlanner() if LearningPlanner else None
+    user_manager = UserManager() if UserManager else None
+    resume_analyzer = ResumeAnalyzer() if ResumeAnalyzer else None
+    print("✅ 模块初始化完成")
+except Exception as e:
+    print(f"⚠️ 模块初始化失败: {e}")
+    resume_parser = None
+    skill_manager = None
+    learning_planner = None
+    user_manager = None
+    resume_analyzer = None
 
 # 文件上传配置
 UPLOAD_FOLDER = 'uploads'
@@ -3230,5 +3249,8 @@ if __name__ == '__main__':
     print(f"🤖 Live2D: http://0.0.0.0:{port}/live2d")
     print("=" * 60)
     
+    # 确保在Render上正确监听端口
+    print(f"🔧 正在监听端口: {port}")
+    
     # 使用SocketIO运行，同时支持原有功能、ASR功能和TTS功能
-    socketio.run(app, host='0.0.0.0', port=port, debug=debug_mode, use_reloader=False)
+    socketio.run(app, host='0.0.0.0', port=port, debug=debug_mode, use_reloader=False, log_output=True)

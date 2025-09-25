@@ -8,10 +8,15 @@ from openai import OpenAI
 
 class ResumeParser:
     def __init__(self):
-        self.client = OpenAI(
-            api_key='QcGCOyVichfHetzkUDeM:AUoiqAJtarlstnrJMcTI',
-            base_url='https://spark-api-open.xf-yun.com/v1/'
-        )
+        try:
+            self.client = OpenAI(
+                api_key='QcGCOyVichfHetzkUDeM:AUoiqAJtarlstnrJMcTI',
+                base_url='https://spark-api-open.xf-yun.com/v1/'
+            )
+        except Exception as e:
+            print(f"⚠️ OpenAI客户端初始化失败: {e}")
+            # 如果初始化失败，设置为None，后续调用时会有错误处理
+            self.client = None
         
     def save_resume_to_mock_interview(self, text):
         """将简历文本保存到 modules/Mock_interview/resume.txt"""
