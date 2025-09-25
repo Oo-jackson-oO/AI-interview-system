@@ -3253,4 +3253,5 @@ if __name__ == '__main__':
     print(f"🔧 正在监听端口: {port}")
     
     # 使用SocketIO运行，同时支持原有功能、ASR功能和TTS功能
-    socketio.run(app, host='0.0.0.0', port=port, debug=debug_mode, use_reloader=False, log_output=True)
+    # 在生产环境中允许使用Werkzeug
+    socketio.run(app, host='0.0.0.0', port=port, debug=debug_mode, use_reloader=False, log_output=True, allow_unsafe_werkzeug=True)
